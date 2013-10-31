@@ -331,8 +331,8 @@ class BIM_Utils{
                 $ids = array( $ids );
                 $return1 = true;
             }
-            if( defined('RELEASE_ID_KEY_PREFIX') ){
-                $prefix = RELEASE_ID_KEY_PREFIX."_$prefix";
+            if( defined('RELEASE_ID') ){
+                $prefix = RELEASE_ID."_$prefix";
             }
             foreach( $ids as &$id ){
                 $id = "{$prefix}_{$id}";
