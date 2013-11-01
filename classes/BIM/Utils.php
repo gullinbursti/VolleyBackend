@@ -331,8 +331,9 @@ class BIM_Utils{
                 $ids = array( $ids );
                 $return1 = true;
             }
-            if( defined('RELEASE_ID') ){
-                $prefix = RELEASE_ID."_$prefix";
+            $c = BIM_Config::app();
+            if( !empty($c->release_id) ){
+                $prefix = $c->release_id."_$prefix";
             }
             foreach( $ids as &$id ){
                 $id = "{$prefix}_{$id}";

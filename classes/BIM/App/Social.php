@@ -186,6 +186,9 @@ class BIM_App_Social extends BIM_App_Base{
     }
     
     public static function getFollowers( $params, $assoc = false ){
+        if( is_string( $params ) || is_numeric( $params ) ){
+            $params = (object) array( 'userID' => $params );
+        }
         $friends = self::getFriends($params, $assoc);
         $followers = array();
         foreach( $friends as $key => $friend ){

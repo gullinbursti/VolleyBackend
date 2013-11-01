@@ -241,10 +241,11 @@ class BIM_Push{
     public static function sendVolleyNotifications( $volleyId ){
         $volley = BIM_Model_Volley::get( $volleyId );
         $creator = BIM_Model_User::get($volley->creator->id);
-        $targetIds = $volley->getUsers();
+        $followers = BIM_App_Social::getFollowers( $creator->id, true );
+        $targetIds = array_keys($followers);
         $targets = BIM_Model_User::getMulti($targetIds);
         foreach( $targets as $target ){
-            if ( $target->isExtant() && $target->notifications == "Y"){
+            if ( $target->isExtant() && $target->canPush() ){
                 $msg = "@$creator->username has just created the Volley $volley->subject";
                 $type = 1;
                 self::send($target->device_token, $msg, $type, $volleyId ); 
@@ -258,8 +259,7 @@ class BIM_Push{
         if ( $challenger->canPush() ){
             $volley = BIM_Model_Volley::get($volleyId);
             $creator = BIM_Model_User::get($volley->creator->id);
-            $private = $volley->is_private == 'Y' ? ' private' : '';
-            $msg = "@$creator->username has sent you a$private Volley. $volley->subject";
+            $msg = "@$creator->username has sent you a Volley. $volley->subject";
             $type = 1;
             self::send($challenger->device_token, $msg, $type, $volley->id ); 
         }
