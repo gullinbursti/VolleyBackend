@@ -206,7 +206,14 @@ class BIM_App_Users extends BIM_App_Base{
     	$user = BIM_Model_User::get( $userId );
 	    if( $target->isExtant() && $userId != $targetId ){
     	    $verifyVolley = BIM_Model_Volley::getVerifyVolley( $targetId );
-    	    $approves = ($approves ? -1 : 1);
+    	    $approves = (int) $approves;
+	        if( $approves > 0 ){
+	            $approves = -1;
+	        } else if( $approves < 0 ) {
+	            $approves = 1;
+	        } else {
+	            $approves = 0;
+	        }
     	    $c = BIM_Config::app();
     	    if( $user->isSuperUser() ){
     	        $approves = ($approves * 10000);
