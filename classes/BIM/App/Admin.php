@@ -381,43 +381,48 @@ Find a user: <input type='text' name='search' size='75'> <input type='submit' va
     }
     
     public static function getEditUserForm( $user, $errors = null ){
-        $date = new DateTime( $user->age );
-        $date = $date->format('m/d/Y');
-        
         $image = $user->getAvatarUrl();
-            $image = preg_replace('/\.jpg/','', $user->img_url );
-            $image = preg_replace('/Large_640x1136/','', $image );
-            $image = "{$image}Small_160x160.jpg";
+        $image = preg_replace('/\.jpg/','', $user->img_url );
+        $image = preg_replace('/Large_640x1136/','', $image );
+        $image = "{$image}Small_160x160.jpg";
         
         return "
 <html>
 <head>
+<!--
     <link rel='stylesheet' href='http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css'>
 	<script src='http://code.jquery.com/jquery-1.9.1.js'></script>
 	<script src='http://code.jquery.com/ui/1.10.3/jquery-ui.js'></script>
+-->
 </head>
 <body>
 <h4>
 Editing: $user->username - id: $user->id
 </h4>
-<form method=post>
+<form method=post enctype='multipart/form-data'>
 Username: <input type='text' name='user[username]' size='50' value='$user->username'>
 <br><br>
-Email: <input type='text' name='user[email]' size='50' value='$user->username'>
+Email: <input type='text' name='user[email]' size='50' value='$user->email'>
 <br><br>
-Birthdate: <input id='age' type='text' name='user[age]' size='50' value='$date'>
+Birthdate: <input id='age' type='text' name='user[age]' size='50' value='$user->age'>
+<!--
 <div id='datepicker'></div>
 <script>
 $( '#datepicker' ).datepicker();
-$( '#datepicker' ).datepicker('setDate', '$date' );
+$( '#datepicker' ).datepicker('setDate', '$user->age' );
 $( '#datepicker' ).datepicker('option','showOtherMonths' );
 $( '#datepicker' ).datepicker('option','stepMonths' );
 $( '#datepicker' ).datepicker('option','onSelect', function(text,o){ $('#age').val(text) } );
 </script>
+-->
 <br><br>
-Avatar Image: <input type='file' name='avatar' size='50'>
+Avatar Image: <input type='file' name='avatar'>
 <br>
 <img src='$image'>
+<br>
+<br>
+<input type='hidden' value='$user->id' name='user[id]'>
+<input type='submit' value='edit user'>
 </form>
 </body>
 </html>
@@ -460,11 +465,13 @@ Avatar Image: <input type='file' name='avatar' size='50'>
         if( !empty( $update->username ) ){
             $setSql[] = "username = ?";
             $params[] = $update->username;
+            $user->username = $update->username;
         }
         
         if( !empty( $update->email ) ){
             $setSql[] = "email = ?";
             $params[] = $update->email;
+            $user->email = $update->email;
         }
         
         if( !empty( $update->age ) ){
@@ -472,16 +479,18 @@ Avatar Image: <input type='file' name='avatar' size='50'>
             $d = new DateTime( $update->age );
             $age = $d->getTimestamp();
             $params[] = $age;
+            $user->age = $update->age;
         }
         
         if( !empty( $update->img_url ) ){
             $setSql[] = "img_url = ?";
             $params[] = $update->img_url;
+            $user->img_url = $update->img_url;
         }
         
         $params[] = $user->id;
         
-        $setsql = join(',', $setSql );
+        $setSql = join(',', $setSql );
         
         $sql = "update `hotornot-dev`.tblUsers set $setSql where id = ?";
         $dao = new BIM_DAO_Mysql( BIM_Config::db() );
@@ -495,6 +504,31 @@ Avatar Image: <input type='file' name='avatar' size='50'>
         $name = "{$namePrefix}{$suffix}";
         $imgUrlPrefix = "https://d3j8du2hyvd35p.cloudfront.net/$namePrefix";
         BIM_Utils::putImage( $imgPath, $name, 'hotornot-avatars' );
-        BIM_Utils::processImage( $imgUrlPrefix );
+        BIM_Utils::processImage( $imgUrlPrefix, 'hotornot-avatars'  );
+        return $imgUrlPrefix;
+    }
+    
+    public static function manageUser(){
+        $input = (object) ( $_POST ? $_POST : $_GET );
+        if( strtolower( $_SERVER['REQUEST_METHOD'] ) == 'get' ){
+            //prin the form to search for a user
+            echo self::getSearchUserForm();
+        } else if( !empty($input->search)  ) {
+            // print the user details
+            $input->search = trim($input->search);
+            $user = BIM_Model_User::getByUsername($input->search);
+            echo self::getEditUserForm( $user );
+        } else if( !empty($input->user)  ){
+            $errors = self::validateUserData( $input->user );
+            if( $errors->ok ){
+                $user = BIM_Model_User::get( $input->user['id'] );
+                if( !empty($_FILES['avatar']['tmp_name'] ) ){
+                    $input->user['img_url'] = self::handleUserImage( $_FILES['avatar']['tmp_name']);
+                }
+                self::updateUser( $user, (object) $input->user );
+                $user->purgeFromCache();
+            }
+            echo self::getEditUserForm( $user, $errors );
+        }
     }
 }
