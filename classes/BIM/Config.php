@@ -176,6 +176,11 @@ class BIM_Config{
         return BIM_Utils::makeCacheKeys('volley_boot_conf', $type);
     }
     
+    public static function getBootConfNames( ){
+        $dao = new BIM_DAO_Mysql_Config( self::db() );
+        return $dao->getBootConfNames(  );
+    }
+    
     public static function getBootConf( $type = 'live' ){
         $bootConf = null;
         $cacheKey = self::bootConfCacheKey( $type );

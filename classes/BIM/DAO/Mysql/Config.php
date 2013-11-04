@@ -2,6 +2,12 @@
 
 class BIM_DAO_Mysql_Config extends BIM_DAO_Mysql{
 	
+	public function getBootConfNames(  ){
+		$sql = "select type from `hotornot-dev`.boot_conf";
+		return $this->prepareAndExecute($sql)
+		    ->fetchAll( PDO::FETCH_COLUMN, 0 );
+	}
+    
 	public function getBootConf( $type = 'live' ){
 		$sql = "select * from `hotornot-dev`.boot_conf where type = ?";
 		$params = array($type);
