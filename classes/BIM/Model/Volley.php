@@ -31,17 +31,7 @@ class BIM_Model_Volley{
                 $this->setRecentLikes();
             } else {
                 $this->recent_likes = json_decode( $this->recent_likes );
-                if( $this->recent_likes ){
-                    $users = BIM_Model_User::getMulti($this->recent_likes, true);
-                    foreach( $this->recent_likes as &$id ){
-                        if( !empty( $users[ $id ] ) ){
-                            $id = (object) array(
-                            	'id' => $users[ $id ]->id, 
-                            	'username' => $users[ $id ]->username
-                            );
-                        }
-                    }
-                }
+                $this->populateRecentLikes();
             }
             
             $creator = (object) array(
@@ -88,6 +78,21 @@ class BIM_Model_Volley{
         }
     }
     
+    private function populateRecentLikes(){
+        if( $this->recent_likes ){
+            $users = BIM_Model_User::getMulti($this->recent_likes, true);
+            foreach( $this->recent_likes as &$id ){
+                if( !empty( $users[ $id ] ) ){
+                    $uData = $users[ $id ];
+                    $id = (object) array(
+                    	'id' => $uData->id, 
+                    	'username' => $uData->username
+                    );
+                }
+            }
+        }
+    }
+    
     public function getPics( $userId ){
         $pics = array();
         if( $this->creator->id == $userId ){
@@ -114,15 +119,7 @@ class BIM_Model_Volley{
         $this->recent_likes = $dao->getRecentLikes( $this->id );
         if( $this->recent_likes ){
             $dao->setRecentLikes( $this->id, $this->recent_likes );
-            $users = BIM_Model_User::getMulti($this->recent_likes, true);
-            foreach( $this->recent_likes as &$id ){
-                if( !empty( $users[ $id ] ) ){
-                    $id = (object) array(
-                    	'id' => $users[ $id ]->id, 
-                    	'username' => $users[ $id ]->username
-                    );
-                }
-            }
+            $this->populateRecentLikes();
         }
     }
     
