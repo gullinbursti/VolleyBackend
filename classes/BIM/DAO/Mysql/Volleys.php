@@ -281,7 +281,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         	where challenge_id = ?
         	GROUP BY user_id
         	ORDER BY added DESC
-        	LIMIT 3
+        	limit 1000
         ";
         $params = array( $volleyId );
         $stmt = $this->prepareAndExecute( $sql,$params );

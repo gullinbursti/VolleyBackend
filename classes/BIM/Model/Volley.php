@@ -25,14 +25,15 @@ class BIM_Model_Volley{
             $this->is_private = $volley->is_private;
             $this->is_verify = (int) $volley->is_verify;
             
+            $this->total_likers = 0;
             // setting up recent likes
             $this->recent_likes = $volley->recent_likes;
             if( $this->recent_likes == '' ){
                 $this->setRecentLikes();
             } else {
                 $this->recent_likes = json_decode( $this->recent_likes );
-                $this->populateRecentLikes();
             }
+            $this->populateRecentLikes();
             
             $creator = (object) array(
                 'id' => $volley->creator_id,
@@ -117,9 +118,10 @@ class BIM_Model_Volley{
     public function setRecentLikes( ){
         $dao = new BIM_DAO_Mysql_Volleys(BIM_Config::db());
         $this->recent_likes = $dao->getRecentLikes( $this->id );
+        $this->total_likers = count($this->recent_likes);
+        array_splice( $this->recent_likes, 3 );
         if( $this->recent_likes ){
             $dao->setRecentLikes( $this->id, $this->recent_likes );
-            $this->populateRecentLikes();
         }
     }
     
