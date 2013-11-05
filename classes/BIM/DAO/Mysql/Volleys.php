@@ -274,6 +274,20 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         return $stmt->fetchColumn( 0 );
     }
     
+    public function getRecentLikes($volleyId){
+        $sql = "
+        	select user_id, max(added) as added
+        	from `hotornot-dev`.tblChallengeVotes 
+        	where challenge_id = ?
+        	GROUP BY user_id
+        	ORDER BY added DESC
+        	LIMIT 3
+        ";
+        $params = array( $volleyId );
+        $stmt = $this->prepareAndExecute( $sql,$params );
+        return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+    }
+    
     public function setLikes( $volleyId, $userId, $count, $isCreator = false ) {
         $sql = "
         	update `hotornot-dev`.tblChallengeParticipants
@@ -297,6 +311,20 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
             $params = array( $count, $volleyId, $userId );
             $this->prepareAndExecute( $sql, $params );
         }
+    }
+    
+    public function setRecentLikes( $volleyId, $likerIds ) {
+        if( !is_array( $likerIds ) ){
+            $likerIds = array( $likerIds );
+        }
+        $likerIds = json_encode($likerIds);
+        $sql = "
+        	update `hotornot-dev`.tblChallenges
+        	set recent_likes = ?
+        	where id = ?
+        ";
+        $params = array( $likerIds, $volleyId );
+        $this->prepareAndExecute( $sql, $params );
     }
     
     public function join( $volleyId, $userId, $imgUrl, $hashTag = '' ){

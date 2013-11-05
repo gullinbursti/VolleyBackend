@@ -6,6 +6,17 @@ class BIM_DAO_Mysql extends BIM_DAO{
     public $rowCount = null;
     public static $profile = null;
     
+    public function beginTransaction(){
+        
+    }
+    
+    public function rollback(){
+        
+    }
+    
+    public function commit(){
+        
+    }
     /**
      * retrieves config data for connecting to a data source.
      * 

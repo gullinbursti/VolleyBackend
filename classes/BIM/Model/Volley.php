@@ -25,6 +25,25 @@ class BIM_Model_Volley{
             $this->is_private = $volley->is_private;
             $this->is_verify = (int) $volley->is_verify;
             
+            // setting up recent likes
+            $this->recent_likes = $volley->recent_likes;
+            if( $this->recent_likes == '' ){
+                $this->setRecentLikes();
+            } else {
+                $this->recent_likes = json_decode( $this->recent_likes );
+                if( $this->recent_likes ){
+                    $users = BIM_Model_User::getMulti($this->recent_likes, true);
+                    foreach( $this->recent_likes as &$id ){
+                        if( !empty( $users[ $id ] ) ){
+                            $id = (object) array(
+                            	'id' => $users[ $id ]->id, 
+                            	'username' => $users[ $id ]->username
+                            );
+                        }
+                    }
+                }
+            }
+            
             $creator = (object) array(
                 'id' => $volley->creator_id,
                 'img' => $volley->creator_img,
@@ -49,7 +68,7 @@ class BIM_Model_Volley{
                     'id' => $challenger->challenger_id,
                     'img' => $challenger->challenger_img,
                     'score' => $challenger->likes,
-                    'subject' => empty($challenger->subject) ? $this->subject : $challenger->subject,
+                	'subject' => empty($challenger->subject) ? $this->subject : $challenger->subject,
                 	'joined' => $joined,
                     'joined_timestamp' => $challenger->joined,
                 );
@@ -84,6 +103,23 @@ class BIM_Model_Volley{
             $this->creator = $data;
         }
         return $data;
+    }
+    
+    public function setRecentLikes( ){
+        $dao = new BIM_DAO_Mysql_Volleys(BIM_Config::db());
+        $this->recent_likes = $dao->getRecentLikes( $this->id );
+        if( $this->recent_likes ){
+            $dao->setRecentLikes( $this->id, $this->recent_likes );
+            $users = BIM_Model_User::getMulti($this->recent_likes, true);
+            foreach( $this->recent_likes as &$id ){
+                if( !empty( $users[ $id ] ) ){
+                    $id = (object) array(
+                    	'id' => $users[ $id ]->id, 
+                    	'username' => $users[ $id ]->username
+                    );
+                }
+            }
+        }
     }
     
     private function _setSubject( $volley ){
@@ -383,6 +419,7 @@ class BIM_Model_Volley{
     public function upVote( $targetId, $userId, $imgUrl ){
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
         $dao->upVote( $this->id, $userId, $targetId, $imgUrl  );
+        $this->setRecentLikes();
         $this->purgeFromCache();
     }
     
