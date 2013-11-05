@@ -17,6 +17,7 @@ $names = BIM_Config::getBootConfNames();
 foreach( $names as $name ){
     echo "<a href='boot/edit/$name'>Edit Boot Conf $name</a><br>";
 }
+
 ?>
 
 <script type='text/javascript'>

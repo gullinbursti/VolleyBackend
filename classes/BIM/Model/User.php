@@ -477,6 +477,9 @@ delete from tblUsers where username like "%yoosnapyoo";
             $this->purgeVolleys();
             $this->purgeFromCache();
             $this->volleys = BIM_Model_Volley::getMulti($this->getVolleyIds());
+            foreach( $this->volleys as $volley ){
+                $volley->setRecentLikes();
+            }
             $data = json_encode($this);
             $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
             $dao->archive($this->id, $this->username, $data);
