@@ -10,13 +10,14 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
     
     public function getLikedVolleys( $userId ){
         $sql = "
-        	select challenge_id 
-        	from `hotornot-dev`.tblChallengeVotes 
-        	where user_id = ?
+            select challenge_id 
+            from `hotornot-dev`.tblChallengeVotes 
+            where user_id = ?
         ";
         $params = array( $userId );
-		$stmt = $this->prepareAndExecute($sql);
-        return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+		$stmt = $this->prepareAndExecute($sql, $params);
+        $data = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+        return $data;
     }
     
     public function delete( $userId ){
@@ -40,13 +41,6 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         $this->prepareAndExecute( $sql, $params );
         
         $sql = "
-        	delete from `hotornot-dev`.tblChallengeVotes
-        	where user_id = ?
-        ";
-        $params = array( $userId );
-        $this->prepareAndExecute( $sql, $params );
-        
-        $sql = "
         	delete from `hotornot-dev`.tblChallenges 
         	where creator_id = ?
         ";
@@ -56,6 +50,15 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         $sql = "
         	delete from `hotornot-dev`.tblUsers 
         	where id = ?
+        ";
+        $params = array( $userId );
+        $this->prepareAndExecute( $sql, $params );
+    }
+    
+    public function removeLikes( $userId ){
+        $sql = "
+        	delete from `hotornot-dev`.tblChallengeVotes
+        	where user_id = ?
         ";
         $params = array( $userId );
         $this->prepareAndExecute( $sql, $params );
@@ -89,13 +92,6 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         	) or user_id = ?
         ";
         $params = array( $userId, $userId );
-        $this->prepareAndExecute( $sql, $params );
-        
-        $sql = "
-        	delete from `hotornot-dev`.tblChallengeVotes
-        	where user_id = ?
-        ";
-        $params = array( $userId );
         $this->prepareAndExecute( $sql, $params );
         
         $sql = "

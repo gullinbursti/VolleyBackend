@@ -494,6 +494,7 @@ delete from tblUsers where username like "%yoosnapyoo";
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
         $volleyIds = $dao->getLikedVolleys( $this->id );
         $volleys = BIM_Model_Volley::getMulti($volleyIds);
+        $dao->removeLikes( $this->id );
         if( !empty( $volleys ) ){
             foreach( $volleys as $volley ){
                 $volley->setRecentLikes();
@@ -637,10 +638,10 @@ delete from tblUsers where username like "%yoosnapyoo";
         }
         foreach( $ids as $id ){
             $user = self::get($id);
+            $user->removeLikes();
             $user->archive();
             $user->delete();
             $user->removeFriends();
-            $user->removeLikes();
             $return[] = $user;
         }
         
