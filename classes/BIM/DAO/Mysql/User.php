@@ -8,6 +8,17 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
     }
     
+    public function getLikedVolleys( $userId ){
+        $sql = "
+        	select challenge_id 
+        	from `hotornot-dev`.tblChallengeVotes 
+        	where user_id = ?
+        ";
+        $params = array( $userId );
+		$stmt = $this->prepareAndExecute($sql);
+        return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+    }
+    
     public function delete( $userId ){
         $sql = "
         	delete from `hotornot-dev`.tblChallengeParticipants 

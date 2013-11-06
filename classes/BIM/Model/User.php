@@ -477,9 +477,6 @@ delete from tblUsers where username like "%yoosnapyoo";
             $this->purgeVolleys();
             $this->purgeFromCache();
             $this->volleys = BIM_Model_Volley::getMulti($this->getVolleyIds());
-            foreach( $this->volleys as $volley ){
-                $volley->setRecentLikes();
-            }
             $data = json_encode($this);
             $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
             $dao->archive($this->id, $this->username, $data);
@@ -490,6 +487,17 @@ delete from tblUsers where username like "%yoosnapyoo";
         if( $this->isExtant() ){
             $dao = new BIM_DAO_ElasticSearch_Social( BIM_Config::elasticSearch() );
             $docs = $dao->deleteRelationships( $this->id );
+        }
+    }
+    
+    public function removeLikes(){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        $volleyIds = $dao->getLikedVolleys( $this->id );
+        $volleys = BIM_Model_Volley::getMulti($volleyIds);
+        if( !empty( $volleys ) ){
+            foreach( $volleys as $volley ){
+                $volley->setRecentLikes();
+            }
         }
     }
     
@@ -628,10 +636,11 @@ delete from tblUsers where username like "%yoosnapyoo";
             $wantArray = false;
         }
         foreach( $ids as $id ){
-            $user = BIM_Model_User::get($id);
+            $user = self::get($id);
             $user->archive();
             $user->delete();
             $user->removeFriends();
+            $user->removeLikes();
             $return[] = $user;
         }
         
@@ -655,7 +664,7 @@ delete from tblUsers where username like "%yoosnapyoo";
         
         $return = array();
         foreach( $userNames as $name ){
-            $user = BIM_Model_User::getByUsername($name);
+            $user = self::getByUsername($name);
             $return[] = self::archiveUser($user->id);
         }
         
