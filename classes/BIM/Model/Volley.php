@@ -41,13 +41,11 @@ class BIM_Model_Volley{
                 'score' => $volley->creator_likes,
                 'subject' => $this->subject,
             );
+            $this->creator = $creator;
+            $this->resolveScore($creator);
             
     	    $this->is_explore = $volley->is_explore;
             $this->is_celeb = BIM_Utils::isCelebrity( $volley->creator_id );
-            // finally get the correct score if necessary
-            
-            $this->creator = $creator;
-            $this->resolveScore($creator);
             
             $challengers = array();
             
