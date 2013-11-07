@@ -283,6 +283,10 @@ class BIM_Utils{
     public static function finalizeImages( $image ){
         $convertedImages = array();
         
+        $tabImage = clone $image;
+        self::cropTab($tabImage, 640, 592);
+        $convertedImages['Tab_640x592'] = $tabImage;
+        
         self::resize($image, 320, 568);
         self::cropY($image, 320, 320);
         $mediumImage = clone $image;
@@ -313,6 +317,13 @@ class BIM_Utils{
         $image->setImagePage(0,0,0,0);
         $image->setImageResolution($width,$height);
         $image->cropImage($width, $height, 0, $y);
+    }
+    
+    public static function cropTab( $image, $width, $height ){
+        $y = 100;
+        $image->setImagePage(0,0,0,0);
+        $image->setImageResolution($width,$height);
+        $image->cropImage($width, $height, 0, 100);
     }
     
     public static function isCelebrity( $id ){
