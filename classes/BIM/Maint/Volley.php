@@ -36,9 +36,11 @@ Small_160x160
             $ids = array_splice($volleyIds, 0, 250);
             $volleys = BIM_Model_Volley::getMulti($ids);
             foreach( $volleys as $volley ){
-                self::processImage( $volley->creator->img );
+                BIM_Utils::processImage( $volley->creator->img );
+                echo "processed creator image ".$volley->creator->img."\n";
                 foreach( $volley->challengers as $challenger ){
-                    self::processImage( $challenger->img );
+                    BIM_Utils::processImage( $challenger->img );
+                    echo "processed challenger image $challenger->img\n";
                 }
                 echo "processed volley $volley->id\n\n";
             }

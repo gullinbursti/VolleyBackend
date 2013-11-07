@@ -112,9 +112,8 @@ Small_160x160
             $users = BIM_Model_User::getMulti($ids);
             foreach( $users as $user ){
                 if( !empty( $user->img_url ) ){
-                    $imgPrefix = preg_replace('@\.jpg@','', $user->img_url );
-                    self::processImage( $imgPrefix );
-                    echo "processed user $user->id\n\n";
+                    BIM_Utils::processUserImage( $user->img_url );
+                    echo "processed img $user->img_url for user $user->username, $user->id\n\n";
                 }
             }
             print count( $userIds )." remaining\n\n====\n\n";

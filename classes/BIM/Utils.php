@@ -240,7 +240,7 @@ class BIM_Utils{
         if( $image ){
             $conf = BIM_Config::aws();
             S3::setAuth($conf->access_key, $conf->secret_key);
-            $convertedImages = BIM_Utils::finalizeImages($image);
+            $convertedImages = self::finalizeImages($image);
             $parts = parse_url( $imgPrefix );
             $path = trim($parts['path'] , '/');
             foreach( $convertedImages as $suffix => $image ){
@@ -253,18 +253,8 @@ class BIM_Utils{
     
     public static function processUserImage( $imgPrefix, $bucket = 'hotornot-avatars' ){
         $imgPrefix = preg_replace('@Large_640x1136\.jpg@', '', $imgPrefix);
-        $image = self::getImage($imgPrefix);
-        if( $image ){
-            $conf = BIM_Config::aws();
-            S3::setAuth($conf->access_key, $conf->secret_key);
-            $convertedImages = BIM_Utils::finalizeImages($image);
-            $parts = parse_url( $imgPrefix );
-            $path = trim($parts['path'] , '/');
-            foreach( $convertedImages as $suffix => $image ){
-                $name = "{$path}{$suffix}.jpg";
-                S3::putObjectString($image->getImageBlob(), $bucket, $name, S3::ACL_PUBLIC_READ, array(), 'image/jpeg' );
-            }
-        }
+        $imgPrefix = preg_replace('@\.jpg@', '', $imgPrefix);
+        self::processImage($imgPrefix, $bucket);
     }
     
     public static function getImage( $imgPrefix ){
@@ -284,8 +274,8 @@ class BIM_Utils{
         $convertedImages = array();
         
         $tabImage = clone $image;
-        self::cropTab($tabImage, 640, 592);
-        $convertedImages['Tab_640x592'] = $tabImage;
+        self::cropTab($tabImage, 640, 640);
+        $convertedImages['Tab_640x640'] = $tabImage;
         
         self::resize($image, 320, 568);
         self::cropY($image, 320, 320);
