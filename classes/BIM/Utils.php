@@ -274,8 +274,8 @@ class BIM_Utils{
         $convertedImages = array();
         
         $tabImage = clone $image;
-        self::cropTab($tabImage, 640, 640);
-        $convertedImages['Tab_640x640'] = $tabImage;
+        self::cropTab($tabImage, 640, 960);
+        $convertedImages['Tab_640x960'] = $tabImage;
         
         self::resize($image, 320, 568);
         self::cropY($image, 320, 320);
@@ -310,7 +310,7 @@ class BIM_Utils{
     }
     
     public static function cropTab( $image, $width, $height ){
-        $y = 100;
+        $y = 0;
         $image->setImagePage(0,0,0,0);
         $image->setImageResolution($width,$height);
         $image->cropImage($width, $height, 0, 100);
