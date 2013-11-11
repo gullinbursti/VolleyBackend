@@ -123,13 +123,13 @@ class BIM_Model_Volley{
         }
     }
     
-    private function _setSubject( $volley ){
-        if( empty($volley->subject) ){
+    private function _setSubject( $me ){
+        if( empty($me->subject) ){
             $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-            $this->subject = $dao->getSubject( $volley->subject_id );
+            $this->subject = $dao->getSubject( $me->subject_id );
             $dao->setSubject( $this->id );
         } else {
-            $this->subject = $volley->subject;
+            $this->subject = $me->subject;
         }
     }
     /*
@@ -400,6 +400,14 @@ class BIM_Model_Volley{
     public function updateStatus( $status ){
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
         $dao->updateStatus( $this->id, $status );
+        $this->purgeFromCache();
+    }
+    
+    public function updateHashTag( $hashTag ){
+        $hashTag = preg_replace('@#@','',$hashTag);
+        $hashTag = "#$hashTag";
+        $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
+        $dao->updateHashTag( $this->id, $hashTag );
         $this->purgeFromCache();
     }
     

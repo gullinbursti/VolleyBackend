@@ -24,6 +24,51 @@ class BIM_App_Admin{
         }
     }
     
+    public static function doEditVolley( $input ){
+        $volley = BIM_Model_Volley::get( $input->volley_id );
+        
+        if( !empty( $input->hashtag ) ){
+            $volley->updateHashTag( $input->hashtag );
+        }
+                    
+        if( !empty( $_FILES['volley_img']['tmp_name'] ) ){
+            $volleyImagePath = $_FILES['volley_img']['tmp_name'];
+            
+            $namePrefix = 'TV_Volley_Image-'.uniqid(true);
+            $name = "{$namePrefix}Large_640x1136.jpg";
+            $imgUrlPrefix = "https://d1fqnfrnudpaz6.cloudfront.net/$namePrefix";
+            
+            //echo("BIM_Utils::putImage( $volleyImagePath, $name )\n");
+            BIM_Utils::putImage( $volleyImagePath, $name );
+            //echo("BIM_Utils::processImage(".$volley->creator->img.")\n");
+            BIM_Utils::processImage($imgUrlPrefix);
+            //echo "updating image to $imgUrlPrefix\n";
+            $volley->updateImage($imgUrlPrefix);
+            $volley->purgeFromCache();
+        }
+        
+        if( !empty($input->delete) ){
+            $volleyIds = array($input->delete);
+            BIM_Model_Volley::deleteVolleys( $volleyIds );
+        }
+    }
+    
+    public static function doCreateVolley( $input ){
+        if( !empty( $_FILES['image']['tmp_name'] ) && !empty( $input->hashtag ) ){
+            $teamVolleyId = BIM_Config::app()->team_volley_id;
+            $imagePath = $_FILES['image']['tmp_name'];
+            $namePrefix = 'TV_Volley_Image-'.uniqid(true);
+            $name = "{$namePrefix}Large_640x1136.jpg";
+            $imgUrlPrefix = "https://d1fqnfrnudpaz6.cloudfront.net/$namePrefix";
+            
+            BIM_Utils::putImage( $imagePath, $name );
+            BIM_Utils::processImage($imgUrlPrefix);
+            
+            $hashTag = trim($input->hashtag,'#');
+            $hashTag = "#$hashTag";
+            BIM_Model_Volley::create( $teamVolleyId, $hashTag, $imgUrlPrefix );
+        }
+    }
     /**
      * if we are receiving a posted image
      * first we upload the image to s3
@@ -38,50 +83,12 @@ class BIM_App_Admin{
      */
     
     public static function createVolley(){
-        if( !empty( $_FILES['volleys']['tmp_name'] ) ){
-            $volleyImages = $_FILES['volleys']['tmp_name'];
-            if( !is_array($volleyImages) ){
-                $volleyImages = array( $volleyImages );
-            }
-            foreach( $volleyImages as $volleyId => $volleyImagePath ){
-                if( $volleyImagePath ){
-                    $volley = BIM_Model_Volley::get( $volleyId );
-                    $namePrefix = 'TV_Volley_Image-'.uniqid(true);
-                    $name = "{$namePrefix}Large_640x1136.jpg";
-                    $imgUrlPrefix = "https://d1fqnfrnudpaz6.cloudfront.net/$namePrefix";
-                    
-                    //echo("BIM_Utils::putImage( $volleyImagePath, $name )\n");
-                    BIM_Utils::putImage( $volleyImagePath, $name );
-                    //echo("BIM_Utils::processImage(".$volley->creator->img.")\n");
-                    BIM_Utils::processImage($imgUrlPrefix);
-                    //echo "updating image to $imgUrlPrefix\n";
-                    $volley->updateImage($imgUrlPrefix);
-                    $volley->purgeFromCache();
-                }
-            }
-        }
-        
         $input = (object)( $_POST? $_POST : $_GET);
-        $teamVolleyId = BIM_Config::app()->team_volley_id;
         
-        $volleyIds = array();
-        if( property_exists($input, 'volleyIds') ){
-            $volleyIds = !empty($input->volleyIds) ? $input->volleyIds : array();
-            BIM_Model_Volley::deleteVolleys( $volleyIds );
-        }
-        
-        if( !empty( $_FILES['image']['tmp_name'] ) && !empty( $input->hashtag ) ){
-            $imagePath = $_FILES['image']['tmp_name'];
-            $namePrefix = 'TV_Volley_Image-'.uniqid(true);
-            $name = "{$namePrefix}Large_640x1136.jpg";
-            $imgUrlPrefix = "https://d1fqnfrnudpaz6.cloudfront.net/$namePrefix";
-            
-            BIM_Utils::putImage( $imagePath, $name );
-            BIM_Utils::processImage($imgUrlPrefix);
-            
-            $hashTag = trim($input->hashtag,'#');
-            $hashTag = "#$hashTag";
-            BIM_Model_Volley::create( $teamVolleyId, $hashTag, $imgUrlPrefix );
+        if( !empty( $input->edit_volley ) ){
+            self::doEditVolley( $input );
+        } else if( $input->create_volley ) {
+            self::doCreateVolley( $input );
         }
         
         echo("
@@ -92,6 +99,7 @@ class BIM_App_Admin{
         <body>
         ");
         
+        $teamVolleyId = BIM_Config::app()->team_volley_id;
         $volleys = BIM_Model_Volley::getVolleys($teamVolleyId);
         
         echo("
@@ -102,7 +110,8 @@ class BIM_App_Admin{
         	<br>
 			Volley Image: <input type='file' name='image'>
 			<br>
-        <input type='submit'>
+        <input type='submit' name='create_volley' value='create_volley'>
+        </form>
         
 		<hr>Team Volley volleys - ".count( $volleys )."<hr>\n
 		
@@ -123,21 +132,31 @@ class BIM_App_Admin{
             $creator = $volley->creator;
             $totalChallengers = count($volley->challengers);
             $img = $volley->getCreatorImage();
-            $checked = in_array( $volley->id, $volleyIds ) ? ' checked ' : '';
             if( $volley->isExtant() ){
                 echo "
                 <tr>
-                <td>$volley->id</td>
+                <td>
+                    $volley->id<br>
+					<form method='post'enctype='multipart/form-data'>
+        			<input type='hidden' name='volley_id' value='$volley->id'>
+					<input type='submit' name='edit_volley' value='edit_volley'>
+                </td>
                 <td>
                 	<img src='$img'><br>
-					New Volley Image: <input type='file' name='volleys[$volley->id]'>
+					New Volley Image: <input type='file' name='volley_img'>
                 	</td>
                 <td>$creator->username</td>
-                <td>$volley->subject</td>
+                <td>
+                    $volley->subject<br>
+                    New Hash Tag:<input type='text' name='hashtag' value=''>
+                </td>
                 <td>$totalChallengers</td>
                 <td>$volley->added</td>
                 <td>$volley->updated</td>
-                <td><input type='checkbox' $checked name='volleyIds[]' value='$volley->id'></td>
+                <td>
+                	<input type='checkbox' name='delete' value='$volley->id'>
+                	</form>
+                </td>
                 </tr>
                 ";
             }
