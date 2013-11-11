@@ -457,7 +457,7 @@ class BIM_Model_Volley{
         $this->purgeFromCache();
     }
     
-    public function setPreviewed( $userId ){
+    public function setPreviewed( ){
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
         $dao->setPreviewed( $this->id );
         $this->purgeFromCache();
