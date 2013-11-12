@@ -80,12 +80,12 @@ class BIM_App_Votes extends BIM_App_Base{
 	 * @param $username The username of the user (string)
 	 * @return The list of challenges (array)
 	**/	
-	public function getChallengesForUsername($username, $private = false ) {
+	public function getChallengesForUsername($username ) {
 	    $volleys = array();
 	    $user = BIM_Model_User::getByUsername($username);
 		if ( $user && $user->isExtant() ) {
             $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-            $ids = $dao->getVolleysForUserId( $user->id, $private );
+            $ids = $dao->getVolleysForUserId( $user->id );
             $volleys = BIM_Model_Volley::getMulti($ids);
 		}
 		return $volleys;

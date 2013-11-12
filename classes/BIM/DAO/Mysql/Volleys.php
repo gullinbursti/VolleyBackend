@@ -757,26 +757,17 @@ WHERE is_verify != 1
         return $ids;        
     }
     
-    public function getVolleysForUserId( $userId, $private = false ){
+    public function getVolleysForUserId( $userId ){
 		// get latest 10 challenges for user
-	    $privateSql = ' AND tc.`is_private` != "Y" ';
-	    if( $private ){
-	        $privateSql = ' AND tc.`is_private` = "Y" ';
-	    }
-		
         $query = "
-			SELECT tc.id 
-			FROM `hotornot-dev`.`tblChallenges` as tc
-            	LEFT JOIN `hotornot-dev`.tblChallengeParticipants as tcp
-            	ON tc.id = tcp.challenge_id
-			WHERE ( tc.status_id IN (1,2,4) ) 
-				$privateSql
-				AND (tc.`creator_id` = ? OR tcp.`user_id` = ? )
-				AND tc.is_verify != 1 
-			GROUP BY id
-			ORDER BY tc.`updated`
-			";
-				
+			SELECT id 
+			FROM `hotornot-dev`.`tblChallenges`
+			WHERE `creator_id` = ? AND is_verify != 1
+			UNION
+			SELECT challenge_id 
+			FROM `hotornot-dev`.`tblChallengeParticipants`
+			WHERE `user_id` = ?
+		";
 		$params = array( $userId, $userId );
         $stmt = $this->prepareAndExecute( $query, $params );
         $ids = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
