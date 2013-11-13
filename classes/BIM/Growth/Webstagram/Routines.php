@@ -57,17 +57,531 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             }	   
 	   
      */
-    public function follow( $id ){
-        $url = 'http://web.stagram.com/do_follow/';
+    /**
+     * 
+     * @param int $id - id of the target user for the follow
+     * @param string $name - the name of the target user for the follow
+     */
+    public function follow( $id, $name ){
+        $time = time();
+        $url = "http://web.stagram.com/do_follow/?$time";
         $params = array(
             'pk' => $id,
-            't' => mt_rand(5000, 10000)
+            't' => mt_rand(0, 10000)
         );
-        $response = json_decode( $this->post( $url ) );
+        $headers = array(
+        	'Origin: http://web.stagram.com',
+			'X-Requested-With: XMLHttpRequest',
+            'Content-Type: application/x-www-form-urlencoded',
+			"Referer: http://web.stagram.com/n/$name/"
+        );
+
+        $response = $this->post( $url, $params, false, $headers );
+        $response = json_decode( $response );
+        print_r( array($this->persona->name, $name, $response) );
         if( empty( $response->status ) || $response->status != 'OK' ){
-            $msg = "cannot like photo using id : $id with persona: ".$this->persona->username;
-            echo "$msg\n";
+            $msg = "cannot follow user $name using id : $id with persona: ".$this->persona->name;
+            $msg = "$msg ".print_r( $response, 1 );
+            error_log($msg);
             $this->sendWarningEmail( $msg );
+        }
+    }
+    
+    /**
+     * This routine does the following for each persona
+     * 
+     * login
+     * hit feed
+     * generate a random number between 5 - 20
+     * 
+     * get between 10 - 20 images
+     * 
+     * 		get each image on feed pages
+     * 		check to see if we have liked the image
+     * 		if not, then generate a random number to see if we will like it
+     * 
+     * if we exhaust our feed and still have not collected 20 images, 
+     * then we search using a random popular tag and browse that until 
+     * we found all of our images to like.  if we do not find all of them
+     * then we go to the next popular tag and 
+     * repeat until we have found all of the images we want to like
+     * 
+     * once we have found them all
+     * 
+     * or alternatively, we can simply space out the likes that we get over the next week
+     * 
+     * 
+     * h1 - 6(6) workers - 6 likes - nh3,5,7,9,11
+     * h2 - 6(12) workers - 6 likes - nh4,6,8,10,12
+     * h3 - 6(18) workers - 12 likes - nh5,7,9,11
+     * h4 - 6(24) workers - 12 likes - nh6,8,10,12
+     * h5 - 6(30) workers - 18 likes - nh7,9,11,13
+     * h6 - 7(36) workers - 18 likes - nh8,10,12,14
+     * h - 7(42) workers - 24 likes - nh8,10,12,14
+     * h - 7(48) workers - 24 likes - nh8,10,12,14
+     * h - 7(54) workers - 30 likes - nh8,10,12,14
+     * h - 7(60) workers - 30 likes - nh8,10,12,14
+     * h - 7(66) workers - 36 likes - nh8,10,12,14
+     * h12 - 7(72) workers - 36 likes - nh8,10,12,14
+     * 
+     *
+     * page that lists the selfies from webstagram hundreds at a time
+     * 
+     * text
+     * select an IG account
+     * 
+     * top of page will be a set of fields that can be set as  a shoutout
+     * then the list can be browsed and shoutouts sent
+     * 
+     * text field for message
+     * dropdown which account
+     * text field for the number of shoutouts
+     * filter for which users to target (min followers max followers, min following, max following)
+     * 
+     * 
+     * 
+     * 
+     */
+    // generate the job times over the next 2 weeks
+    /*
+     * foreach persona
+     * 
+     * foreach each site
+     * 
+     * generate a random time between now and x seconds from now
+     * 
+     * then resolve the time to the closest minute and use that for job time
+     * 
+     * then create the job
+     * 
+     * the job will be to like the web property id in the job
+     */
+    public static function queueLikeJobs(){
+        $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+	    $sql = "select name from growth.persona where network = 'instagram'";
+		$stmt = $dao->prepareAndExecute( $sql );
+		$personaNames = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+		
+        $accountNames = array(
+        	'rateselfie',
+        	'shoutoutselfiez',
+            'letsvolley',
+            'volleyapp',
+            'teamvolleyapp',
+            'cutetumblrselfies',
+            'weheartitselfies',
+            'theselfiecontest',
+            'shoutoutselfiecontest',
+            'famousselfies',
+        );
+        $minutes = 1440 * 10;
+        $time = time();
+        
+        $date = new DateTime();
+        $date->setTimezone(new DateTimeZone('UTC') );
+        foreach( $accountNames as $accountName ){
+            foreach( $personaNames as $name ){
+                $whichMinute = mt_rand( 1, $minutes );
+                $seconds = $whichMinute * 60;
+                $targetDate = $time + $seconds;
+                $date->setTimestamp($targetDate);
+                $targetDate = $date->format('Y-m-d H:i:s');
+                echo "$name, $accountName - $targetDate\n";
+                self::queueHouseFollow($name, $accountName, $targetDate);
+            }
+        }
+    }
+    
+    public static function queueBlastJobs(){
+        $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+	    $sql = "select name from growth.persona where network = 'instagram'";
+		$stmt = $dao->prepareAndExecute( $sql );
+		$personaNames = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+		
+        $minutes = 1440 * 1;
+        $time = time();
+        
+        $date = new DateTime();
+        $date->setTimezone(new DateTimeZone('UTC') );
+        foreach( $personaNames as $name ){
+            for($n = 0; $n < 10; $n++ ){
+                $whichMinute = mt_rand( 1, $minutes );
+                $seconds = $whichMinute * 60;
+                $targetDate = $time + $seconds;
+                $date->setTimestamp($targetDate);
+                $targetDate = $date->format('Y-m-d H:i:s');
+                echo "$name - $targetDate\n";
+                self::queueHouseFollow($name, $targetDate);
+            }
+        }
+    }
+    
+    public static function queueBlastJob($personaId, $targetDate = null ){
+        if( !$targetDate ){
+            $targetDate = new DateTime();
+            $targetDate = $targetDate->format( 'Y-m-d H:i:s' );
+        }
+        $job = (object) array(
+            'nextRunTime' => $targetDate,
+            'class' => 'BIM_Jobs_Growth',
+            'method' => 'doBlastJob',
+            'name' => 'do_blast_job',
+            'params' => array(
+                'persona_id' => $personaId
+            ),
+            'is_temp' => true,
+            'disabled' => 1
+        );
+        
+        $j = new BIM_Jobs_Gearman();
+        $j->createJbb($job);
+    }
+    
+    public static function queueHouseFollow($personaId, $accountName, $targetDate = null ){
+        if( !$targetDate ){
+            $targetDate = new DateTime();
+            $targetDate = $targetDate->format( 'Y-m-d H:i:s' );
+        }
+        $job = (object) array(
+            'nextRunTime' => $targetDate,
+            'class' => 'BIM_Jobs_Growth',
+            'method' => 'doHouseFollow',
+            'name' => 'do_house_follow',
+            'params' => array(
+                'house_account_id' => $accountName,
+                'persona_id' => $personaId
+            ),
+            'is_temp' => true,
+            'disabled' => 1
+        );
+        
+        $j = new BIM_Jobs_Gearman();
+        $j->createJbb($job);
+    }
+    
+    /**
+     * generate a random tag
+     * generate a unique image
+     * post the unique image with the tag in the caption
+     * find a random user from one of our tags
+     * drop a comment with the tag
+     */
+    public static function doBlastJob( $personaId ){
+        $me = new self( $personaId );
+        //if( $me->handleLogin() ){
+            $tag = self::getUniqueTag();
+            
+            //$caption = self::getRandomCaption( $tag );
+            //$pic = self::getUniqueMedia();
+            //$me->postMedia( $pic, $caption );
+            
+            $comment = self::getRandomComment( $tag );
+            $user = self::getRandomUser();
+            
+            $me->commentOnLatestPhoto( $user->url, $comment );
+            print_r( array( "commented on photo",$tag,$comment,$user ) );
+            
+        //}
+    }
+
+    public static function getRandomUser(){
+        $randomUser = null;
+        $attempts = 0;
+        while( !$randomUser && $attempts++ < 100 ){
+            $time = time() - mt_rand(0, 86400 * 60);
+            $selfieUrl = "http://web.stagram.com/tag/selfie/?npk=$time";
+            
+            echo "getting $selfieUrl\n";
+            
+            $g = new BIM_Growth_Webstagram();
+            $response = $g->get( $selfieUrl );
+            $users = self::getUsersFromText($response);
+            foreach( $users as $user ){
+                if( self::canDoPing( $user->id ) ){
+                    $randomUser = $user;
+                    break;
+                }
+            }
+            if( !$randomUser ){
+                $sleep = 5;
+                error_log("sleeping for $sleep seconds") ;
+                sleep( $sleep );
+            }
+        }
+        
+        return $randomUser;
+    }
+    
+    // returns a unique 6 letter string
+    public static function getRandomComment( $tag = '' ){
+        $comments = array(
+            'Wnna shoutout?',
+            'Wanna shoutout?',
+            'shoutout?',
+            's4s?',
+            'wanna host a game?',
+            'host a game?',
+            'wanna play?',
+            'play?',
+            'host?',
+            'share?',
+            'share for share?',
+            'shoutout for shoutout?',
+            'wanna shout?',
+            'give me a shoutout?',
+            'want a shoutout?',
+            'gimme a shoutout?',
+            'shoutout?!',
+            'i <3 shoutouts',
+            'shoutout selfie?',
+            'selife shoutout?',
+            'selfie?',
+            'selfie shoutout >>',
+            'shoutout selfie >>',
+            'host selfie game?',
+            'Wnna shoutout >>',
+            'Wanna shoutout >>>',
+            'shoutout >>',
+            's4s >>',
+            'wanna host a game >>',
+            'host a game >>',
+            'wanna play >>',
+            'play >>',
+            'host >>',
+            'share >>',
+            'share me ?? >>',
+            'share? >>',
+            'share4share? >>',
+            'follow? >>',
+            'want a shoutout or follow??',
+        );
+        $idx = array_rand( $comments );
+        $comment = $comments[$idx]." $tag";
+        return $comment;
+    }
+    
+    // returns a unique 6 letter string
+    public static function getUniqueTag(){
+        $tags = array(
+            '#finotx',
+            '#cenoux',
+            '#eijluy',
+            '#dntuvw',
+            '#adegtz',
+            '#aehuwx',
+            '#kmrsyz',
+            '#behlqx',
+            '#cfmqrw',
+            '#fjkouw',
+            '#fgmpqu',
+            '#dfijlr',
+            '#bdpsuy',
+            '#abfkrx',
+            '#klprvx',
+            '#ahlnrt',
+            '#ceilqz',
+            '#cknosy',
+            '#acqrty',
+            '#lpqstw',
+            '#akouvw',
+            '#cdgiqy',
+            '#cfgkru',
+            '#hikovw',
+            '#adfjnv',
+            '#finopy',
+            '#hjnvyz',
+            '#gmtvwx',
+            '#dkpruw',
+            '#dmorsy',
+            '#dhlnps',
+            '#cikosy',
+            '#bcmtvy',
+            '#bcjnpu',
+            '#cfpuvx',
+            '#anoqvw',
+            '#aefxyz',
+            '#hkmuvx',
+            '#ckmnqu',
+            '#eitwxy',
+            '#abchst',
+            '#bfnpqs',
+            '#dhijvy',
+            '#cefuxz',
+            '#kostyz',
+            '#bcgoux',
+            '#ekmnqs',
+            '#bgjlmq',
+            '#abfmry',
+            '#ejopwz',
+            '#abgknq',
+            '#chpruw',
+            '#ikqvwy',
+            '#abgmrs',
+            '#ehjnqy',
+            '#fgjtwx',
+            '#hjmtxz',
+            '#bfpqst',
+            '#egipwx',
+            '#joqtuv',
+            '#ackmsx',
+            '#bemrwx',
+            '#choqtv',
+            '#acilty',
+            '#dhjsty',
+            '#flmowy',
+            '#dgoxyz',
+            '#dhilpq',
+            '#ceiouz',
+            '#fjklwx',
+            '#bcenot',
+            '#dghqsx',
+            '#cemqrz',
+            '#mtuwxy',
+            '#cfghpt',
+            '#fkpvxy',
+            '#fpstwz',
+            '#fglnpz',
+            '#dgoqvw',
+            '#ghiqrv',
+            '#cjknqu',
+            '#aghlnt',
+            '#hilnpq',
+            '#bdlmpt',
+            '#acilqy',
+            '#cfmsuw',
+            '#hiklou',
+            '#nopqyz',
+            '#himnvx',
+            '#afjknu',
+            '#aegjux',
+            '#iklprw',
+            '#ilowxz',
+            '#aejruz',
+            '#bioquy',
+            '#bfhjlp',
+            '#befjoz',
+            '#fnptyz',
+            '#hijmvy',
+            '#cdfqsu',
+            '#bejlns',
+            '#deilpw',
+            '#bcdjvz',
+            '#dghkxz',
+            '#bklstx',
+            '#bcdgps',
+            '#dehnty',
+            '#achknq',
+            '#achkvy',
+            '#klprwx',
+            '#dgkqrz',
+            '#cfiuyz',
+            '#bcnosz',
+            '#fgiqty',
+            '#hjktwz',
+            '#egkmsw',
+            '#aejqvw',
+            '#hlntvz',
+            '#behntz',
+            '#bejrsu',
+            '#krtvwy',
+            '#adjlpt',
+            '#eilnxy',
+            '#dmpqsy',
+            '#hjrtwz',
+            '#eknrst',
+            '#dfnqry',
+            '#fhkosy',
+            '#gkmotz',
+            '#ghkmvw',
+            '#dhikrw',
+            '#bkmopv',
+            '#aefipz',
+            '#begqru',
+            '#hiloqw',
+            '#ehsuvy',
+            '#amoptu',
+            '#ejoqxy',
+            '#bklswz',
+            '#cdfkou',
+            '#abfimw',
+            '#efipqv',
+            '#djlquv',
+            '#hnoqvz',
+            '#ahikpv',
+            '#afkoqv',
+            '#amqrst',
+            '#aceouy',
+            '#bemovx',
+            '#fikoqs',
+            '#acdeoy',
+            '#klnxyz',
+            '#egmqst',
+            '#cgnosy',
+            '#hoprty',
+            '#cgptwx',
+            '#egjkuy',
+            '#abdlst',
+            '#hlnouy',
+            '#abghoq',
+            '#abjlqs',
+            '#acdkqr',
+            '#hjmsvw',
+            '#enoqyz',
+            '#chjopw',
+            '#djqsuw',
+            '#aeikrt',
+            '#bmpqtz',
+            '#aefjoy',
+            '#afgwyz',
+            '#gnopyz',
+            '#gnpuvw',
+            '#hjmnsy',
+            '#efgimr',
+            '#aostvx',
+            '#achqry',
+            '#abimoq',
+            '#begijv',
+            '#ahjmrv',
+            '#eklprz',
+            '#cehiot',
+            '#cjlmuy',
+            '#cfjpux',
+            '#eqruwy',
+            '#dginqr',
+            '#airsvy',
+            '#jpstxz',
+            '#klpvwy',
+            '#afiksz',
+            '#bcgqrx',
+            '#abemnt',
+            '#abfjxz',
+            '#dghsxy',
+            '#cdekmy',
+        );
+        
+        /**
+        $str = str_split('abcdefghijklmnopqrstuvwxyz');
+        $tag = array_rand( $str, 6 );
+        foreach( $tag as &$char ){
+            $char = $str[$char];
+        }
+        $tag = join('',$tag);
+        **/
+        return $tags[ array_rand( $tags ) ];
+    }
+    
+    public static function doHouseFollow( $personaId, $houseAccountname ){
+        $me = new self( $personaId );
+        if( $me->handleLogin() ){
+            $url = "http://web.stagram.com/n/$houseAccountname/";
+            $response = $me->get( $url );
+            $ptrn = '@"follow_button_(\w+)"@';
+            $matches = array();
+            preg_match($ptrn, $response, $matches);
+            if( !empty( $matches[1] ) ){
+                $id = $matches[1];
+                $me->follow( $id, $houseAccountname );
+            }
         }
     }
     
@@ -429,19 +943,27 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         return $ids;
     }
     
-    public function canPing( $id ){
+    public static function canDoPing( $id ){
         $canPing = false;
-        list( $imageId, $userId ) = explode( '_', $id, 2 );
-        if( $imageId && $userId ){
-            $dao = new BIM_DAO_Mysql_Growth_Webstagram( BIM_Config::db() );
-            $timeSpan = 86400 * 7;
-            $currentTime = time();
-            $lastContact = $dao->getLastContact( $userId );
-            if( ($currentTime - $lastContact) >= $timeSpan ){
-                $canPing = true;
+        $data = explode( '_', $id );
+        if( $data ){
+            print_r( $data );
+            $userId = empty( $data[1] ) ? $data[0] : $data[1];
+            if( $userId ){
+                $dao = new BIM_DAO_Mysql_Growth_Webstagram( BIM_Config::db() );
+                $timeSpan = 86400 * 7;
+                $currentTime = time();
+                $lastContact = $dao->getLastContact( $userId );
+                if( ($currentTime - $lastContact) >= $timeSpan ){
+                    $canPing = true;
+                }
             }
         }
         return $canPing;
+    }
+    
+    public function canPing( $id ){
+        return self::canDoPing($id);
     }
     
     public function isLoggedIn( $html ){
@@ -540,7 +1062,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         }
     }
     
-    public function commentOnLatestPhoto( $pageUrl ){
+    public function commentOnLatestPhoto( $pageUrl, $message = '' ){
         $ids = array();
         $response = $this->get( $pageUrl );
         
@@ -549,8 +1071,10 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         preg_match($ptrn, $response, $matches);
         if( isset( $matches[1] ) ){
             $id = $matches[1];
-            $inviteText = BIM_Config::inviteMsgs();            
-            $message = $inviteText['instagram'];
+            if( !$message ){
+                $inviteText = BIM_Config::inviteMsgs();
+                $message = $inviteText['instagram'];
+            }
             $message = preg_replace('/\[\[USERNAME\]\]/', $this->persona->name, $message);
             $this->submitComment($id, $message);
             $sleep = 5;
@@ -605,8 +1129,8 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         $data = $dao->getData( null, 'instagram' );
         foreach($data as $persona ){
             self::checkPersona( $persona );
-            $sleep = 0;
-            echo "loaded $persona->username sleeping for $sleep seconds\n";
+            $sleep = 5;
+            echo "checked $persona->username sleeping for $sleep seconds\n";
             sleep($sleep);
         }
     }
@@ -619,24 +1143,79 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
                 $username = $data[0];
                 $persona = (object) array( 'username' => $username);
                 self::checkPersona( $persona );
-                $sleep = 1;
-                echo "loaded $persona->username sleeping for $sleep seconds\n";
+                $sleep = 5;
+                echo "checked $persona->username sleeping for $sleep seconds\n";
                 sleep($sleep);
             }
         }
     }
     
+    public static function loadPersonasInFile( $filename = '' ){
+        $fh = fopen($filename,'rb');
+        while( $line = trim( fgets( $fh ) ) ){
+            $data = explode(':', $line);
+            if( $data ){
+                
+                $personaData = (object) array(
+                'name' => $data[0],
+                'instagram' => (object) array(
+                    	'username' => $data[0],
+                        'password' => $data[1],
+                    )
+                );
+                
+                $persona = new BIM_Growth_Persona( $personaData );
+                $r = new self( $persona );
+                
+                if( !$r->handleLogin() ){
+                    echo "invalid account: ".$persona->instagram->username.",".$persona->instagram->password."\n";
+                } else {
+                    echo "valid account: ".$persona->instagram->username.",".$persona->instagram->password."\n";
+                    self::loadPersona( $personaData );
+                }
+                
+                $sleep = 5;
+                echo "loaded $personaData->name sleeping for $sleep seconds\n";
+                sleep($sleep);
+            }
+        }
+    }
+    
+    public static function loadPersona( $personaData ){
+        $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+         /*
+INSERT INTO `persona` 
+(`network`, `email`, `username`, `password`, `name`, `extra`, `enabled`, `type`)
+VALUES
+('instagram', '\'\'', 'Ariannaxoxoluver', 'teamvolleypassword', 'Ariannaxoxoluver', '{}', 1, 'authentic');
+          * 
+          */
+        $sql = "
+            INSERT INTO growth.`persona` 
+            (`network`, `email`, `username`, `password`, `name`, `extra`, `enabled`, `type`)
+            VALUES
+            ('instagram', '', ?, ?, ?, '{}', 1, 'authentic');
+        ";
+        $params = array(
+            $personaData->instagram->username,
+            $personaData->instagram->password,
+            $personaData->name        
+        );
+        $dao->prepareAndExecute( $sql, $params );
+        error_log("loaded $personaData->name\n");
+    }
+    
     public static function checkPersona( $persona ){
-        
         $persona = new BIM_Growth_Persona( $persona->username );
-        $r = new self( $persona );
+        $r = new BIM_Growth_Instagram_Routines( $persona );
         
         if( !$r->handleLogin() ){
+            $persona = null;
             echo "invalid account: ".$persona->instagram->username.",".$persona->instagram->password."\n";
         } else {
             echo "valid account: ".$persona->instagram->username.",".$persona->instagram->password."\n";
-            $r->enablePersona();
         }
+        return $persona;
     }
     
     public static function enablePersonas( $file ){
@@ -691,11 +1270,11 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         $g = new BIM_Growth_Webstagram();
         $attempts = 0;
         while( $selfieUrl && $attempts < 3 ){
-            @unlink('/tmp/cookies_BIM_Growth_Webstagram.txt');
+            //@unlink('/tmp/cookies_BIM_Growth_Webstagram.txt');
             echo "getting $selfieUrl\n";
             $response = $g->get( $selfieUrl );
             self::_findShoutOuts( $response );
-            $oldSelfieurl = $selfieUrl;
+            $oldSelfieUrl = $selfieUrl;
             $selfieUrl = self::getNextSelfieUrl($response);
             
             $msg = '';
@@ -703,7 +1282,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             
             if( !$selfieUrl ){
                 $attempts++;
-                $selfieUrl = $oldSelfieurl;
+                $selfieUrl = $oldSelfieUrl;
                 $sleep = 30;
                 $msg = " could not find selfie url at $selfieUrl";
             }
