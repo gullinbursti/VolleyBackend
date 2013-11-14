@@ -90,15 +90,15 @@ class BIM_Growth{
             CURLOPT_COOKIEFILE => $cookieFile,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_HEADER		   => true,
-			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_FOLLOWLOCATION => false, // we handle 3xx redirects ourselves
 			CURLOPT_ENCODING	   => "",
 			CURLOPT_AUTOREFERER	   => true,
-			CURLOPT_CONNECTTIMEOUT => 60,
-			CURLOPT_TIMEOUT		   => 60,
+			CURLOPT_CONNECTTIMEOUT => 30,
+			CURLOPT_TIMEOUT		   => 30,
 			CURLOPT_MAXREDIRS	   => 10,
 			CURLOPT_SSL_VERIFYPEER => false,
 			CURLOPT_VERBOSE        => false,
-			CURLOPT_USERAGENT => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36'
+			CURLOPT_USERAGENT => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36'
         );
         return $opts;
     }
@@ -109,7 +109,7 @@ class BIM_Growth{
     	    $url = "$url?$queryStr";
         }
 		$options = $this->getCurlParams( $headers );
-	    return $this->handleRequest($url, $options, $fullResponse, $headers );
+	    return $this->handleRequest( $url, $options, $fullResponse, $headers );
 	}
 	
 	public function post( $url, $args = array(), $fullResponse = false, $headers = array() ){
@@ -122,15 +122,31 @@ class BIM_Growth{
 	}
 	
 	public function handleRequest( $url, $options, $fullResponse = false ){
+	    $maxRedirects = 50;
+	    while( $url && $maxRedirects-- > 0 ){
+    	    $response = $this->_handleRequest($url, $options);
+    	    if( !empty( $response['status'] ) && preg_match( '@3\d\d@', $response['status'] ) ){
+    	        $url = $response['headers']['Location'];
+    	    } else {
+    	        $url = false;
+    	    }
+	    }
+		if( !$fullResponse ){
+            $response = $response['body'];
+        }
+	    return $response;
+	}
+	
+	private function _handleRequest( $url, $options ){
 	    
         $ch = curl_init( $url );
-		curl_setopt_array($ch,$options);
-		curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-		
-		if( $this->useProxy() ){
+        curl_setopt_array($ch,$options);
+        curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+        
+        if( $this->useProxy() ){
             $proxy = $this->getProxy();
-		    if( $proxy ){
-		        print_r( array( 'USING PROXY', $proxy ) );
+            if( $proxy ){
+                print_r( array( 'USING PROXY', $proxy ) );
                 curl_setopt($ch, CURLOPT_PROXY, $proxy->host);
                 curl_setopt($ch, CURLOPT_PROXYPORT, $proxy->port);
                 curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 0);
@@ -138,21 +154,17 @@ class BIM_Growth{
         }
         
         $responseStr = curl_exec($ch);
-		$err = curl_errno($ch);
-		$data = curl_getinfo( $ch );
-		if( $err ){
-			$errmsg  = curl_error($ch) ;
-			$msg = "err no: $err - err msg: $errmsg\n";
-			error_log( print_r(array($msg,$data),true) );
-		}
-		curl_close($ch);
-		$response = self::parseResponse( $responseStr );
-		$response['req_info'] = $data;
-		if( $fullResponse ){
-		    return $response;
-        } else {
-            return $response['body'];
+        $err = curl_errno($ch);
+        $data = curl_getinfo( $ch );
+        if( $err ){
+            $errmsg  = curl_error($ch) ;
+            $msg = "err no: $err - err msg: $errmsg\n";
+            error_log( print_r(array($msg,$data),true) );
         }
+        curl_close($ch);
+        $response = self::parseResponse( $responseStr );
+        $response['req_info'] = $data;
+        return $response;
 	}
 	
 	/**

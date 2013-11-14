@@ -614,7 +614,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         $this->purgeCookies();
         
         $response = $this->login();
-
+        
         $ptrn = '@This account is inactive@i';
         if( preg_match( $ptrn, $response ) ){
             echo "inactive account: ",join(',', array( $this->persona->instagram->username, $this->persona->instagram->password ) ),"\n";
@@ -671,6 +671,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             'response_type' => 'code',
             'scope' => 'likes comments relationships',
         );
+        
         $response = $this->get( $redirectUri, $params );
         
         // now we should have the login form
@@ -692,16 +693,12 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         
         $headers = array(
             'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Referer: https://instagram.com/accounts/login/',
+            "Referer: $formActionUrl",
             'Origin: https://instagram.com',
         );
-        //print_r(  array( $response, $args, $headers ) ); exit;
         
         $response = $this->post( $formActionUrl, $args, false, $headers );
         $this->setUseProxy( true );
-        
-        //print_r( array( $formActionUrl, $args, $response)  ); exit;
-        
         return $response;
     }
     
@@ -773,7 +770,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         $response = $this->get( $url );
         if( !$this->isLoggedIn($response) ){
             $name = $this->persona->name;
-            echo "user $name not logged in!  logging in!\n";
+            echo "user $name not logged in to webstagram!  logging in!\n";
             $this->loginAndAuthorizeApp();
             $response = $this->get( $url );
             if( !$this->isLoggedIn($response) ){
@@ -1207,7 +1204,7 @@ VALUES
     
     public static function checkPersona( $persona ){
         $persona = new BIM_Growth_Persona( $persona->username );
-        $r = new BIM_Growth_Instagram_Routines( $persona );
+        $r = new self( $persona );
         
         if( !$r->handleLogin() ){
             $persona = null;
