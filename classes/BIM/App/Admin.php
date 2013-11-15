@@ -1,6 +1,92 @@
 <?php 
 class BIM_App_Admin{
     
+    public static function showWebstaContacts(){
+        $input = (object)( $_POST? $_POST : $_GET);
+        
+        $sql = '
+        	select *, concat("http://web.stagram.com/p/",url) as target_img
+        	from growth.webstagram_contact_log 
+        	where logged > 0 
+        	order by logged desc 
+        	limit 300
+        ';
+        
+        $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+        $stmt = $dao->prepareAndExecute( $sql );
+        $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+        
+        /**
+            [time] => 1384471859
+            [url] => 589314179606345900_38865605
+            [type] => photo
+            [comment] => gimme a shoutout? #dgoqvw
+            [network] => webstagram
+            [name] => RyanBr909
+            [logged] => 2013-11-14 23:29:22
+            [target_img] => http://web.stagram.com/p/589314179606345900_38865605
+         */
+        
+        echo("
+        <html>
+        <head>
+		<script src='http://code.jquery.com/jquery-1.10.1.min.js'></script>
+        </head>
+        <body>
+        
+		<hr>Latest Webstagram Contacts - ".count( $data )."<hr>\n
+		
+        <table border=1 cellpadding=10>
+        <tr>
+        <th>Bot Name</th>
+        <th>Comment</th>
+        <th>Target</th>
+        <th>Date</th>
+        </tr>
+        ");
+        // now get the flag counts for each user
+        foreach( $data as $info ){
+            echo "
+                <tr>
+                <td>
+                    $info->name
+                </td>
+                <td>
+                	$info->comment
+            	</td>
+                <td>
+                    <a href='$info->target_img'>$info->target_img</a>
+                </td>
+                <td>
+                	$info->logged
+            	</td>
+                </tr>
+            ";
+        }
+        echo("
+        </table>
+        </body>
+        </html>
+        ");
+        exit;
+    }
+    
+    public static function getRandomTags(){
+        if( $_POST ){
+            for( $n = 0; $n < 20; $n++){
+                $str = str_split('abcdefghijklmnopqrstuvwxyz');
+                $tag = array_rand( $str, 6 );
+                foreach( $tag as &$char ){
+                    $char = $str[$char];
+                }
+                $tag = join('',$tag);
+                echo "#$tag ";
+            }
+        } else {
+            echo "<form method='POST'><input name='submit' type='submit' value='get random tags'></form>";
+        }
+    }
+    
     public static function shoutout(){
         $input = (object)( $_POST? $_POST : $_GET);
         if( !empty( $input->volleyId ) ){
@@ -283,7 +369,7 @@ class BIM_App_Admin{
         </table>
         ");
         // $volleys = BIM_Model_Volley::getTopVolleysByVotes();
-        $volleys = BIM_Model_Volley::getTopVolleysByVotes( 86400 * 30 );
+        $volleys = BIM_Model_Volley::getTopVolleysByVotes( 86400 * 120, 500 );
         //$rem = array();
         //$volleyArr = $volleys;
         //foreach( $volleyArr as $idx => $volley ){
@@ -333,7 +419,7 @@ class BIM_App_Admin{
         ");
         
         $v = new BIM_App_Votes();
-        $volleys = $v->getChallengesByCreationTime();
+        $volleys = $v->getChallengesByCreationTime( 500 );
         echo "<hr><a id='recent'>Most Recent Volleys - ".count( $volleys )."</a>&nbsp;&nbsp;<a href='#current'>Current</a>&nbsp;&nbsp;<a href='#likes'>By Likes</a><hr>\n";
         
         echo("
