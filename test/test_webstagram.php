@@ -1,6 +1,10 @@
 <?php
 set_include_path('.:/Users/shane/dev/volley/php/volley/classes:/Users/shane/dev/volley/php/volley/lib:/Users/shane/dev/volley/php/volley/lib/smtp_mailer_swift/lib/classes');
 require_once 'vendor/autoload.php';
+
+BIM_Growth_Webstagram_Routines::queueBlastJob("AblesMi307");
+
+
 /**
     [0] => login
     [1] => posting
@@ -36,7 +40,7 @@ require_once 'vendor/autoload.php';
 
 //print_r( $response );
 
-BIM_Growth_Webstagram_Routines::checkPersonas();
+//BIM_Growth_Webstagram_Routines::checkPersonas();
 
 /**
 $persona = (object) array(

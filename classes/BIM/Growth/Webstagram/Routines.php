@@ -156,7 +156,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
      * 
      * the job will be to like the web property id in the job
      */
-    public static function queueLikeJobs(){
+    public static function queueFollowJobs(){
         $dao = new BIM_DAO_Mysql( BIM_Config::db() );
 	    $sql = "select name from growth.persona where network = 'instagram'";
 		$stmt = $dao->prepareAndExecute( $sql );
@@ -198,27 +198,28 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
 		$stmt = $dao->prepareAndExecute( $sql );
 		$personaNames = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
 		
-        $minutes = 1440 * 1;
+        $minutes = 1440 * 2;
         $time = time();
         
         $date = new DateTime();
         $date->setTimezone(new DateTimeZone('UTC') );
         foreach( $personaNames as $name ){
-            for($n = 0; $n < 10; $n++ ){
+            for($n = 0; $n < 20; $n++ ){
                 $whichMinute = mt_rand( 1, $minutes );
                 $seconds = $whichMinute * 60;
                 $targetDate = $time + $seconds;
                 $date->setTimestamp($targetDate);
                 $targetDate = $date->format('Y-m-d H:i:s');
                 echo "$name - $targetDate\n";
-                self::queueHouseFollow($name, $targetDate);
+                self::queueBlastJob($name, $targetDate);
             }
         }
     }
     
-    public static function queueBlastJob($personaId, $targetDate = null ){
+    public static function queueBlastJob($personaId, $targetDate = null, $disabled = 0 ){
         if( !$targetDate ){
             $targetDate = new DateTime();
+            $targetDate->setTimezone(new DateTimeZone('UTC') );
             $targetDate = $targetDate->format( 'Y-m-d H:i:s' );
         }
         $job = (object) array(
@@ -230,7 +231,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
                 'persona_id' => $personaId
             ),
             'is_temp' => true,
-            'disabled' => 1
+            'disabled' => $disabled
         );
         
         $j = new BIM_Jobs_Gearman();
@@ -268,7 +269,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
      */
     public static function doBlastJob( $personaId ){
         $me = new self( $personaId );
-        //if( $me->handleLogin() ){
+        if( $me->handleLogin() ){
             $tag = self::getUniqueTag();
             
             //$caption = self::getRandomCaption( $tag );
@@ -279,9 +280,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             $user = self::getRandomUser();
             
             $me->commentOnLatestPhoto( $user->url, $comment );
-            print_r( array( "commented on photo",$tag,$comment,$user ) );
-            
-        //}
+        }
     }
 
     public static function getRandomUser(){
@@ -314,249 +313,94 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
     
     // returns a unique 6 letter string
     public static function getRandomComment( $tag = '' ){
-        $comments = array(
-            'Wnna shoutout?',
-            'Wanna shoutout?',
-            'shoutout?',
-            's4s?',
-            'wanna host a game?',
-            'host a game?',
-            'wanna play?',
-            'play?',
-            'host?',
-            'share?',
-            'share for share?',
-            'shoutout for shoutout?',
-            'wanna shout?',
-            'give me a shoutout?',
-            'want a shoutout?',
-            'gimme a shoutout?',
-            'shoutout?!',
-            'i <3 shoutouts',
-            'shoutout selfie?',
-            'selife shoutout?',
-            'selfie?',
-            'selfie shoutout >>',
-            'shoutout selfie >>',
-            'host selfie game?',
-            'Wnna shoutout >>',
-            'Wanna shoutout >>>',
-            'shoutout >>',
-            's4s >>',
-            'wanna host a game >>',
-            'host a game >>',
-            'wanna play >>',
-            'play >>',
-            'host >>',
-            'share >>',
-            'share me ?? >>',
-            'share? >>',
-            'share4share? >>',
-            'follow? >>',
-            'want a shoutout or follow??',
+        $compliments = array(
+            'Cute selfie!',
+            'Cute!',
+            'cute selfies :)',
+            '<3 selfie!',
+            'luv this!',
+            'likeee!',
+            'loveee ur posts!',
+            '<3 ur posts!',
+            'omg love this!',
+            'all day everyday!',
+            'selfie award goes to u :)',
+            'so selfie!',
+            'selfie loveeeee!',
+            'loveee it!',
+            'luv it!',
         );
-        $idx = array_rand( $comments );
-        $comment = $comments[$idx]." $tag";
+        
+        $questions = array(
+            'join selfie club???js',
+            'join selfieclub?!!!!a',
+            'join selfie cllub?!?',
+            'wanna join?',
+            'join?',
+            'joinn?',
+            'jjoin?',
+            'join??',
+            'wan join?',
+            'want to join?',
+            'wnna join?!',
+            'you should join!',
+            'join this?',
+            'join selfie club?',
+            'you should join selfie club :)',
+            'joinnn selfie club??',
+            'join this now!!',
+            'thinkin u should join dis!',
+        );
+        
+        $callsToAction = array(
+            '>>>',
+            'kik selfieclub',
+            'i think u kik them for an invite',
+            'get the kikapp ',
+            'go here',
+            'kik them @ selfieclub',
+            'go get the kik app',
+            'lol check this',
+            'check this',
+            '>>>> tap >>>',
+            '>>>>>>> tap this',
+            '>>>>>> TAP THIS',
+            '>>> KIK: selfieclub >>>>>',
+            'kik: selfieclub go here >>>',
+            'go here >>>',
+            'get it >>>',
+            'kik em 4 invite id: selfieclub >>',
+            'tap this >>>>>> ',
+            'tappp this >>>>>>',
+            'hit them up on kik selfieclub',
+        );
+        
+        $compliment = $compliments[array_rand( $compliments )];
+        $question = $questions[array_rand( $questions )];
+        $callToAction = $callsToAction[array_rand( $callsToAction )];
+        
+        $comment = "$compliment $question $callToAction $tag";
         return $comment;
     }
     
     // returns a unique 6 letter string
     public static function getUniqueTag(){
         $tags = array(
-            '#finotx',
-            '#cenoux',
-            '#eijluy',
-            '#dntuvw',
-            '#adegtz',
-            '#aehuwx',
-            '#kmrsyz',
-            '#behlqx',
-            '#cfmqrw',
-            '#fjkouw',
-            '#fgmpqu',
-            '#dfijlr',
-            '#bdpsuy',
-            '#abfkrx',
-            '#klprvx',
-            '#ahlnrt',
-            '#ceilqz',
-            '#cknosy',
-            '#acqrty',
-            '#lpqstw',
-            '#akouvw',
-            '#cdgiqy',
-            '#cfgkru',
-            '#hikovw',
-            '#adfjnv',
-            '#finopy',
-            '#hjnvyz',
-            '#gmtvwx',
-            '#dkpruw',
-            '#dmorsy',
-            '#dhlnps',
-            '#cikosy',
-            '#bcmtvy',
-            '#bcjnpu',
-            '#cfpuvx',
-            '#anoqvw',
-            '#aefxyz',
-            '#hkmuvx',
-            '#ckmnqu',
-            '#eitwxy',
-            '#abchst',
-            '#bfnpqs',
-            '#dhijvy',
-            '#cefuxz',
-            '#kostyz',
-            '#bcgoux',
-            '#ekmnqs',
-            '#bgjlmq',
-            '#abfmry',
-            '#ejopwz',
-            '#abgknq',
-            '#chpruw',
-            '#ikqvwy',
-            '#abgmrs',
-            '#ehjnqy',
-            '#fgjtwx',
-            '#hjmtxz',
-            '#bfpqst',
-            '#egipwx',
-            '#joqtuv',
-            '#ackmsx',
-            '#bemrwx',
-            '#choqtv',
-            '#acilty',
-            '#dhjsty',
-            '#flmowy',
-            '#dgoxyz',
-            '#dhilpq',
-            '#ceiouz',
-            '#fjklwx',
-            '#bcenot',
-            '#dghqsx',
-            '#cemqrz',
-            '#mtuwxy',
-            '#cfghpt',
-            '#fkpvxy',
-            '#fpstwz',
-            '#fglnpz',
-            '#dgoqvw',
-            '#ghiqrv',
-            '#cjknqu',
-            '#aghlnt',
-            '#hilnpq',
-            '#bdlmpt',
-            '#acilqy',
-            '#cfmsuw',
-            '#hiklou',
-            '#nopqyz',
-            '#himnvx',
-            '#afjknu',
-            '#aegjux',
-            '#iklprw',
-            '#ilowxz',
-            '#aejruz',
-            '#bioquy',
-            '#bfhjlp',
-            '#befjoz',
-            '#fnptyz',
-            '#hijmvy',
-            '#cdfqsu',
-            '#bejlns',
-            '#deilpw',
-            '#bcdjvz',
-            '#dghkxz',
-            '#bklstx',
-            '#bcdgps',
-            '#dehnty',
-            '#achknq',
-            '#achkvy',
-            '#klprwx',
-            '#dgkqrz',
-            '#cfiuyz',
-            '#bcnosz',
-            '#fgiqty',
-            '#hjktwz',
-            '#egkmsw',
-            '#aejqvw',
-            '#hlntvz',
-            '#behntz',
-            '#bejrsu',
-            '#krtvwy',
-            '#adjlpt',
-            '#eilnxy',
-            '#dmpqsy',
-            '#hjrtwz',
-            '#eknrst',
-            '#dfnqry',
-            '#fhkosy',
-            '#gkmotz',
-            '#ghkmvw',
-            '#dhikrw',
-            '#bkmopv',
-            '#aefipz',
-            '#begqru',
-            '#hiloqw',
-            '#ehsuvy',
-            '#amoptu',
-            '#ejoqxy',
-            '#bklswz',
-            '#cdfkou',
-            '#abfimw',
-            '#efipqv',
-            '#djlquv',
-            '#hnoqvz',
-            '#ahikpv',
-            '#afkoqv',
-            '#amqrst',
-            '#aceouy',
-            '#bemovx',
-            '#fikoqs',
-            '#acdeoy',
-            '#klnxyz',
-            '#egmqst',
-            '#cgnosy',
-            '#hoprty',
-            '#cgptwx',
-            '#egjkuy',
-            '#abdlst',
-            '#hlnouy',
-            '#abghoq',
-            '#abjlqs',
-            '#acdkqr',
-            '#hjmsvw',
-            '#enoqyz',
-            '#chjopw',
-            '#djqsuw',
-            '#aeikrt',
-            '#bmpqtz',
-            '#aefjoy',
-            '#afgwyz',
-            '#gnopyz',
-            '#gnpuvw',
-            '#hjmnsy',
-            '#efgimr',
-            '#aostvx',
-            '#achqry',
-            '#abimoq',
-            '#begijv',
-            '#ahjmrv',
-            '#eklprz',
-            '#cehiot',
-            '#cjlmuy',
-            '#cfjpux',
-            '#eqruwy',
-            '#dginqr',
-            '#airsvy',
-            '#jpstxz',
-            '#klpvwy',
-            '#afiksz',
-            '#bcgqrx',
-            '#abemnt',
-            '#abfjxz',
-            '#dghsxy',
-            '#cdekmy',
+            '#afglqr','#biktvw','#ahlnoy','#hjknvw','#fnoruv','#dfgklr','#depquw','#cdenrw','#afqrwz','#hijnuz','#fghlpr','#abdjvy','#chiovw','#iklstw','#lnoqwx','#abcmsv','#efmtwz','#fipqtu','#cfjoyz','#cilost',
+            '#bhimpq','#abijmo','#afhmrt','#btvxyz','#dgkuvw','#cfhjky','#afgjuv','#gjknow','#biuwxy','#apsuwx','#jlnsuy','#fgsvxz','#eqtuxz','#alnqrz','#agpstu','#fjnovy','#amnptu','#fnoryz','#bcempq','#aeijtx',
+            '#fhkqtz','#copqrx','#acmqvw','#bgmuvw','#aekouv','#ilnprw','#adikoq','#cdkoqs','#mnpswy','#egjlqw','#bcehsz','#bnpvwy','#afimox','#akoqtz','#ghklmt','#behsvz','#fjkmrw','#adegwx','#bjkmpq',#efjsuy
+            '#kmnouz','#agpqtv','#jklnrx','#eilrsx','#kmnpvx','#ilnsvw','#jkmstx','#amnuwz','#cdmtvw','#abmstv','#gmnrwx','#ikvwyz','#dfgjuv','#chjmsx','#hmtvwz','#aekpqt','#hmnrxy','#bgsuxy','#abcnpz',#bnopsz
+            '#loquvx','#egjotv','#efknqy','#djkstv','#acinqw','#cfoxyz','#cdjqsw','#fjoqsz','#cekrsy','#gmopuv','#aegkmr','#aklqvw','#ceghln','#bdfkrs','#cfhqst','#cegquz','#bcegjy','#fhikpt','#fotuvw',#ehklpv
+            '#aijmsv','#dflmwz','#fhijrw','#dfkmuy','#bgioqw','#dhlsvw','#bdfikv','#ehkqtw','#nqrwxz','#aeijlv','#aemnty','#efknqr','#abhouw','#ekstvx','#bdfjvx','#dhktux','#abnsuv','#fmnqxy','#ejnorv',#fjosxy
+            '#selfiesunday','#selfieclub','#aijmsv','#dflmwz','#fhijrw','#dfkmuy','#bgioqw','#dhlsvw','#bdfikv','#ehkqtw','#nqrwxz','#aeijlv','#aemnty','#efknqr','#abhouw','#ekstvx','#bdfjvx','#dhktux','#abnsuv','#fmnqxy','#ejnorv','#fjosxy',
+            '#dilosw','#abgipx','#djoqrs','#cghrxy','#cfglsv','#afpsxy','#deghly','#chjmtz','#eglpuw','#agjruw','#dkstxy','#cdmqry','#cdjpqt','#ackntw','#bnorwy','#jklqwy','#cknoqv','#bdglmu','#agknuy','#bhnqrz',
+            '#aghsvz','#ghnprw','#aglmns','#cfpsux','#ejkorz','#dlmpyz','#bmnopy','#akmqrz','#dfgmor','#knrwxz','#gksxyz','#fruwxy','#aceprv','#hkmory','#cfhimy','#jlmowy','#dgkptv','#cgikmz','#bmostw',#dgjoqx
+            '#selfieclub','#selfiesunday','#aijmst','#ablptu','#chilmr','#bfilqz','#deotuz','#almpqu','#denrsu','#adgknx','#bdfglx','#chklsy','#bhiqsy','#agpuxz','#bdgikx','#bhjlvw','#bfoprx','#behqty','#bfhilz','#bmpvxz','#hjntvw',#bfimyz
+            '#beijlr','#aclqwx','#lnuwxy','#akmnpu','#afhjmz','#adpsyz','#dhqrsz','#acrtxz','#dnptwx','#ijklot','#fjmnuy','#aijmvz','#ikmrwy','#abopsv','#eghipv','#cdjlmn','#bclosu','#ijlmqs','#cfinrz','#begjty',
+            '#fjnopq','#bdnsxy','#hmrtvy','#dhjkqz','#bfhkmq','#hjmvwy','#adjmow','#cekoru','#adfirx','#bdfhix','#cgquwz','#giknuy','#jnqrwz','#fgpqrt','#afgmwy','#aejkms','#oprwxz','#akptuy','#cdgkrv',#cdilsw
+            '#dknpqu','#abcjwx','#bcdlpq','#dhiswy','#afhuvy','#cdeist','#afksvx','#fjlqtv','#apsxyz','#bcehls','#dijpuz','#ckpstv','#bcdory','#acgjls','#efilwy','#bfgtuw','#djmryz','#djmtwy','#agikqu',#bdeiow
+            '#bhiosx','#bdgioz','#cmprwx','#bglmtw','#eirsux','#efmopv','#adjrsv','#bcklrv','#ehklvz','#bhopsw','#defquz','#dmpqxy','#agimot','#chmoqy','#jlnvxy','#denswy','#fnotuv','#ckqsxy','#kmorvy',#bchmrs
+            '#gqrtuz','#afghlz','#bghipt','#cdfhis','#ijkqtx','#eknptu','#ablmnw','#acmotu','#cdehkp','#fhikly','#dgknqu','#aikrtu','#aenosx','#eklnpq','#jknouv','#bgkmnu','#bcdimq','#aijpvz','#chnqsx','#abhjly',
         );
         
         /**
@@ -634,6 +478,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
     }
     
     public function authorizeApp( $authPageHtml ){
+        $useProxy = $this->useProxy();
         $this->setUseProxy( false );
         $ptrn = '/<form.*?action="(.+?)"/';
         preg_match($ptrn, $authPageHtml, $matches);
@@ -656,7 +501,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             'Origin: https://instagram.com',
         );
         $response = $this->post( $formActionUrl, $args, false, $headers);
-        $this->setUseProxy( true );
+        $this->setUseProxy( $useProxy );
         // print_r( array( $url, $args, $response)  ); exit;
         return $response;
     }
@@ -986,6 +831,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         } else {
             print_r( $response );
             $sleep = $this->persona->getLoginWaitTime();
+            $sleep = 5;
             echo $this->persona->name." no longer logged in! trying login again after sleeping for $sleep seconds\n";
             sleep( $sleep );
             $this->handleLogin();
@@ -1074,9 +920,9 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             }
             $message = preg_replace('/\[\[USERNAME\]\]/', $this->persona->name, $message);
             $this->submitComment($id, $message);
-            $sleep = 5;
-            echo "submitted comment to $pageUrl - sleeping for $sleep seconds\n";
-            sleep($sleep);
+            //$sleep = 5;
+            //echo "submitted comment to $pageUrl - sleeping for $sleep seconds\n";
+            //sleep($sleep);
         }
     }
     
@@ -1316,7 +1162,8 @@ VALUES
             $users[] = (object) array(
                 'id' => $id,
                 'name' => $name,
-                'selfie' => 'http://web.stagram.com'.$selfies[1][$idx]
+                'url' => "http://web.stagram.com/n/$name",
+            	'selfie' => 'http://web.stagram.com'.$selfies[1][$idx]
             );
         }
         return $users;

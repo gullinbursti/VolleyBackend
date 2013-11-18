@@ -5,7 +5,7 @@ class BIM_Growth{
     protected $curl = null;
     protected $instagramApiClient = null; 
     protected $twilioApiClient = null; 
-    protected $useProxy = false;
+    protected $useProxy = true;
     
 	public function testProxies( $url ){
 	    
