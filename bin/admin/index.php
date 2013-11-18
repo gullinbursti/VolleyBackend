@@ -10,6 +10,8 @@
 <a href="manage_explore.php">Manage Explore Section</a><br>
 <a href="wipe_user.php">Wipe a User</a><br>
 <a href="edit_tags.php">Edit Tags</a><br>
+<a href="show_websta_contacts.php">Check the latest webstagram contacts</a><br>
+<a href="get_random_tags.php">Generate Random Tags</a><br>
 <br><hr><br>
 <?php 
 require_once 'vendor/autoload.php';

@@ -871,13 +871,13 @@ WHERE is_verify != 1
         return $ids;
     }
     
-    public function getChallengesByCreationTime(){
-		$query = '
+    public function getChallengesByCreationTime( $limit = 100 ){
+		$query = "
 			SELECT id 
 			FROM `hotornot-dev`.`tblChallenges` 
 			WHERE is_verify != 1
 			ORDER BY `added` DESC 
-			LIMIT 100;'; 
+			LIMIT $limit;"; 
         $stmt = $this->prepareAndExecute( $query );
         $ids = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
         return $ids;
@@ -931,11 +931,11 @@ WHERE is_verify != 1
         return $stmt->fetchAll( PDO::FETCH_OBJ );
     }
     
-    public function getTopVolleysByVotes( $timeInPast = null ){
+    public function getTopVolleysByVotes( $timeInPast = null, $limit = 64 ){
         $startDate = $timeInPast ? (time() - $timeInPast) : (time() - ( 86400 * 90 ));
         $startDate = new DateTime( "@$startDate" );
         $startDate = $startDate->format('Y-m-d H:i:s');
-        $query = '
+        $query = "
         	SELECT id, subject_id, sum(votes) as votes
         	FROM `hotornot-dev`.tblChallenges as c
         		join `hotornot-dev`.tblChallengeParticipants as p
@@ -943,11 +943,11 @@ WHERE is_verify != 1
         	WHERE status_id = 4 
         		AND added > ? 
 				AND is_verify != 1
-				AND img != "" 
+				AND img != '' 
 				AND img is not null 				
 			GROUP BY subject_id
-        	ORDER BY votes DESC LIMIT 64
-        ';
+        	ORDER BY votes DESC LIMIT $limit
+        ";
 		$params = array( $startDate );
         $stmt = $this->prepareAndExecute( $query, $params );
         return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
