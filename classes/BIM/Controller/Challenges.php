@@ -253,6 +253,11 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
         return $challenge;
     }
     
+    public function getSelfies(){
+        $challenges = new BIM_App_Challenges();
+        return $challenges->getSelfies( );
+    }
+    
     /**
      * returns a list of verifyme volleys
      */
