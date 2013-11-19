@@ -18,6 +18,12 @@ Challenges
 
 class BIM_App_Challenges extends BIM_App_Base{
     
+    public function getSelfies() {
+        $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
+        $ids = $dao->getSelfies( );
+        return BIM_Model_Volley::getMulti( $ids );
+    }
+    
     /**
      * 
      * return a list of awaiting verification objects

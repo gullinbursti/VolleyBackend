@@ -114,7 +114,10 @@ class BIM_Controller{
             $newUser = (strtolower( $request->controllerClass ) == 'bim_controller_users') 
                             && ( strtolower( $request->method ) == 'submitnewuser' );
 
-            if( $newUser || BIM_Utils::getSessionUser(true) ){
+            $getSelfies = (strtolower( $request->controllerClass ) == 'bim_controller_challenges') 
+                            && ( strtolower( $request->method ) == 'getselfies' );
+
+            if( $getSelfies || $newUser || BIM_Utils::getSessionUser(true) ){
                 $OK = true;
             }
 	    }
