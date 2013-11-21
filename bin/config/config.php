@@ -1,4 +1,7 @@
 <?php
+$baseDir = dirname( dirname( __DIR__ ) );
+set_include_path(".:/usr/share/php:/usr/share/pear:$baseDir/classes:$baseDir/lib:$baseDir/lib/smtp_mailer_swift/lib/classes");
+
 require_once 'vendor/autoload.php';
 $requestPath = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
 $build = 'live';
