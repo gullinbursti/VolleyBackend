@@ -345,4 +345,112 @@ class BIM_Utils{
         }
         return $ids;
     }
+    
+    public static function getTagsFromPool(){
+        $dao = new BIM_DAO_Mysql_Growth( BIM_Config::db() );
+        return $dao->getTagsInPool();
+    }
+    
+    public static function saveToTagPool( $tags ){
+        $dao = new BIM_DAO_Mysql_Growth( BIM_Config::db() );
+        $dao->saveToTagPool($tags);
+    }
+    
+    public static function getRandomTags( $total = 20 ){
+        $tags = array();
+        for( $n = 0; $n < $total; $n++){
+            $tags[] = self::getRandomTag();
+        }
+        return $tags;
+    }
+    
+    public static function getRandomTag( $tagLength = 6 ){
+        $str = str_split('abcdefghijklmnopqrstuvwxyz');
+        $tag = array();
+        for( $n = 0; $n < $tagLength; $n++ ){
+            $tag[] = array_rand( $str );
+        }
+        foreach( $tag as &$char ){
+            $char = $str[$char];
+        }
+        $tag = '#'.join('',$tag);
+        return $tag;
+    }
+    
+    // returns a unique 6 letter string
+    public static function getRandomComment( $tag = array() ){
+        if( !is_array( $tag ) ){
+            $tag = array( $tag );
+        }
+        $tag = join(' ', $tag );
+        
+        $compliments = array(
+            'Cute selfie!',
+            'Cute!',
+            'cute selfies :)',
+            '<3 selfie!',
+            'luv this!',
+            'likeee!',
+            'loveee ur posts!',
+            '<3 ur posts!',
+            'omg love this!',
+            'all day everyday!',
+            'selfie award goes to u :)',
+            'so selfie!',
+            'selfie loveeeee!',
+            'loveee it!',
+            'luv it!',
+        );
+        
+        $questions = array(
+            'join selfie club???js',
+            'join selfieclub?!!!!a',
+            'join selfie cllub?!?',
+            'wanna join?',
+            'join?',
+            'joinn?',
+            'jjoin?',
+            'join??',
+            'wan join?',
+            'want to join?',
+            'wnna join?!',
+            'you should join!',
+            'join this?',
+            'join selfie club?',
+            'you should join selfie club :)',
+            'joinnn selfie club??',
+            'join this now!!',
+            'thinkin u should join dis!',
+        );
+        
+        $callsToAction = array(
+            '>>>',
+            'kik selfieclub',
+            'i think u kik them for an invite',
+            'get the kikapp ',
+            'go here',
+            'kik them @ selfieclub',
+            'go get the kik app',
+            'lol check this',
+            'check this',
+            '>>>> tap >>>',
+            '>>>>>>> tap this',
+            '>>>>>> TAP THIS',
+            '>>> KIK: selfieclub >>>>>',
+            'kik: selfieclub go here >>>',
+            'go here >>>',
+            'get it >>>',
+            'kik em 4 invite id: selfieclub >>',
+            'tap this >>>>>> ',
+            'tappp this >>>>>>',
+            'hit them up on kik selfieclub',
+        );
+        
+        $compliment = $compliments[array_rand( $compliments )];
+        $question = $questions[array_rand( $questions )];
+        $callToAction = $callsToAction[array_rand( $callsToAction )];
+        
+        $comment = "$compliment $question $callToAction $tag";
+        return $comment;
+    }
 }

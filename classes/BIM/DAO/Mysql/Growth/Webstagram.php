@@ -29,7 +29,7 @@ class BIM_DAO_Mysql_Growth_Webstagram extends BIM_DAO_Mysql_Growth{
 		$this->prepareAndExecute($sql, $params);
 	}
 	
-    public function logSuccess( $id, $comment, $name ){
+    public function logSuccess( $id, $comment, $name, $network = 'webstagram' ){
 		$sql = "
 			insert into growth.webstagram_contact_log
 			( `time`, `url`, `type`, `comment`, `network`, `name` ) values (?,?,?,?,?,?)
