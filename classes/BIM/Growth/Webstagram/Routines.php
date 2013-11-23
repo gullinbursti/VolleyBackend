@@ -295,7 +295,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             //$pic = self::getUniqueMedia();
             //$me->postMedia( $pic, $caption );
             
-            $comment = self::getRandomComment( $tag );
+            $comment = BIM_Utils::getRandomComment( $tag );
             $user = self::getRandomUser();
             
             $me->commentOnLatestPhoto( $user->url, $comment, true );
@@ -374,78 +374,6 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         }
         
         return $randomUser;
-    }
-    
-    // returns a unique 6 letter string
-    public static function getRandomComment( $tag = '' ){
-        $compliments = array(
-            'Cute selfie!',
-            'Cute!',
-            'cute selfies :)',
-            '<3 selfie!',
-            'luv this!',
-            'likeee!',
-            'loveee ur posts!',
-            '<3 ur posts!',
-            'omg love this!',
-            'all day everyday!',
-            'selfie award goes to u :)',
-            'so selfie!',
-            'selfie loveeeee!',
-            'loveee it!',
-            'luv it!',
-        );
-        
-        $questions = array(
-            'join selfie club???js',
-            'join selfieclub?!!!!a',
-            'join selfie cllub?!?',
-            'wanna join?',
-            'join?',
-            'joinn?',
-            'jjoin?',
-            'join??',
-            'wan join?',
-            'want to join?',
-            'wnna join?!',
-            'you should join!',
-            'join this?',
-            'join selfie club?',
-            'you should join selfie club :)',
-            'joinnn selfie club??',
-            'join this now!!',
-            'thinkin u should join dis!',
-        );
-        
-        $callsToAction = array(
-            '>>>',
-            'kik selfieclub',
-            'i think u kik them for an invite',
-            'get the kikapp ',
-            'go here',
-            'kik them @ selfieclub',
-            'go get the kik app',
-            'lol check this',
-            'check this',
-            '>>>> tap >>>',
-            '>>>>>>> tap this',
-            '>>>>>> TAP THIS',
-            '>>> KIK: selfieclub >>>>>',
-            'kik: selfieclub go here >>>',
-            'go here >>>',
-            'get it >>>',
-            'kik em 4 invite id: selfieclub >>',
-            'tap this >>>>>> ',
-            'tappp this >>>>>>',
-            'hit them up on kik selfieclub',
-        );
-        
-        $compliment = $compliments[array_rand( $compliments )];
-        $question = $questions[array_rand( $questions )];
-        $callToAction = $callsToAction[array_rand( $callsToAction )];
-        
-        $comment = "$compliment $question $callToAction $tag";
-        return $comment;
     }
     
     // returns a unique 6 letter string

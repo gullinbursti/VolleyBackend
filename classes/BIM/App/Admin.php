@@ -71,16 +71,11 @@ class BIM_App_Admin{
         exit;
     }
     
-    public static function getRandomTags(){
+    public static function printRandomTags( ){
         if( $_POST ){
-            for( $n = 0; $n < 20; $n++){
-                $str = str_split('abcdefghijklmnopqrstuvwxyz');
-                $tag = array_rand( $str, 6 );
-                foreach( $tag as &$char ){
-                    $char = $str[$char];
-                }
-                $tag = join('',$tag);
-                echo "#$tag ";
+            $tags = BIM_Utils::getRandomTags();
+            foreach( $tags as $tag ){
+                echo $tag;
             }
         } else {
             echo "<form method='POST'><input name='submit' type='submit' value='get random tags'></form>";
@@ -155,6 +150,134 @@ class BIM_App_Admin{
             BIM_Model_Volley::create( $teamVolleyId, $hashTag, $imgUrlPrefix );
         }
     }
+    
+    public static function getComments(){
+        $tags = BIM_Utils::getTagsFromPool();
+        $comments = array();
+        $attempts = 0;
+        while( $tags && count( $comments ) < 5000 && $attempts++ < 10000 ){
+            $tag = $tags[ array_rand($tags) ];
+            $comment = BIM_Utils::getRandomComment( $tag );
+            $comments[ $comment ] = true;
+        }
+        foreach( $comments as $comment => $bool ){
+            echo "$comment\n";
+        }
+    }
+    
+    public static function getCaptions(){
+        $input = (object)( $_POST? $_POST : $_GET);
+        
+        if( !empty( $input->get_captions ) ){
+            $totalCaptions = $input->total_captions;
+            $captions = self::makeCaptions( $totalCaptions );
+            echo("<pre>");
+            foreach( $captions as $caption ){
+                echo "$caption\n";
+            }
+            echo("</pre>");
+        } else {
+        
+            echo("
+            <html>
+            <head>
+    		<script src='http://code.jquery.com/jquery-1.10.1.min.js'></script>
+            </head>
+            <body>
+            ");
+            
+            $teamVolleyId = BIM_Config::app()->team_volley_id;
+            
+            echo("
+            Gnerate Media Captions.  
+            <br>
+            <br>
+            Enter the number of captions you would like and click the \"Generate Captions\" button.
+            <br><br>
+            Caveat Emptor: 
+            <blockquote>
+            After you have generated your captions, 
+            you must include each one of the captions
+            with a media post on a network (one caption per post) 
+            otherwise our workers will be dropping links to dead ends and empty pages.
+            </blockquote>
+    		<form method='post'enctype='multipart/form-data'>
+        	Total Captions: <input type='text' size='5' name='total_captions'>
+			<input type='submit' name='get_captions' value='generate captions'>
+            </form>
+            </body>
+            </html>
+            ");
+        }
+    }
+    
+    public static function makeCaptions( $totalCaptions ){
+        $captions = array();
+        for( $n = 0; $n < $totalCaptions; $n++ ){
+            $tags = BIM_Utils::getRandomTags(5);
+            BIM_Utils::saveToTagPool( $tags );
+            $captions[] = self::makeCaption($tags);
+        }
+        return $captions;
+    }
+    
+    /**
+     * genertate captions and with each caption a tag
+     */
+    public static function makeCaption( $tags ){
+        
+        $portension = array(
+            '@selfieclub is coming sooooon :) #selfieclub',
+            '10 days for @selfieclub to launch #selfieclub',
+            'who wants in? @selfieclub #selfieclub',
+            'who wants to join? @selfieclub #selfieclub',
+            'wanna join?  @selfieclub #selfieclub',
+            'join?  @selfieclub #selfieclub',
+            'join selfieclub?  @selfieclub #selfieclub',
+            'want to join?  @selfieclub #selfieclub',
+            'it is coming soon! blow this app up  @selfieclub #selfieclub',
+            'help blow this app up?  @selfieclub #selfieclub',
+            'blow this app up?  @selfieclub #selfieclub',
+            'wnnna join?  @selfieclub #selfieclub',
+            'wanna join selfieclub?  @selfieclub #selfieclub',
+            'join now?  @selfieclub #selfieclub',
+            'want in?  @selfieclub #selfieclub',
+            'join???  @selfieclub #selfieclub',
+            'join selfieclub!!!!!  @selfieclub #selfieclub',
+            'omg 10 days till we launch, help blow it up!?  @selfieclub #selfieclub',
+        );
+        
+        $cta = array(
+            'kik to join: selfieclub >>>>>>',
+            'kik2join: selfieclub >>>',
+            'kik: selfieclub >>',
+            'kik id: selfieclub >>>>',
+            'kik us to join kik: selfieclub >',
+            'join kik us! kikid: selfieclub >>',
+            'KIK to join id: selfieclub >>>',
+            'KIK2JOIN: selfieclub >>>>',
+            'kik2join: selfieclub >>>>>>',
+            'kik them to join kik: selfieclub >>>>',
+            'kik 4 invite: selfieclub >>>>',
+            'kik4invite: selfieclub >>>',
+            'kik to get an invite: selfieclub >>>',
+            'kik us for invite: seflieclub >>>',
+            'kik us tojoin: selfieclub >>>>>',
+            'kik selfieclub to join >>',
+            'kik us to joinn selfieclub >>>>',
+            'kik selfieclub to join >>>',
+            'kik: selfieclub for invites >>>',
+            'kik us: selfieclub to join >>>',
+        );
+        
+        $portend = $portension[array_rand( $portension )];
+        $callToAction = $cta[array_rand( $cta )];
+        
+        $tags = join(' ', $tags);
+        $comment = "$portend $callToAction $tags";
+        return $comment;
+    }
+    
     /**
      * if we are receiving a posted image
      * first we upload the image to s3

@@ -2,4 +2,4 @@
 
 require_once 'vendor/autoload.php';
 
-BIM_App_Admin::printRandomTags();
+BIM_App_Admin::getComments();

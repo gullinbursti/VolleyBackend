@@ -74,6 +74,34 @@ class BIM_DAO_Mysql_Growth extends BIM_DAO_Mysql{
 		$this->prepareAndExecute( $sql, $params );
 	}
 	
+	public function getTagsInPool( ){
+	    $sql = "select tag from growth.tag_pool";
+		return $this->prepareAndExecute( $sql )
+		    ->fetchAll( PDO::FETCH_COLUMN, 0 );
+	}
+	
+	public function saveToTagPool( $tags, $groupId = '' ){
+	    if( !$groupId ){
+	        $groupId = uniqid(true);
+	    }
+	    $valueParams = array();
+	    $valueSql = array();
+	    foreach( $tags as $tag ){
+	        $valueParams[] = $groupId;
+	        $valueParams[] = $tag;
+	        $valueSql[] = "(?,?)";
+	    }
+	    if( $valueSql && $valueParams ){
+    	    $valueSql = join(',',$valueSql);
+    		$sql = "
+    			insert ignore into growth.tag_pool
+    			(group_id,tag) 
+    			values 
+    			$valueSql
+    		";
+    		$this->prepareAndExecute( $sql, $valueParams );
+	    }
+	}
 	
 	public function getQuotes(){
 		$sql = "select * from growth.quotes";

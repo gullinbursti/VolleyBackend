@@ -612,6 +612,32 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         }
         return $ids;
     }
+    
+    /**
+     * @param unknown_type $userId
+     */
+    public function getSelfies( ){
+        $teamVolleyId = BIM_Config::app()->team_volley_id;
+        mt_srand();
+        $limit = mt_rand(0, 1000);
+        
+        $sql = "
+			SELECT id 
+			FROM `hotornot-dev`.tblChallenges as tc 
+			WHERE is_verify = 1 
+				AND creator_id != $teamVolleyId
+				AND creator_img != ''
+				AND creator_img not like '%defaultAvatar%'
+				
+			GROUP BY id
+			ORDER BY updated DESC, id DESC 
+			LIMIT $limit,20
+        ";
+        
+        $stmt = $this->prepareAndExecute( $sql, $params );
+        return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+    }
+    
     /**
      * @param unknown_type $userId
      */
