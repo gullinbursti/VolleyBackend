@@ -26,13 +26,27 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
      *  pk	505068195439511399_25025320
 		t	9432
      */
-    public function like( $id ){
+    public function like( $id, $name = '' ){
         $url = 'http://web.stagram.com/do_like/';
         $params = array(
             'pk' => $id,
             't' => mt_rand(5000, 10000)
         );
-        $response = json_decode( $this->post( $url ) );
+        
+        $headers = array(
+        	'Origin: http://web.stagram.com',
+			'X-Requested-With: XMLHttpRequest',
+            'Content-Type: application/x-www-form-urlencoded',
+        );
+        
+        if( $name ){
+			$headers[] = "Referer: http://web.stagram.com/n/$name/";
+        } else {
+			$headers[] = "Referer: http://web.stagram.com/";
+        }
+
+        $response = $this->post( $url, $params, false, $headers );
+        $response = json_decode( $response );
         print_r( $response );
         if( empty( $response->status ) || $response->status != 'OK' ){
             $msg = "cannot like photo using id : $id with persona: ".$this->persona->instagram->username;
@@ -62,7 +76,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
      * @param int $id - id of the target user for the follow
      * @param string $name - the name of the target user for the follow
      */
-    public function follow( $id, $name ){
+    public function follow( $id, $name = '' ){
         $time = time();
         $url = "http://web.stagram.com/do_follow/?$time";
         $params = array(
@@ -73,8 +87,13 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         	'Origin: http://web.stagram.com',
 			'X-Requested-With: XMLHttpRequest',
             'Content-Type: application/x-www-form-urlencoded',
-			"Referer: http://web.stagram.com/n/$name/"
         );
+        
+        if( $name ){
+			$headers[] = "Referer: http://web.stagram.com/n/$name/";
+        } else {
+			$headers[] = "Referer: http://web.stagram.com/";
+        }
 
         $response = $this->post( $url, $params, false, $headers );
         $response = json_decode( $response );
@@ -279,14 +298,60 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             $comment = self::getRandomComment( $tag );
             $user = self::getRandomUser();
             
-            $me->commentOnLatestPhoto( $user->url, $comment );
+            $me->commentOnLatestPhoto( $user->url, $comment, true );
+            self::sleep( 2, "before follow" );
+            $me->follow($user->id, $user->name);
+            // $me->likeXPhotos( $user->url, mt_rand(2,5) );
         }
     }
 
+    public static function sleep( $seconds = 0, $msg = '' ){
+        if($msg) $msg = " - $msg";
+        echo "sleeping for $seconds seconds$msg\n";
+        sleep($seconds);
+    }
+    
+    public function likeXPhotos( $pageUrl, $total ){
+        $photoIds = $this->getXPhotos($pageUrl, $total);
+        foreach( $photoIds as $photoId ){
+            $this->like( $photoId );
+        }
+    }
+    // type="image" name="comment__166595034299642639_37459491"
+    public function getXPhotos( $pageUrl, $total ){
+        if( $total <= 0 ){
+            $total = 1;
+        }
+        $ids = array();
+        $ptrn = '/type="image" name="comment__(.+?)"/';
+        $attempts = 0;
+        while( $pageUrl && $attempts++ < 10 && count( $ids ) < $total ){
+            $response = $this->get( $pageUrl );
+            preg_match_all($ptrn, $response, $matches);
+            if( isset( $matches[1] ) ){
+                array_splice( $ids, count( $ids ),  0, $matches[1] );
+            }
+            if( count( $ids ) < $total ){
+                // we try and get an earlier page
+                $pageUrl = self::getEarlierUrl($response);
+                if( $pageUrl ){
+                    $sleep = 1;
+                    echo "sleeping for $sleep seconds before getting more pics from $pageUrl in function ".__FUNCTION__."\n";
+                    sleep( $sleep );
+                }
+            }
+        }
+        if( count( $ids ) > $total ){
+            array_splice( $ids, $total );
+        }
+        return $ids;
+    }
+    
     public static function getRandomUser(){
         $randomUser = null;
         $attempts = 0;
         while( !$randomUser && $attempts++ < 100 ){
+            mt_srand( time() + ( (int) getmypid() ) );
             $time = time() - mt_rand(0, 86400 * 60);
             $selfieUrl = "http://web.stagram.com/tag/selfie/?npk=$time";
             
@@ -386,6 +451,67 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
     // returns a unique 6 letter string
     public static function getUniqueTag(){
         $tags = array(
+            '#selfieclub', '#srwilv', '#ldwxen', '#dddyyl', '#flqrvx', '#mukyeq',
+            '#pixkcj', '#cvhyuw', '#jmwndb', '#aurpvh', '#mydbpf', '#onoctw', 
+            '#qwunfx', '#igtlnh', '#ubjfir', '#jfchsw', '#xonxln', '#mlyqqz', 
+            '#adchsv', '#hfouum', '#bnyvkf', 
+            '#hrlohr', '#spyxhd', '#plqcyo', '#kxkqqt', '#vggvnj', '#ysjgan', 
+            '#omcrqp', '#chbymv', '#exsdzx', '#jijsgs', '#ucqssf', '#jffttl', 
+            '#rkczmg', '#alzgam', '#qrozgx', '#ehcnjy', '#yixabf', '#nzogbh', 
+            '#knvnxt', '#mgrqhr', 
+            '#sqotqr', '#oeoxvi', '#cwvnbw', '#vtwwyr', '#hiejth', '#cqgtou', 
+            '#rdfzun', '#vqooky', '#iegjru', '#hstdcr', '#oksoje', '#heqrxq', 
+            '#wdxpfh', '#tfnmny', '#ggktmx', '#kcpbzq', '#dlgxmt', '#yqpkea', 
+            '#usctju', '#yelgcn',
+            '#tcrrrm', '#vybnae', '#xemyox', '#xefrfe', '#emekjb', '#dwbzlo', 
+            '#kizfnt', '#phjbgc', '#qvuvpx', '#vajmda', '#czvccr', '#mxevsh', 
+            '#rlfelb', '#zqmlry', '#cjdjib', '#lvhlto', '#ynbvxm', '#azbbmh', 
+            '#bpdfga', '#ismqak', 
+            '#dazygi', '#upjswm', '#gcqtwo', '#budppp', '#sinndd', '#kiclyk', 
+            '#autfza', '#htbcmx', '#tgkmyl', '#yyspym', '#febogu', '#vhzxoo', 
+            '#dibpgy', '#lzenvs', '#ayhrql', '#nonatv', '#pobsvx', '#mivrwk', 
+            '#mysmcg', '#batqvk', 
+            '#oiuzdw', '#btxiyy', '#swnskn', '#ubhejm', '#udwuox', '#jeurnr', 
+            '#npxzvl', '#jvdnfm', '#ziojdc', '#kmovec', '#sggsrd', '#sosmpp', 
+            '#gdgwmh', '#vtbxsi', '#cswdix', '#aayqpv', '#ledpuh', '#uvsunn', 
+            '#zeaiqn', '#yqovyh',
+            '#nrpqow', '#srazhb', '#gygoqn', '#xdxtdr', '#iseoum', '#yjckok', 
+            '#nxygvv', '#rhrbnu', '#momovr', '#ftfnou', '#ivbhhb', '#xlvgtn', 
+            '#jjfcxv', '#omcwzl', '#bkqodr', '#akgsjp', '#fxbltd', '#jfolwm', 
+            '#aniijv', '#mynrrr',
+            '#pqdsna', '#hlwdff', '#zpdrvj', '#fzurce', '#orkxcy', '#wiaroj', 
+            '#toplbp', '#kqfudw', '#ebancd', '#jemtdl', '#cncaff', '#vcyudv', 
+            '#yfzrat', '#ibstyx', '#jeeosd', '#cxlwec', '#kwlkfz', '#coaphp', 
+            '#glyulm', '#qnkuxo',
+            '#mpeksh', '#mxjzsw', '#gginbz', '#jvfuwb', '#zaoysj', '#ykseqb', 
+            '#cqfwqm', '#yndqou', '#mjnupk', '#hggwxa', '#sykhki', '#ybeovo', 
+            '#aerran', '#nmpibu', '#pxhuwf', '#rkuwky', '#codjjv', '#jyhhqi', 
+            '#bcbisb', '#jqupqe',
+            '#ypaxos', '#qftqgq', '#gdclmc', '#cmqmmj', '#dfqxft', '#xobygk', 
+            '#suocmm', '#fhbpxq', '#rjsoiq', '#qqtfkk', '#wnbeym', '#tbogpq', 
+            '#sfsxms', '#jzvemb', '#qgbguz', '#ugeygk', '#aprvkk', '#oqpnlc', 
+            '#ojoill', '#ynbouu', 
+            '#gvtfhp', '#hrgiyx', '#pqojcr', '#zozoiq', '#dnhmhi', '#eslkeh', 
+            '#xfoegc', '#khdbof', '#aceoqo', '#vmrjeb', '#kfmnbn', '#voweza', 
+            '#olncrp', '#lqmrhl', '#jovagl', '#mexvqf', '#tiyjuk', '#xlkxum', 
+            '#mqqeam', '#sdreoj',
+            '#ymfemm', '#ventxs', '#vufgjz', '#gekrgg', '#zizhwn', '#ttfkpm', 
+            '#gwwpwg', '#oakeqk', '#hzbcnk', '#vthxus', '#gfbdwc', '#mzigmz', 
+            '#vubedc', '#nhkljg', '#ffifzr', '#siabdk', '#arbmxs', '#xgzixt', 
+            '#znkytx', '#bwfxcv', 
+        	'#xbcgby','#rnzgwt','#jnkqty','#sfdsbp','#xbetzc','#mewbkx','#fjqeyp',
+            '#wzwkps','#nzdjky','#sqambv','#dyrpoz','#dnatmu','#cswjet','#nbqier',
+            '#uswtjl','#lpzgag','#mabjlp','#pbrcxn','#cliwqy','#uakixz',
+            '#duwafr','#dkssqd','#jirosn','#feduzp','#phaqch','#chzrtr','#dxjnid',
+            '#balcdz','#sckooi','#yojogc','#tgkpyz','#nuxxei','#glcunt','#dfnzbc',
+            '#ovifyk','#pgdanv','#shxpna','#qnqpdz','#sidkaq','#avghlx',
+            '#strsby', '#zfeuef', '#izlbue', '#qvrukw', '#fvkanb', '#jegzrs', 
+            '#fdwpcs', '#coxjms', '#wnrlfw', '#vsttpd', '#qdbvag', '#tnhaeh', 
+            '#sbvxsv', '#bbgcjp', '#fhtswp', '#bbvcpf', '#snvymv', '#maozqd', 
+            '#jgdlql', '#cvtvcx',
+        );
+        /*
+        $tags = array(
             '#afglqr','#biktvw','#ahlnoy','#hjknvw','#fnoruv','#dfgklr','#depquw','#cdenrw','#afqrwz','#hijnuz','#fghlpr','#abdjvy','#chiovw','#iklstw','#lnoqwx','#abcmsv','#efmtwz','#fipqtu','#cfjoyz','#cilost',
             '#bhimpq','#abijmo','#afhmrt','#btvxyz','#dgkuvw','#cfhjky','#afgjuv','#gjknow','#biuwxy','#apsuwx','#jlnsuy','#fgsvxz','#eqtuxz','#alnqrz','#agpstu','#fjnovy','#amnptu','#fnoryz','#bcempq','#aeijtx',
             '#fhkqtz','#copqrx','#acmqvw','#bgmuvw','#aekouv','#ilnprw','#adikoq','#cdkoqs','#mnpswy','#egjlqw','#bcehsz','#bnpvwy','#afimox','#akoqtz','#ghklmt','#behsvz','#fjkmrw','#adegwx','#bjkmpq',#efjsuy
@@ -402,6 +528,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             '#bhiosx','#bdgioz','#cmprwx','#bglmtw','#eirsux','#efmopv','#adjrsv','#bcklrv','#ehklvz','#bhopsw','#defquz','#dmpqxy','#agimot','#chmoqy','#jlnvxy','#denswy','#fnotuv','#ckqsxy','#kmorvy',#bchmrs
             '#gqrtuz','#afghlz','#bghipt','#cdfhis','#ijkqtx','#eknptu','#ablmnw','#acmotu','#cdehkp','#fhikly','#dgknqu','#aikrtu','#aenosx','#eklnpq','#jknouv','#bgkmnu','#bcdimq','#aijpvz','#chnqsx','#abhjly',
         );
+        */
         
         /**
         $str = str_split('abcdefghijklmnopqrstuvwxyz');
@@ -905,8 +1032,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         }
     }
     
-    public function commentOnLatestPhoto( $pageUrl, $message = '' ){
-        $ids = array();
+    public function commentOnLatestPhoto( $pageUrl, $message = '', $like = false ){
         $response = $this->get( $pageUrl );
         
         // type="image" name="comment__166595034299642639_37459491"
@@ -920,6 +1046,10 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             }
             $message = preg_replace('/\[\[USERNAME\]\]/', $this->persona->name, $message);
             $this->submitComment($id, $message);
+            if( $like ){
+                self::sleep( 2, "before liking" );
+                $this->like($id);
+            }
             //$sleep = 5;
             //echo "submitted comment to $pageUrl - sleeping for $sleep seconds\n";
             //sleep($sleep);
@@ -1136,13 +1266,19 @@ VALUES
     }
     
     public static function getNextSelfieUrl( $text ){
+        $url = self::getEarlierUrl($text);
+        if(!$url) {
+            print_r( $text );
+        }
+        return $url;
+    }
+    
+    public static function getEarlierUrl( $text ){
         $url = null;
         $ptrn = '@<a href="(.*?)" rel="next">Earlier</a>@i';
         preg_match($ptrn, $text, $matches);
         if( !empty( $matches[1] ) ){
             $url = 'http://web.stagram.com/'.$matches[1];
-        } else {
-            print_r( $text );
         }
         return $url;
     }
