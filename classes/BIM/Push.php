@@ -132,7 +132,7 @@ class BIM_Push{
     	$target = BIM_Model_User::get( $targetId );
         if( $target->canPush() ){
             if( $target->isApproved() ){
-                $msg = "Awesome! You have been Selfieclub Verified! Would you like to share Selfieclub with your friends?";
+                $msg = "Awesome! You have been Selfieclub verified! Would you like to share Selfieclub with your friends?";
             } else {
                 $msg = "Your Selfieclub profile has been verified by another Selfieclub user! Would you like to share Selfieclub with your friends?";
             }
@@ -247,7 +247,7 @@ class BIM_Push{
         $targets = BIM_Model_User::getMulti($targetIds);
         foreach( $targets as $target ){
             if ( $target->isExtant() && $target->canPush() ){
-                $msg = "@$creator->username has just created a new Selfie: $volley->subject";
+                $msg = "@$creator->username has just created the Selfieclub conversation: $volley->subject";
                 $type = 1;
                 self::send($target->device_token, $msg, $type, $volleyId ); 
             }
@@ -269,7 +269,7 @@ class BIM_Push{
     public static function friendNotification( $userId, $friendId ){
         $user = BIM_Model_User::get( $userId );
         $friend = BIM_Model_User::get( $friendId );
-        $msg = "@$user->username has subscribed to your Selfie updates!";
+        $msg = "@$user->username is following your Selfie updates!";
         $type = 3;
         self::send($friend->device_token, $msg, $type, null, $user->id ); 
     }
