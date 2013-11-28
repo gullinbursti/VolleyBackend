@@ -15,7 +15,7 @@ class BIM_Push{
         BIM_Push_UrbanAirship_Iphone::sendPush( $workload->push );
     }
     
-    public static function createTimedPush( $time, $jobId = null, $tokens, $msg, $pushType = null, $volleyId = null, $userId = null ){
+    public static function createTimedPush( $time, $tokens, $msg, $jobId = null, $pushType = null, $volleyId = null, $userId = null, $disabled = 0 ){
         $time = new DateTime("@$time");
         $time = $time->format('Y-m-d H:i:s');
         
@@ -34,6 +34,7 @@ class BIM_Push{
             'name' => 'push',
             'params' => $params,
             'is_temp' => true,
+            'disabled' => $disabled
         );
         
         if( !empty( $jobId ) ){
@@ -84,7 +85,7 @@ class BIM_Push{
     
     public static function shoutoutPush( $volley ){
         $user = BIM_Model_User::get($volley->creator->id);
-        $msg = "Yo! Your Selfie got a shoutout from Team Volley!";
+        $msg = "Yo! Your Selfie got a shoutout from Selfieclub!";
         if( $user->canPush() && !empty( $user->device_token ) ){
             self::send($user->device_token, $msg ); 
         }
@@ -99,7 +100,7 @@ class BIM_Push{
             $creators[] = $volley->creator->id;
         }
         $users = BIM_Model_User::getMulti($creators);
-        $msg = "Your Volley had made it to the top of the Explore section! Tap or swipe to view.";
+        $msg = "Your Selfie made it to the top of the Explore section! Tap or swipe to view.";
         foreach( $users as $user ){
             if( $user->canPush() && !empty( $user->device_token ) ){
                 self::send($user->device_token, $msg ); 
@@ -118,9 +119,9 @@ class BIM_Push{
 	public static function sendFlaggedPush( $targetId ){
     	$target = BIM_Model_User::get( $targetId );
         if( $target->canPush() ){
-            $msg = "Your Volley profile has been flagged";
+            $msg = "Your Selfieclub profile has been flagged";
             if( $target->isSuspended() ){
-                $msg = "Your Volley profile has been suspended";
+                $msg = "Your Selfieclub profile has been suspended";
             }
             $type = 3;
             self::send($target->device_token, $msg, $type ); 
@@ -131,9 +132,9 @@ class BIM_Push{
     	$target = BIM_Model_User::get( $targetId );
         if( $target->canPush() ){
             if( $target->isApproved() ){
-                $msg = "Awesome! You have been Volley Verified! Would you like to share Volley with your friends?";
+                $msg = "Awesome! You have been Selfieclub Verified! Would you like to share Selfieclub with your friends?";
             } else {
-                $msg = "Your Volley profile has been verified by another Volley user! Would you like to share Volley with your friends?";
+                $msg = "Your Selfieclub profile has been verified by another Selfieclub user! Would you like to share Selfieclub with your friends?";
             }
             $type = 2;
             self::send($target->device_token, $msg, $type ); 
@@ -160,7 +161,7 @@ class BIM_Push{
         }
         
         if( $deviceTokens ){
-            $msg = "A new user just joined Volley, can you verify them? @$target->username";
+            $msg = "A new user just joined Selfieclub, can you verify them? @$target->username";
             $type = 3;
             self::send($deviceTokens, $msg, $type ); 
         }
@@ -168,14 +169,14 @@ class BIM_Push{
 	
     public static function emailVerifyPush( $userId ){
         $user = BIM_Model_User::get( $userId );
-        $msg = "Volley on! Your Volley account has been verified!";
+        $msg = "Your Selfieclub account has been verified!";
         self::send( $user->device_token, $msg );
     }
     
     public static function matchPush( $userId, $friendId ){
         $user = BIM_Model_User::get( $userId );
         $friend = BIM_Model_User::get( $friendId );
-        $msg = "Your friend $user->username joined Volley!";
+        $msg = "Your friend $user->username joined Selfieclub!";
         self::send( $friend->device_token, $msg );
     }
     
@@ -204,7 +205,7 @@ class BIM_Push{
 	    $volley = BIM_Model_Volley::get($volleyId);
 		$liker = BIM_Model_User::get( $likerId );
 		$target = BIM_Model_User::get( $targetId );
-		$msg = "@$liker->username liked your Volley $volley->subject";
+		$msg = "@$liker->username liked your Selfie $volley->subject";
 		if( $volley->subject == '#__verifyMe__' ){
 		    $msg = "Your profile selfie has been liked by @$liker->username";
 		}
@@ -221,7 +222,7 @@ class BIM_Push{
         $secondPushTime = $time + (3600 * 17);
         $thirdPushTime = $secondPushTime + (3600 * 9);
         
-        $msg = "@$targetUser->username has joined the Volley $volleyObject->subject";
+        $msg = "@$targetUser->username has replied to your Selfie: $volleyObject->subject";
         $pushType = 6;
         
         $users = BIM_Model_User::getMulti( $volleyObject->getUsers() );
@@ -246,7 +247,7 @@ class BIM_Push{
         $targets = BIM_Model_User::getMulti($targetIds);
         foreach( $targets as $target ){
             if ( $target->isExtant() && $target->canPush() ){
-                $msg = "@$creator->username has just created the Volley $volley->subject";
+                $msg = "@$creator->username has just created a new Selfie: $volley->subject";
                 $type = 1;
                 self::send($target->device_token, $msg, $type, $volleyId ); 
             }
@@ -259,7 +260,7 @@ class BIM_Push{
         if ( $challenger->canPush() ){
             $volley = BIM_Model_Volley::get($volleyId);
             $creator = BIM_Model_User::get($volley->creator->id);
-            $msg = "@$creator->username has sent you a Volley. $volley->subject";
+            $msg = "@$creator->username has sent you a Selfie: $volley->subject";
             $type = 1;
             self::send($challenger->device_token, $msg, $type, $volley->id ); 
         }
@@ -268,7 +269,7 @@ class BIM_Push{
     public static function friendNotification( $userId, $friendId ){
         $user = BIM_Model_User::get( $userId );
         $friend = BIM_Model_User::get( $friendId );
-        $msg = "@$user->username has subscribed to your Volley updates!";
+        $msg = "@$user->username has subscribed to your Selfie updates!";
         $type = 3;
         self::send($friend->device_token, $msg, $type, null, $user->id ); 
     }
@@ -276,7 +277,7 @@ class BIM_Push{
     public static function friendAcceptedNotification( $userId, $friendId ){
         $user = BIM_Model_User::get( $userId );
         $friend = BIM_Model_User::get( $friendId );
-        $msg = "$user->username accepted your friend request on Volley!";
+        $msg = "$user->username accepted your friend request on Selfieclub!";
         self::send( $friend->device_token, $msg );
     }
     
@@ -289,20 +290,20 @@ class BIM_Push{
                 $deviceTokens[] = $user->device_token;
             }
         }
-        $msg = "$user->username has joined Volley and needs to be checked out";
+        $msg = "$user->username has joined Selfieclub and needs to be checked out";
         self::send($deviceTokens, $msg);
     }
     
     public static function introPush( $userId, $targetId, $pushTime ){
         $user = BIM_Model_User::get($userId);
         $target = BIM_Model_User::get($targetId);
-        $msg = "@$user->username has subscribed to your Volleys!";
+        $msg = "@$user->username has subscribed to your Selfie updates!";
         self::createTimedPush( $pushTime, null, $target->device_token, $msg, null );
     }
     
     public static function selfieReminder( $userId ){
         $user = BIM_Model_User::get($userId);
-        $msg = "Volley reminder! Please update your selfie to get verfied. No adults allowed!";
+        $msg = "Selfieclub reminder! Please update your selfie to get verfied. No adults allowed!";
         self::send($user->device_token, $msg);
     }
 }

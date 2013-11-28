@@ -531,6 +531,20 @@ If most or all of the images in a volley are missing, then do not make the call 
         }
     }
     
+    public static function fixVolleyImages( $volleyId ){
+        $volley = BIM_Model_Volley::get( $volleyId );
+        if( $volley->isExtant() ){
+            $o = new self();
+            error_log( "checking volley $volley->id" );
+            $o->missingImage($volley->creator->img);
+            if( $volley->challengers ){
+                foreach( $volley->challengers as $challenger ){
+                    $o->missingImage( $challenger->img );
+                }
+            }
+        }
+    }
+    
     public static function checkVolleyImagesFromLastXSeconds( $seconds = 1800 ){
 		$dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
 		$time = time() - $seconds;

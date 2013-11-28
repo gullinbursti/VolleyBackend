@@ -75,7 +75,7 @@ class BIM_App_Admin{
         if( $_POST ){
             $tags = BIM_Utils::getRandomTags();
             foreach( $tags as $tag ){
-                echo $tag;
+                echo $tag.' ';
             }
         } else {
             echo "<form method='POST'><input name='submit' type='submit' value='get random tags'></form>";
@@ -610,9 +610,21 @@ Find a user: <input type='text' name='search' size='75'> <input type='submit' va
     
     public static function getEditUserForm( $user, $errors = null ){
         $image = $user->getAvatarUrl();
-        $image = preg_replace('/\.jpg/','', $user->img_url );
+        $image = preg_replace('/\.jpg/','', $image );
         $image = preg_replace('/Large_640x1136/','', $image );
-        $image = "{$image}Small_160x160.jpg";
+        if( !preg_match('@defaultAvatar@',$image) ){
+            $image = "{$image}Small_160x160.jpg";
+        }
+        $volleys = BIM_Model_Volley::getVolleys($user->id);
+        $imgHTML = array();
+        foreach( $volleys as $volley ){
+            $userPics = $volley->getUserPics( $user->id );
+            foreach( $userPics as $picUrl ){
+                $picUrl .= "Large_640x1136.jpg";
+                $imgHTML[] = "<img src='$picUrl'>";
+            }
+        }
+        $imgHTML = join('<br>',$imgHTML);
         
         return "
 <html>
@@ -628,11 +640,11 @@ Find a user: <input type='text' name='search' size='75'> <input type='submit' va
 Editing: $user->username - id: $user->id
 </h4>
 <form method=post enctype='multipart/form-data'>
-Username: <input type='text' name='user[username]' size='50' value='$user->username'>
+Username: <input type='text' name='user[username]' size='50' value='$user->username'> ($user->username)
 <br><br>
-Email: <input type='text' name='user[email]' size='50' value='$user->email'>
+Email: <input type='text' name='user[email]' size='50' value='$user->email'> ($user->email)
 <br><br>
-Birthdate: <input id='age' type='text' name='user[age]' size='50' value='$user->age'>
+Birthdate: <input id='age' type='text' name='user[age]' size='50' value='$user->age'> ( $user->age )
 <!--
 <div id='datepicker'></div>
 <script>
@@ -652,6 +664,8 @@ Avatar Image: <input type='file' name='avatar'>
 <input type='hidden' value='$user->id' name='user[id]'>
 <input type='submit' value='edit user'>
 </form>
+<hr>
+$imgHTML
 </body>
 </html>
         ";

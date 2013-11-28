@@ -100,7 +100,6 @@ VALUES
     		VALUES
     		(?, '', ?, ?, ?, ?, ?, ?, ?, ?)
     	";
-        
 		$params = array( $id, $nextRunTime, $class, $name, $method, $disabled, $schedule, $params, $isTemp );
 
  		$this->prepareAndExecute($sql, $params);

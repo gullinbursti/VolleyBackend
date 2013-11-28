@@ -364,4 +364,44 @@ Small_160x160
         }
     
     }
+    
+    public static function sendVerifyPushes(){
+        $sql = "
+            select 
+                u.user_id as voter,
+                c.creator_id as target,
+                u.flag as flag 
+            from `hotornot-dev`.tblFlaggedUserApprovals as u
+                join `hotornot-dev`.tblChallenges as c
+                on u.challenge_id = c.id
+            where u.added > unix_timestamp('2013-11-26')
+                and u.added < unix_timestamp('2013-11-27 18:00:00')
+        ";
+        $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+        $stmt = $dao->prepareAndExecute( $sql );
+        $votes = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+        
+        $seconds = 86400 * 7;
+        $time = time();
+        
+        mt_srand();
+        foreach( $votes as $vote ){
+            
+            $voter = BIM_Model_User::get( $vote->voter );
+            $target = BIM_Model_User::get( $vote->target );
+            
+            $sql = "update `hotornot-dev`.tblUsers set abuse_ct = abuse_ct + ? where id = ?";
+            $params = array( $vote->flag, $target->id );
+            $stmt = $dao->prepareAndExecute( $sql, $params );
+            
+            //if( $target->canPush() ){
+                //$pushTime = $time + mt_rand(1, $seconds);
+                //$msg = 'Your Selfieclub profile has been verified by another Selfieclub user!  :)))';
+                //if( $vote->flag > 0 ){
+                    //$msg = "Your Selfieclub profile has been flagged!";
+                //}
+                //BIM_Push::createTimedPush($pushTime, array( $target->device_token ), $msg, null, null, null, null, 1);
+            //}
+        }
+    }
 }
