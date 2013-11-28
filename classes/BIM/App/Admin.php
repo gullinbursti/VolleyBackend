@@ -301,9 +301,9 @@ class BIM_App_Admin{
         
         $teamVolleyId = $input->userId;
         $volleys = BIM_Model_Volley::getVolleys($teamVolleyId);
-        
+        $user = BIM_Model_User::get( $teamVolleyId );
         echo("
-        Create a new Volley for Team Volley
+        Create a new Volley for $user->username
         <br><br>
 		<form method='post'enctype='multipart/form-data'>
 		<input type='hidden'' name='userId' value='$teamVolleyId'>
@@ -314,7 +314,7 @@ class BIM_App_Admin{
         <input type='submit' name='create_volley' value='create_volley'>
         </form>
         
-		<hr>Team Volley volleys - ".count( $volleys )."<hr>\n
+		<hr> $user->username volleys - ".count( $volleys )."<hr>\n
 		
         <table border=1 cellpadding=10>
         <tr>
