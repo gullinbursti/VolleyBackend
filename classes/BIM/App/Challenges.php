@@ -18,9 +18,9 @@ Challenges
 
 class BIM_App_Challenges extends BIM_App_Base{
     
-    public function getSelfies() {
+    public function getSelfies( $exclude = array() ) {
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-        $ids = $dao->getSelfies( );
+        $ids = $dao->getSelfies( $exclude );
         return BIM_Model_Volley::getMulti( $ids );
     }
     

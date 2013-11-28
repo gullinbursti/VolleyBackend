@@ -1288,6 +1288,9 @@ VALUES
         for( $n = 0; $n < 10; $n++ ){
             @unlink('/tmp/cookies_BIM_Growth_Webstagram.txt');
             self::_findPromoters();
+            $sleep = 5;
+            echo "sleeping for $sleep seconds\n";
+            sleep( $sleep );
         }
     }
     
