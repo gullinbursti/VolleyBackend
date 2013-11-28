@@ -1,6 +1,6 @@
-SCRIPTS=/home/shane/dev/hotornot/bin/elasticsearch
+SCRIPTS=/home/volley/admin/bin/elasticsearch
 TO_FOLDER=/home/shane/esbackups
-FROM=/elasticsearch
+FROM=/elasticsearch/data
  
 DATE=`date +%Y-%m-%d_%H`
 TO=$TO_FOLDER/$DATE/
