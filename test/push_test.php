@@ -1,9 +1,10 @@
 <?php
+set_include_path('.:/usr/share/php:/usr/share/pear:/home/volley/api/sc0001/classes:/home/volley/api/sc0001/lib:/home/volley/api/sc0001/lib/smtp_mailer_swift/lib/classes');
 require_once 'vendor/autoload.php';
 
-$volley = BIM_Model_Volley::get( 37845 );
-$user = BIM_Model_User::get( 13306 );
-$challenger = BIM_Model_User::get( 13219 );
+$volley = BIM_Model_Volley::get( 50773 );
+//$user = BIM_Model_User::get( 13306 );
+//$challenger = BIM_Model_User::get( 13219 );
 
 /*
 $workload = (object) array(
@@ -30,5 +31,5 @@ $p->sendTimedPush($workload);
 //BIM_Push::sendApprovePush($user->id);
 //BIM_Push::sendFirstRunPush(array($user->id), $challenger->id);
 //BIM_Push::sendFlaggedPush($user->id);
-//BIM_Push::sendVolleyNotifications($volley->id);
+BIM_Push::sendVolleyNotifications($volley->id);
 // -- this one is dangerous as fuck -- BIM_Push::volleySignupVerificationPush($user->id);
