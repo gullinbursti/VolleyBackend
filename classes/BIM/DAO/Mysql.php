@@ -6,16 +6,23 @@ class BIM_DAO_Mysql extends BIM_DAO{
     public $rowCount = null;
     public static $profile = null;
     
-    public function beginTransaction(){
-        
+    public function beginTransaction( $getWriter = false, $shardKey = '' ){
+        $connParams = $this->getConnectionParams( $getWriter, $shardKey );
+        $conn = $this->getConnection( $connParams );
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $conn->beginTransaction();
     }
     
-    public function rollback(){
-        
+    public function rollback( $getWriter = false, $shardKey = '' ){
+        $connParams = $this->getConnectionParams( $getWriter, $shardKey );
+        $conn = $this->getConnection( $connParams );
+        $conn->rollback();
     }
     
-    public function commit(){
-        
+    public function commit( $getWriter = false, $shardKey = '' ){
+        $connParams = $this->getConnectionParams( $getWriter, $shardKey );
+        $conn = $this->getConnection( $connParams );
+        $conn->commit();
     }
     /**
      * retrieves config data for connecting to a data source.

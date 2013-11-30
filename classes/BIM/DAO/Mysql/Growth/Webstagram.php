@@ -2,6 +2,34 @@
 
 class BIM_DAO_Mysql_Growth_Webstagram extends BIM_DAO_Mysql_Growth{
 	
+	public function retainUser( $userId ){
+	    $checkedOut = false;
+	    try{
+	        $this->beginTransaction();
+    		$sql = "
+    			insert into growth.user_checkout
+    			(user_id) values (?)
+    		";
+    		$params = array( $userId );
+    		$this->prepareAndExecute($sql, $params);
+    		$this->commit();
+    		$checkedOut = true;
+	    } catch( Exception $e ){
+	        $this->rollback();
+    	    $checkedOut = false;
+	    }
+	    return $checkedOut;
+	}
+	
+	public function releaseUser( $userId ){
+		$sql = "
+			delete from growth.user_checkout
+			where user_id = ?
+		";
+		$params = array( $userId );
+		$this->prepareAndExecute($sql, $params);
+	}
+	
 	public function getLastContact( $userId ){
 		$sql = "
 			select last_contact 
@@ -14,7 +42,7 @@ class BIM_DAO_Mysql_Growth_Webstagram extends BIM_DAO_Mysql_Growth{
 		if( $data ){
 		    $data = $data[0]->last_contact;
 		} else {
-		    $data = 0;
+	        $data = 0;
 		}
 		return $data;
 	}

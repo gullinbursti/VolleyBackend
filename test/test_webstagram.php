@@ -1,9 +1,40 @@
 <?php
-set_include_path('.:/Users/shane/dev/volley/php/volley/classes:/Users/shane/dev/volley/php/volley/lib:/Users/shane/dev/volley/php/volley/lib/smtp_mailer_swift/lib/classes');
+//set_include_path('.:/Users/shane/dev/volley/php/volley/classes:/Users/shane/dev/volley/php/volley/lib:/Users/shane/dev/volley/php/volley/lib/smtp_mailer_swift/lib/classes');
 require_once 'vendor/autoload.php';
 
-BIM_Growth_Webstagram_Routines::queueBlastJob("AblesMi307");
+/*
+$job = (object) array(
+    "nextRunTime" => '2013-11-29 23:57:08',
+    "class" => 'BIM_Jobs_Growth',
+    "method" => 'doBlastJob',
+    "name" => 'do_blast_job',
+    "params" => json_encode(
+        array(
+            "persona_id" => 'RiversLa496',
+            "target" => (object) array(
+                "id" => '12113563',
+                "name" => 'tsuritb',
+                "url" => 'http://web.stagram.com/n/tsuritb',
+                "selfie" => ''
+            )
+        )
+    ),
 
+    "is_temp" => '1',
+    "disabled" => '0'
+);
+*/
+$job = json_decode(
+'{"nextRunTime":"2013-12-02 13:01:01","class":"BIM_Jobs_Growth","method":"doBlastJob","name":"do_blast_job","params":{"persona_id":"BrennanCh716","target":{"id":"239452459","name":"rzn34","url":"http:\/\/web.stagram.com\/n\/rzn34","selfie":""},"comment":"likeee! join selfie club? selfieclub is on the Apple app store. get it! #eqlcoy"},"is_temp":true,"disabled":0}'
+);
+$job->params = json_encode( $job->params );
+
+print_r( $job );
+
+$j = new BIM_Jobs_Growth();
+$j->doBlastJob($job);
+
+// BIM_Growth_Webstagram_Routines::doBlastJob("AblesMi307");
 
 /**
     [0] => login

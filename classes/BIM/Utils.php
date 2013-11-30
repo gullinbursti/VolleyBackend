@@ -377,6 +377,82 @@ class BIM_Utils{
         return $tag;
     }
     
+    // 
+    public static function getGeneralSelfieClubComment( $tag = array() ){
+        if( !is_array( $tag ) ){
+            $tag = array( $tag );
+        }
+        $tag = join(' ', $tag );
+        
+        $compliments = array(
+            'sweeeet!',
+            ':)))) <3 (((((:',
+            'niiiice! :)',
+            'niiice <3!',
+            'luv this!',
+            'likeee!',
+            'loveee ur posts!',
+            '<3 ur posts!',
+            'omg love this!',
+            'all day everyday!',
+            'the best award goes to u :)',
+            'so sweeeeet!',
+            'tooo awesome!',
+            'loveee it!',
+            'luv it!',
+        );
+        
+        $questions = array(
+            'join selfie club???js',
+            'join selfieclub?!!!!a',
+            'join selfie cllub?!?',
+            'wanna join?',
+            'join?',
+            'joinn?',
+            'jjoin?',
+            'join??',
+            'wan join?',
+            'want to join?',
+            'wnna join?!',
+            'you should join!',
+            'join this?',
+            'join selfie club?',
+            'you should join selfie club :)',
+            'joinnn selfie club??',
+            'join this now!!',
+            'thinkin u should join dis!',
+        );
+        
+        $callsToAction = array(
+            '>>>',
+            'go get the selfieclub iOS app',
+            'selfieclub is on the Apple app store. get it!',
+            'get the app on the apple app store ',
+            'go here',
+            'install selfieclub on ur iOS device!',
+            'go get selfieclub!  on the app store now :))))',
+            'lol check this',
+            'check this',
+            '>>>> tap >>>',
+            '>>>>>>> tap this',
+            '>>>>>> TAP THIS',
+            '>>> join selfieclub >>>>>',
+            'join selfieclub go here >>>',
+            'go here for selfieclub >>>',
+            'get it >>>',
+            'join selfieclub >>',
+            'tap this to get selfieclub>>>>>> ',
+            'selfieclub? tappp this to join >>>>>>',
+        );
+        
+        $compliment = $compliments[array_rand( $compliments )];
+        $question = $questions[array_rand( $questions )];
+        $callToAction = $callsToAction[array_rand( $callsToAction )];
+        
+        $comment = "$compliment $question $callToAction $tag";
+        return $comment;
+    }
+    // returns a unique 6 letter string
     // returns a unique 6 letter string
     public static function getRandomComment( $tag = array() ){
         if( !is_array( $tag ) ){
