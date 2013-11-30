@@ -118,25 +118,26 @@ class BIM_Push{
 	public static function sendFlaggedPush( $targetId ){
     	$target = BIM_Model_User::get( $targetId );
         if( $target->canPush() ){
-            $msg = "Your Selfieclub profile has been flagged";
+            $msg = "Your profile has been flagged. Make sure you have a good selfie profile picture!";
             if( $target->isSuspended() ){
-                $msg = "Your Selfieclub profile has been suspended";
+                $msg = "Your Selfieclub profile has been suspended!";
             }
             $type = 3;
             self::send($target->device_token, $msg, $type ); 
         }
 	}
 	
-	public static function sendApprovePush( $targetId ){
+	public static function sendApprovePush( $targetId, $voterId ){
     	$target = BIM_Model_User::get( $targetId );
         if( $target->canPush() ){
+            $voter = BIM_Model_User::get( $voterId );
             if( $target->isApproved() ){
-                $msg = "Awesome! You have been Selfieclub verified! Would you like to share Selfieclub with your friends?";
+            	$msg = "Your Selfieclub profile has been Verified by $voter->username";
             } else {
-                $msg = "Your Selfieclub profile has been verified by another Selfieclub user! Would you like to share Selfieclub with your friends?";
+            	$msg = "Your Selfieclub profile has been Verified by $voter->username";
             }
-            $type = 2;
-            self::send($target->device_token, $msg, $type ); 
+            $type = 3;
+            self::send($target->device_token, $msg, $type, null, $voter->id ); 
         }
 	}
 	
