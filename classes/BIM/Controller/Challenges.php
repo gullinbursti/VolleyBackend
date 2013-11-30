@@ -255,7 +255,12 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
     
     public function getSelfies(){
         $challenges = new BIM_App_Challenges();
-        return $challenges->getSelfies( );
+        $ids = array();
+        if( !empty( $_COOKIE['selfies_seen'] ) ){
+            $ids = trim( $_COOKIE['selfies_seen'] );
+            $ids = explode(',', $ids);
+        }
+        return $challenges->getSelfies( $ids );
     }
     
     /**

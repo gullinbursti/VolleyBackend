@@ -18,9 +18,9 @@ Challenges
 
 class BIM_App_Challenges extends BIM_App_Base{
     
-    public function getSelfies() {
+    public function getSelfies( $exclude = array() ) {
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-        $ids = $dao->getSelfies( );
+        $ids = $dao->getSelfies( $exclude );
         return BIM_Model_Volley::getMulti( $ids );
     }
     
@@ -528,6 +528,20 @@ If most or all of the images in a volley are missing, then do not make the call 
                 }
             }
             print count( $volleyIds )." remaining\n";
+        }
+    }
+    
+    public static function fixVolleyImages( $volleyId ){
+        $volley = BIM_Model_Volley::get( $volleyId );
+        if( $volley->isExtant() ){
+            $o = new self();
+            error_log( "checking volley $volley->id" );
+            $o->missingImage($volley->creator->img);
+            if( $volley->challengers ){
+                foreach( $volley->challengers as $challenger ){
+                    $o->missingImage( $challenger->img );
+                }
+            }
         }
     }
     

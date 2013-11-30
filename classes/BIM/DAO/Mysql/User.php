@@ -573,9 +573,31 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
 	    $this->prepareAndExecute( $sql, $params );
 	}
 	
+        /*
+	    $sql = "
+            select c.creator_id as id, sum(flag) as sum
+            from `hotornot-dev`.tblChallenges as c
+                join `hotornot-dev`.tblFlaggedUserApprovals as u
+                on c.id = u.challenge_id
+            where c.is_verify = 1
+            group by c.creator_id
+            having sum >= 10
+            order by c.updated desc, id
+            limit $limit
+        ";
+        */
 	public function getSuspendees( $limit = 50 ){
 	    $limit = mysql_escape_string($limit);
-        $sql = "select id from `hotornot-dev`.tblUsers where abuse_ct >= 10  order by abuse_ct desc, id limit $limit";
+        $sql = "
+            select u.id 
+            from `hotornot-dev`.tblUsers as u
+                join  `hotornot-dev`.tblChallenges as c
+                on u.id = c.creator_id
+            where u.abuse_ct >= 10
+            and c.is_verify = 1
+            order by c.updated desc, id 
+            limit $limit
+        ";
         $stmt = $this->prepareAndExecute( $sql );
         return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
 	}

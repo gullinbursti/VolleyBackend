@@ -75,7 +75,7 @@ class BIM_App_Admin{
         if( $_POST ){
             $tags = BIM_Utils::getRandomTags();
             foreach( $tags as $tag ){
-                echo $tag;
+                echo $tag.' ';
             }
         } else {
             echo "<form method='POST'><input name='submit' type='submit' value='get random tags'></form>";
@@ -136,7 +136,11 @@ class BIM_App_Admin{
     
     public static function doCreateVolley( $input ){
         if( !empty( $_FILES['image']['tmp_name'] ) && !empty( $input->hashtag ) ){
-            $teamVolleyId = BIM_Config::app()->team_volley_id;
+            
+            $teamVolleyId = empty( $input->userId ) 
+                        ? BIM_Config::app()->team_volley_id 
+                        : $input->userId;
+            
             $imagePath = $_FILES['image']['tmp_name'];
             $namePrefix = 'TV_Volley_Image-'.uniqid(true);
             $name = "{$namePrefix}Large_640x1136.jpg";
@@ -278,6 +282,95 @@ class BIM_App_Admin{
         return $comment;
     }
     
+    public static function createAnyVolley(){
+        $input = (object)( $_POST? $_POST : $_GET);
+        
+        if( !empty( $input->edit_volley ) ){
+            self::doEditVolley( $input );
+        } else if( $input->create_volley ) {
+            self::doCreateVolley( $input );
+        }
+        
+        echo("
+        <html>
+        <head>
+		<script src='http://code.jquery.com/jquery-1.10.1.min.js'></script>
+        </head>
+        <body>
+        ");
+        
+        $teamVolleyId = $input->userId;
+        $volleys = BIM_Model_Volley::getVolleys($teamVolleyId);
+        $user = BIM_Model_User::get( $teamVolleyId );
+        echo("
+        Create a new Volley for $user->username
+        <br><br>
+		<form method='post'enctype='multipart/form-data'>
+		<input type='hidden'' name='userId' value='$teamVolleyId'>
+        	Hash Tag: <input type='text' size='100' name='hashtag'>
+        	<br>
+			Volley Image: <input type='file' name='image'>
+			<br>
+        <input type='submit' name='create_volley' value='create_volley'>
+        </form>
+        
+		<hr> $user->username volleys - ".count( $volleys )."<hr>\n
+		
+        <table border=1 cellpadding=10>
+        <tr>
+        <th>Volley Id</th>
+        <th>Image</th>
+        <th>Creator</th>
+        <th>Hash Tag</th>
+        <th>Challengers</th>
+        <th>Creation Date</th>
+        <th>Last Updated</th>
+        <th>Remove Volley</th>
+        </tr>
+        ");
+        // now get the flag counts for each user
+        foreach( $volleys as $volley ){
+            $creator = $volley->creator;
+            $totalChallengers = count($volley->challengers);
+            $img = $volley->getCreatorImage();
+            if( $volley->isExtant() ){
+                echo "
+                <tr>
+                <td>
+                    $volley->id<br>
+					<form method='post' enctype='multipart/form-data'>
+        			<input type='hidden' name='volley_id' value='$volley->id'>
+					<input type='submit' name='edit_volley' value='edit_volley'>
+                </td>
+                <td>
+                	<img src='$img'><br>
+					New Volley Image: <input type='file' name='volley_img'>
+                	</td>
+                <td>$creator->username</td>
+                <td>
+                    $volley->subject<br>
+                    New Hash Tag:<input type='text' name='hashtag' value=''>
+                </td>
+                <td>$totalChallengers</td>
+                <td>$volley->added</td>
+                <td>$volley->updated</td>
+                <td>
+                	<input type='checkbox' name='delete' value='$volley->id'>
+                	</form>
+                </td>
+                </tr>
+                ";
+            }
+        }
+        echo("
+        </table>
+        </form>
+        </body>
+        </html>
+        ");
+        exit;
+    }
+    
     /**
      * if we are receiving a posted image
      * first we upload the image to s3
@@ -346,7 +439,7 @@ class BIM_App_Admin{
                 <tr>
                 <td>
                     $volley->id<br>
-					<form method='post'enctype='multipart/form-data'>
+					<form method='post' enctype='multipart/form-data'>
         			<input type='hidden' name='volley_id' value='$volley->id'>
 					<input type='submit' name='edit_volley' value='edit_volley'>
                 </td>
@@ -610,9 +703,21 @@ Find a user: <input type='text' name='search' size='75'> <input type='submit' va
     
     public static function getEditUserForm( $user, $errors = null ){
         $image = $user->getAvatarUrl();
-        $image = preg_replace('/\.jpg/','', $user->img_url );
+        $image = preg_replace('/\.jpg/','', $image );
         $image = preg_replace('/Large_640x1136/','', $image );
-        $image = "{$image}Small_160x160.jpg";
+        if( !preg_match('@defaultAvatar@',$image) ){
+            $image = "{$image}Small_160x160.jpg";
+        }
+        $volleys = BIM_Model_Volley::getVolleys($user->id);
+        $imgHTML = array();
+        foreach( $volleys as $volley ){
+            $userPics = $volley->getUserPics( $user->id );
+            foreach( $userPics as $picUrl ){
+                $picUrl .= "Large_640x1136.jpg";
+                $imgHTML[] = "<img src='$picUrl'>";
+            }
+        }
+        $imgHTML = join('<br>',$imgHTML);
         
         return "
 <html>
@@ -628,11 +733,11 @@ Find a user: <input type='text' name='search' size='75'> <input type='submit' va
 Editing: $user->username - id: $user->id
 </h4>
 <form method=post enctype='multipart/form-data'>
-Username: <input type='text' name='user[username]' size='50' value='$user->username'>
+Username: <input type='text' name='user[username]' size='50' value='$user->username'> ($user->username)
 <br><br>
-Email: <input type='text' name='user[email]' size='50' value='$user->email'>
+Email: <input type='text' name='user[email]' size='50' value='$user->email'> ($user->email)
 <br><br>
-Birthdate: <input id='age' type='text' name='user[age]' size='50' value='$user->age'>
+Birthdate: <input id='age' type='text' name='user[age]' size='50' value='$user->age'> ( $user->age )
 <!--
 <div id='datepicker'></div>
 <script>
@@ -652,6 +757,8 @@ Avatar Image: <input type='file' name='avatar'>
 <input type='hidden' value='$user->id' name='user[id]'>
 <input type='submit' value='edit user'>
 </form>
+<hr>
+$imgHTML
 </body>
 </html>
         ";

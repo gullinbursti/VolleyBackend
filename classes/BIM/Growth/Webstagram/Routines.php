@@ -218,13 +218,16 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
 		$stmt = $dao->prepareAndExecute( $sql );
 		$personaNames = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
 		
-        $minutes = 1440 * 2;
+        $usersToContactPerPersona = 10;
+        $daysToRun = 1;
+        
+        $minutes = 1440 * $daysToRun;
         $time = time();
         
         $date = new DateTime();
         $date->setTimezone(new DateTimeZone('UTC') );
         foreach( $personaNames as $name ){
-            for($n = 0; $n < 20; $n++ ){
+            for($n = 0; $n < $usersToContactPerPersona; $n++ ){
                 $whichMinute = mt_rand( 1, $minutes );
                 $seconds = $whichMinute * 60;
                 $targetDate = $time + $seconds;
@@ -1327,6 +1330,9 @@ VALUES
         for( $n = 0; $n < 10; $n++ ){
             @unlink('/tmp/cookies_BIM_Growth_Webstagram.txt');
             self::_findPromoters();
+            $sleep = 5;
+            echo "sleeping for $sleep seconds\n";
+            sleep( $sleep );
         }
     }
     

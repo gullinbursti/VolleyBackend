@@ -595,7 +595,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
             FROM `hotornot-dev`.tblChallenges as tc
             	LEFT JOIN `hotornot-dev`.tblChallengeParticipants as tcp
             	ON tc.id = tcp.challenge_id
-            WHERE tc.status_id in ( 1,2,4 ) and is_verify != 1
+            WHERE tc.is_verify != 1
                 AND (tc.creator_id = ?  OR tcp.user_id = ? )
                 $pSql
             ORDER BY tc.updated DESC
@@ -616,16 +616,18 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
     /**
      * @param unknown_type $userId
      */
-    public function getSelfies( ){
+    public function getSelfies( $exclude = array() ){
         $teamVolleyId = BIM_Config::app()->team_volley_id;
+        $exclude[] = $teamVolleyId;
+        $placeHolders = join(',',array_fill(0, count( $exclude ), '?') );
+        
         mt_srand();
         $limit = mt_rand(0, 1000);
-        
         $sql = "
 			SELECT id 
 			FROM `hotornot-dev`.tblChallenges as tc 
 			WHERE is_verify = 1 
-				AND creator_id != $teamVolleyId
+				AND creator_id NOT IN ($placeHolders)
 				AND creator_img != ''
 				AND creator_img not like '%defaultAvatar%'
 				
@@ -634,7 +636,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
 			LIMIT $limit,20
         ";
         
-        $stmt = $this->prepareAndExecute( $sql, $params );
+        $stmt = $this->prepareAndExecute( $sql, $exclude );
         return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
     }
     

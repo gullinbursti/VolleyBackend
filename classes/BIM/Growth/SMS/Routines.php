@@ -13,6 +13,39 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
         }
     }
     
+    public static function getLogs(){
+        $self = new BIM_Growth();
+        $client = $self->getTwilioClient();
+        
+        $messages = $client->account->sms_messages->getIterator(0, 1000, array(
+            'DateSent>' => '2013-11-26', // Wed, 27 Nov 2013 02:29:25 +0000
+            'DateSent<' => '2013-11-27 00:41:00',
+            //'From' => '+17075551234', // **Optional** filter by 'From'...
+            //'To' => '+18085559876', // ...or by 'To'
+        ));
+        
+        // Write rows
+        $conf = BIM_Config::twilio();
+        $from = $conf->api->number;
+        $msg = 'Selfieclub is LIVE on the App Store! GET THE APP NOW!!!! Get the app to #1!!http://taps.io/JZ5Q';
+        foreach ($messages as $sms) {
+            /*
+            $row = (object) array(
+                'sid' => $sms->sid, 'from' => $sms->from, 'to' => $sms->to, 'date_sent' => $sms->date_sent,
+                'status' => $sms->status, 'direction' => $sms->direction, 'price' => $sms->price, 'body' => $sms->body
+            );
+            */
+            $to = $sms->to;
+            // $to = '+14152549391';
+            echo "sending $from, $to, $msg\n";
+            try{
+                $client->account->sms_messages->create( $from, $to, $msg );
+            } catch ( Exception $e ){
+                print_r( $e );
+            }
+        }
+    }    
+    
     public function sendSMSInvite( $number ){
         $client = $this->getTwilioClient();
         $conf = BIM_Config::twilio();

@@ -205,7 +205,7 @@ class BIM_Config_Dynamic{
         return (object) array(
             'api' => (object) array(
                 //'pass_key' => "qJAZs8c4RLquTcWKuL-gug:mbNYNOkaQ7CZJDypDsyjlQ", // dev
-                'pass_key' => "", // live
+                'pass_key' => "", // app_key:app_master_secret
                 'push_url' => 'https://go.urbanairship.com/api/push/',
             ),
         );

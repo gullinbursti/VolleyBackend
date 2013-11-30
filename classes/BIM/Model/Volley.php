@@ -105,6 +105,19 @@ class BIM_Model_Volley{
         return $pics;
     }
     
+    public function getUserPics( $userId ){
+        $pics = array();
+        if( $this->isCreator($userId) ){
+            $pics[] = $this->creator->img;
+        }
+        foreach( $this->challengers as $challenger ){
+            if( $challenger->id == $userId ){
+                $pics[] = $challenger->img;
+            }
+        }
+        return $pics;
+    }
+    
     public function setAsCreator( $userId ){
         $data = $this->hasUser( $userId );
         if( $data ){
