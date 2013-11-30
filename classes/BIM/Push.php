@@ -116,9 +116,10 @@ class BIM_Push{
     }
     
 	public static function sendFlaggedPush( $targetId ){
+	    return true;
     	$target = BIM_Model_User::get( $targetId );
         if( $target->canPush() ){
-            $msg = "Your profile has been flagged. Make sure you have a good selfie profile picture!";
+            $msg = "Your Selfieclub profile has been flagged. Make sure you have a good selfie profile picture!";
             if( $target->isSuspended() ){
                 $msg = "Your Selfieclub profile has been suspended!";
             }

@@ -141,7 +141,7 @@ class BIM_Model_User{
     }
         
     public function isSuspended(){
-        return (!empty( $this->abuse_ct ) && $this->abuse_ct >= 10);
+        return (!empty( $this->abuse_ct ) && $this->abuse_ct >= 20);
     }
     
     public function isApproved(){
