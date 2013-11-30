@@ -568,6 +568,7 @@ If most or all of the images in a volley are missing, then do not make the call 
                         }
                     }
                 }
+                $volley->purgeFromCache();
             }
             error_log( count( $volleyIds )." remaining\n" );
         }

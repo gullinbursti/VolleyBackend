@@ -217,8 +217,8 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
 		$stmt = $dao->prepareAndExecute( $sql );
 		$personaNames = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
 		
-        $usersToContactPerPersona = 10;
-        $daysToRun = 1;
+        $usersToContactPerPersona = 20;
+        $daysToRun = 2;
         
         $minutes = 1440 * $daysToRun;
         $time = time();
