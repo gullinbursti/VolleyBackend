@@ -18,7 +18,9 @@ class BIM_Jobs_Growth extends BIM_Jobs{
     
     public function doBlastJob( $workload ){
         $params = json_decode( $workload->params );
-        BIM_Growth_Webstagram_Routines::doBlastJob( $params->persona_id );
+        $target = !empty( $params->target ) ? $params->target : null;
+        $comment = !empty( $params->comment ) ? $params->comment : null;
+        BIM_Growth_Webstagram_Routines::doBlastJob( $params->persona_id, $target, $comment );
     }
     
     public function doHouseFollow( $workload ){

@@ -5,6 +5,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
     protected $persona = null;
     protected $oauth = null;
     protected $oauth_data = null;
+    protected static $personaNames = null;
     
     public static function doLikesAndFollows(){
         $routines = new self( 'getvolleyapp' );
@@ -286,7 +287,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
      * find a random user from one of our tags
      * drop a comment with the tag
      */
-    public static function doBlastJob( $personaId ){
+    public static function doBlastJob( $personaId, $user = null, $comment = null ){
         $me = new self( $personaId );
         if( $me->handleLogin() ){
             $tag = self::getUniqueTag();
@@ -294,20 +295,27 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             //$caption = self::getRandomCaption( $tag );
             //$pic = self::getUniqueMedia();
             //$me->postMedia( $pic, $caption );
+            if( !$comment ){
+                $comment = BIM_Utils::getRandomComment( $tag );
+            }
             
-            $comment = BIM_Utils::getRandomComment( $tag );
-            $user = self::getRandomUser();
-            
-            $me->commentOnLatestPhoto( $user->url, $comment, true );
+            if( !$user ){
+                $user = self::getRandomUser();
+                error_log("got random user: ".$user->username);
+            }
             self::sleep( 2, "before follow" );
             $me->follow($user->id, $user->name);
+            $me->commentOnLatestPhoto( $user->url, $comment, true );
             // $me->likeXPhotos( $user->url, mt_rand(2,5) );
+        }
+        if( $user ){
+            self::releaseUser($user->id);
         }
     }
 
     public static function sleep( $seconds = 0, $msg = '' ){
         if($msg) $msg = " - $msg";
-        echo "sleeping for $seconds seconds$msg\n";
+        error_log( "sleeping for $seconds seconds. \n$msg\n" );
         sleep($seconds);
     }
     
@@ -351,7 +359,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         $randomUser = null;
         $attempts = 0;
         while( !$randomUser && $attempts++ < 100 ){
-            mt_srand( time() + ( (int) getmypid() ) );
+            mt_srand(abs(crc32(uniqid())) + ( (int) getmypid() ) );
             $time = time() - mt_rand(0, 86400 * 60);
             $selfieUrl = "http://web.stagram.com/tag/selfie/?npk=$time";
             
@@ -379,65 +387,90 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
     // returns a unique 6 letter string
     public static function getUniqueTag(){
         $tags = array(
-            '#selfieclub', '#srwilv', '#ldwxen', '#dddyyl', '#flqrvx', '#mukyeq',
-            '#pixkcj', '#cvhyuw', '#jmwndb', '#aurpvh', '#mydbpf', '#onoctw', 
-            '#qwunfx', '#igtlnh', '#ubjfir', '#jfchsw', '#xonxln', '#mlyqqz', 
-            '#adchsv', '#hfouum', '#bnyvkf', 
-            '#hrlohr', '#spyxhd', '#plqcyo', '#kxkqqt', '#vggvnj', '#ysjgan', 
-            '#omcrqp', '#chbymv', '#exsdzx', '#jijsgs', '#ucqssf', '#jffttl', 
-            '#rkczmg', '#alzgam', '#qrozgx', '#ehcnjy', '#yixabf', '#nzogbh', 
-            '#knvnxt', '#mgrqhr', 
-            '#sqotqr', '#oeoxvi', '#cwvnbw', '#vtwwyr', '#hiejth', '#cqgtou', 
-            '#rdfzun', '#vqooky', '#iegjru', '#hstdcr', '#oksoje', '#heqrxq', 
-            '#wdxpfh', '#tfnmny', '#ggktmx', '#kcpbzq', '#dlgxmt', '#yqpkea', 
-            '#usctju', '#yelgcn',
-            '#tcrrrm', '#vybnae', '#xemyox', '#xefrfe', '#emekjb', '#dwbzlo', 
-            '#kizfnt', '#phjbgc', '#qvuvpx', '#vajmda', '#czvccr', '#mxevsh', 
-            '#rlfelb', '#zqmlry', '#cjdjib', '#lvhlto', '#ynbvxm', '#azbbmh', 
-            '#bpdfga', '#ismqak', 
-            '#dazygi', '#upjswm', '#gcqtwo', '#budppp', '#sinndd', '#kiclyk', 
-            '#autfza', '#htbcmx', '#tgkmyl', '#yyspym', '#febogu', '#vhzxoo', 
-            '#dibpgy', '#lzenvs', '#ayhrql', '#nonatv', '#pobsvx', '#mivrwk', 
-            '#mysmcg', '#batqvk', 
-            '#oiuzdw', '#btxiyy', '#swnskn', '#ubhejm', '#udwuox', '#jeurnr', 
-            '#npxzvl', '#jvdnfm', '#ziojdc', '#kmovec', '#sggsrd', '#sosmpp', 
-            '#gdgwmh', '#vtbxsi', '#cswdix', '#aayqpv', '#ledpuh', '#uvsunn', 
-            '#zeaiqn', '#yqovyh',
-            '#nrpqow', '#srazhb', '#gygoqn', '#xdxtdr', '#iseoum', '#yjckok', 
-            '#nxygvv', '#rhrbnu', '#momovr', '#ftfnou', '#ivbhhb', '#xlvgtn', 
-            '#jjfcxv', '#omcwzl', '#bkqodr', '#akgsjp', '#fxbltd', '#jfolwm', 
-            '#aniijv', '#mynrrr',
-            '#pqdsna', '#hlwdff', '#zpdrvj', '#fzurce', '#orkxcy', '#wiaroj', 
-            '#toplbp', '#kqfudw', '#ebancd', '#jemtdl', '#cncaff', '#vcyudv', 
-            '#yfzrat', '#ibstyx', '#jeeosd', '#cxlwec', '#kwlkfz', '#coaphp', 
-            '#glyulm', '#qnkuxo',
-            '#mpeksh', '#mxjzsw', '#gginbz', '#jvfuwb', '#zaoysj', '#ykseqb', 
-            '#cqfwqm', '#yndqou', '#mjnupk', '#hggwxa', '#sykhki', '#ybeovo', 
-            '#aerran', '#nmpibu', '#pxhuwf', '#rkuwky', '#codjjv', '#jyhhqi', 
-            '#bcbisb', '#jqupqe',
-            '#ypaxos', '#qftqgq', '#gdclmc', '#cmqmmj', '#dfqxft', '#xobygk', 
-            '#suocmm', '#fhbpxq', '#rjsoiq', '#qqtfkk', '#wnbeym', '#tbogpq', 
-            '#sfsxms', '#jzvemb', '#qgbguz', '#ugeygk', '#aprvkk', '#oqpnlc', 
-            '#ojoill', '#ynbouu', 
-            '#gvtfhp', '#hrgiyx', '#pqojcr', '#zozoiq', '#dnhmhi', '#eslkeh', 
-            '#xfoegc', '#khdbof', '#aceoqo', '#vmrjeb', '#kfmnbn', '#voweza', 
-            '#olncrp', '#lqmrhl', '#jovagl', '#mexvqf', '#tiyjuk', '#xlkxum', 
-            '#mqqeam', '#sdreoj',
-            '#ymfemm', '#ventxs', '#vufgjz', '#gekrgg', '#zizhwn', '#ttfkpm', 
-            '#gwwpwg', '#oakeqk', '#hzbcnk', '#vthxus', '#gfbdwc', '#mzigmz', 
-            '#vubedc', '#nhkljg', '#ffifzr', '#siabdk', '#arbmxs', '#xgzixt', 
-            '#znkytx', '#bwfxcv', 
-        	'#xbcgby','#rnzgwt','#jnkqty','#sfdsbp','#xbetzc','#mewbkx','#fjqeyp',
-            '#wzwkps','#nzdjky','#sqambv','#dyrpoz','#dnatmu','#cswjet','#nbqier',
-            '#uswtjl','#lpzgag','#mabjlp','#pbrcxn','#cliwqy','#uakixz',
-            '#duwafr','#dkssqd','#jirosn','#feduzp','#phaqch','#chzrtr','#dxjnid',
-            '#balcdz','#sckooi','#yojogc','#tgkpyz','#nuxxei','#glcunt','#dfnzbc',
-            '#ovifyk','#pgdanv','#shxpna','#qnqpdz','#sidkaq','#avghlx',
-            '#strsby', '#zfeuef', '#izlbue', '#qvrukw', '#fvkanb', '#jegzrs', 
-            '#fdwpcs', '#coxjms', '#wnrlfw', '#vsttpd', '#qdbvag', '#tnhaeh', 
-            '#sbvxsv', '#bbgcjp', '#fhtswp', '#bbvcpf', '#snvymv', '#maozqd', 
-            '#jgdlql', '#cvtvcx',
+            '#vvoyac', '#qlhmgm', '#dsyvqp', '#sudzba', '#blymew', '#jgkkgj', '#qwxset', '#chqprg', '#evjtof', '#siooaq', '#jxqfbn', '#eyrmfj', '#cydipe', '#djicwv', '#hmhbjj', '#rbiwbs', '#xdoyjn', '#kmxiln', '#wosbuv', '#orgfvz',            
+            '#dehmap', '#lnemjz', '#ycivwy', '#aljjpf', '#rdarko', '#bwvqdl', '#vxxeuw', '#xvpito', '#kxsiwj', '#nqoquo', '#iluawy', '#hfjpza', '#yutlmb', '#ksczet', '#nwvpsl', '#sffqdv', '#npbsqq', '#lwlemd', '#fcbaiz',
+            '#podhxs', '#yhzzvg', '#iprjba', '#xebanj', '#cnsjsj', '#hovsiu', '#eltnvq', '#sttjpi', '#ihospm', '#zfewbq', '#hbopfz', '#jvfcnt', '#nhezal', '#ryemma', '#jfpdgg', '#jnlqki', '#rrlrje', '#iidqoo', '#arximt', '#pedxcg',
+            '#vntrwm', '#nfquox', '#rvnnfo', '#xkspvf', '#pxdczg', '#hpzgfi', '#emwgau', '#ajbukt', '#oommga', '#remibq', '#bevvei', '#iryqhw', '#qdrcbz', '#niseqc', '#wcmpqo', '#nvdvuo', '#deudll', '#cdssri', '#lfvpnf', '#zxnybm',
+            '#vmvqis', '#ynwlba', '#sswpjw', '#xtkpdw', '#qnmkpc', '#wrdbgi', '#pbtvwr', '#fkvryv', '#psuskk', '#ojaaky', '#vfqkcp', '#bgtfgw', '#dackgb', '#rgxcdn', '#vwnqim', '#yienen', '#tgowef', '#izfqmx', '#wikaip', '#vhprln',
+            '#icaull', '#znntuc', '#vfmnmf', '#lvccck', '#lphxwu', '#oclqbj', '#xhnxan', '#vncvcq', '#jwstqb', '#kynngp', '#wtojww', '#nnceiz', '#rjfqvf', '#balyhf', '#taxuda', '#tmwamt', '#xsxfeq', '#bjugnt', '#loqzzp', '#amhkqr',
+            '#kqbswf', '#neayno', '#hjhqdd', '#gyoftt', '#vebfrn', '#hxfjzx', '#ahhten', '#tlderz', '#svzvon', '#srwyhr', '#bxguyg', '#jxojrn', '#llnxyy', '#ukjxxk', '#asiynx', '#mvdlte', '#ynerqc', '#eqrlcy', '#korzmr', '#aonses',
+            '#oqwhzj', '#lycpuk', '#uimftg', '#vfdowj', '#vcnwqh', '#dxqnfk', '#eqkckv', '#aacmtz', '#fsteuw', '#srnxxp', '#jmnbvp', '#jagtgh', '#cpxhzh', '#djeqbz', '#mukdqr', '#edlxwd', '#unjtsf', '#fceljo', '#lkqfnf', '#reyjto', 
+            '#gertyn', '#aypdvw', '#twjmjt', '#tfclys', '#gaprvb', '#lnrklh', '#drbrjc', '#yywwop', '#mnyzaj', '#nyicrp', '#zffyqt', '#kgaifg', '#jtuukr', '#zalpag', '#wmfizb', '#oqaojv', '#znrnfa', '#vjcmdj', '#kqpeld', '#vxjepg',
+            '#qorzdg', '#ribmxi', '#lnpzbc', '#osvosa', '#hvmkhl', '#yneoxz', '#txfjnv', '#gugcrp', '#xvtqmm', '#fjqepq', '#asiogi', '#wcwduf', '#yhpitw', '#feboka', '#leajpj', '#wjizyh', '#tgztvl', '#ygsurf', '#llhtcq', '#tmymxu',
+            '#qrzqac', '#dlqknf', '#tilquv', '#dummst', '#luarnl', '#rnkzsw', '#nozohv', '#hshrnu', '#rihccp', '#sryhki', '#gywetf', '#pkeriz', '#evapwz', '#telfih', '#anlybb', '#etorfo', '#acxkdv', '#skfbdi', '#lsvvls', '#npuhja',
+            '#tipvrg', '#lnhoje', '#ljgyqv', '#fcoqzf', '#bjiuvk', '#xudelo', '#vptuiu', '#eksbyr', '#aikzuf', '#sjjlxe', '#fhbpqw', '#zbpdzc', '#ffhflw', '#gwnfxx', '#adctou', '#ltemcf', '#cwjzve', '#iiqqzm', '#jiaqli', '#zvgwrc',
+            '#mqvnip', '#gexjlm', '#cyuroo', '#jxytvh', '#nnyeal', '#pzkfxs', '#lhqpll', '#cxseqd', '#wnqlzw', '#bnteqe', '#xmmbhx', '#eqlcoy', '#ojlzek', '#reywbk', '#kwwfho', '#ecfgvs', '#ruxotq', '#cwmijt', '#ghmbuv', '#choznu',
+            '#cvpifj', '#ffnahr', '#zyygen', '#umbhme', '#csvkyy', '#mdpaot', '#lkmkyv', '#kynfpa', '#cnzwzs', '#kolnbe', '#yaohqu', '#ojyfdy', '#whyscq', '#ynpips', '#skrsjv', '#xexgbq', '#fcczoz', '#gonnfn', '#lpxpol', '#tmkjji',
+            '#ehhqkc', '#opysmu', '#hedjwe', '#uoizgk', '#vbvrmc', '#hkcsjv', '#dexqaa', '#uhqbzo', '#pdspdm', '#uttbbo', '#gkoipq', '#dzfjhn', '#bzsotq', '#qtanjl', '#nozitq', '#qmuvnn', '#pnhtqb', '#xycvqo', '#ngimwg', '#bpbelv',
+            '#cfhkzt', '#mwbule', '#gzqpfp', '#eyccqz', '#irtbns', '#wxqlnq', '#dyztoh', '#ojllpk', '#gufaak', '#lpjlfc', '#ufhsbq', '#gylvvs', '#ijgiym', '#waorrp', '#fwecjj', '#alpwlp', '#qosnbg', '#milfuu', '#akuist', '#iwbwdf',
+        	'#wvemyx', '#updnwx', '#risjzn', '#cyogyr', '#dveofd', '#bacjpe', '#aapund', '#azlatz', '#wnqbdr', '#dsolym', '#vovhyz', '#iueovp', '#mpymdy', '#zwvxkb', '#qrtjrq', '#fgndux', '#vsnndd', '#uyeyqw', '#sgfbcx', '#nllugf',
+            '#zxndgf', '#ewlsoc', '#wtaqyu', '#utomea', '#fokrqp', '#rervna', '#qbrokv', '#jypupf', '#cqzkng', '#wkqvaj', '#ofkwpe', '#bhknwv', '#sdlrjm', '#ewrpka', '#tvtcob', '#gkjccr', '#tugdug', '#hhylke', '#grzofi', '#itbbsc',
+            '#xmdwny', '#moeduc', '#cxaccz', '#pzneyl', '#npuglp', '#cjggtc', '#ynfzas', '#btsvbu', '#klmhzw', '#tcrkxk', '#yshjoj', '#gmxuar', '#phzpob', '#jlkikf', '#mzlzbc', '#nmkrxl', '#vrrduu', '#oidtfx', '#mjjddz', '#dpuihz',
         );
+        
+        /*
+        $tags = array(
+            '#wvemyx', '#updnwx', '#risjzn', '#cyogyr', '#dveofd', '#bacjpe', '#aapund', '#azlatz', '#wnqbdr', '#dsolym', '#vovhyz', '#iueovp', '#mpymdy', '#zwvxkb', '#qrtjrq', '#fgndux', '#vsnndd', '#uyeyqw', '#sgfbcx', '#nllugf',
+            '#russsy', '#yclzom', '#uvihtf', '#mnpbwa', '#dcflft', '#nwtcsy', '#ezgmfn', '#oatxih', '#qtbwuf', '#lwornn', '#gviwwy', '#evjziu', '#pgrxiy', '#vtwhjd', '#wqlqrv', '#zlbxnr', '#eminxf', '#hevlch', '#gieouu', '#ttrmio',
+            '#xncbzq', '#sigroh', '#qsajew', '#qqyqax', '#fzvywf', '#gfjjjn', '#gwcinc', '#cxvlyr', '#mwllrs', '#mfrdxc', '#rffzid', '#rwzzej', '#jvrmbk', '#xqjnkz', '#iuucft', '#ryvyqu', '#sowbxs', '#egaofl', '#gfaysn', '#vtfolw',
+            '#xjuhmz', '#xogpou', '#fyvgov', '#bytyvk', '#rxesab', '#lvahkw', '#hmuzrb', '#wcxpgn', '#kyqrre', '#dkjrpn', '#ndvnyf', '#bwbaxk', '#xwozlw', '#wwqukr', '#zchuys', '#kgfltb', '#rnoyiu', '#rbirom', '#awywsz', '#ifhdry',
+            '#ausckm', '#qzlqog', '#ezsjnh', '#rpjids', '#ziqfwm', '#frwnsu', '#dpibhj', '#gfqmpb', '#klpvth', '#igfehb', '#robtvh', '#zpwgay', '#gtjdfr', '#yrezzg', '#qszqhn', '#ashevs', '#olqlzs', '#qonyoc', '#ngrqzt', '#gtarfi',
+            '#cfhkzt', '#mwbule', '#gzqpfp', '#eyccqz', '#irtbns', '#wxqlnq', '#dyztoh', '#ojllpk', '#gufaak', '#lpjlfc', '#ufhsbq', '#gylvvs', '#ijgiym', '#waorrp', '#fwecjj', '#alpwlp', '#qosnbg', '#milfuu', '#akuist', '#iwbwdf',
+            '#tbvhxk', '#kdvofe', '#zifdyp', '#atmemf', '#epwehy', '#yodvwn', '#wghepy', '#aqakjn', '#fnoyff', '#qdfcmx', '#ewgyxr', '#ttgasz', '#pzqidk', '#kkgugd', '#kflxku', '#tkcumh', '#hvmpbp', '#ehxnxs', '#tyqwwh', '#vpdamd',
+            '#ogdzjz', '#cfskpg', '#arkybv', '#grnhvn', '#halqjy', '#mkhmrv', '#rarqdi', '#uozxzg', '#ljovla', '#elwuxc', '#fbgmcb', '#mirgtg', '#wolwtp', '#nwgpeh', '#vlfjyd', '#onybnx', '#garuwo', '#rxwocq', '#glaevc', '#pmfaxo',
+            '#ykeijs', '#fsazgu', '#fdkxeb', '#gdpflv', '#ksfpez', '#cibsjw', '#wjhlpm', '#ozxngv', '#itnoib', '#covota', '#lhjsgv', '#yhplya', '#qmlzdl', '#gqlpab', '#uwufre', '#lyfnoj', '#kimfba', '#dqmcth', '#ckjotk', '#revwix',
+            '#nuxqmi', '#eydysr', '#ajziqu', '#xzvvuj', '#qfzwvw', '#hglrsy', '#rxgjmg', '#vqluov', '#hvxgfj', '#vuilpw', '#tpxhdj', '#efssbs', '#vfzpda', '#twnwqu', '#qicmgy', '#pvibui', '#uxrhlg', '#qraqlt', '#qknnuv', '#mdoyzm',
+            '#gucsyx', '#omhyxv', '#tkunna', '#rhfjba', '#asztlr', '#inlqbk', '#kbwkzd', '#mlgvph', '#diwaor', '#nxgukt', '#uyckbh', '#oozhkr', '#edqxij', '#jywaul', '#jyqqsu', '#nfvamh', '#ztxxvx', '#qhplgc', '#wifpwq', '#slpbyc',
+            '#cmzymc', '#lnswgh', '#urbdee', '#nckjhs', '#pkiykr', '#amvzqw', '#liyfje', '#rwqsmn', '#erflvs', '#dqgesh', '#mauqwt', '#todrnr', '#zdtmby', '#ysrjji', '#pyaosm', '#tojonl', '#xnkbnn', '#cofpqa', '#cnbjvm', '#zwggbp',
+            '#jebpux', '#jdhwks', '#xxujcj', '#iszkfa', '#aiyuus', '#vqsmaa', '#htsbog', '#zbcbls', '#hpvnqf', '#jcxstg', '#jljrjc', '#fqgtid', '#tobfpt', '#pocyzf', '#tbncqu', '#uftypp', '#qkcbsh', '#ynpazz', '#ycynqy', '#ymicrq',
+            '#uiiicr', '#zhjedw', '#sknolc', '#kwgpth', '#hpyfwc', '#kwlamg', '#fmsmna', '#cnsxkl', '#eaoypn', '#trdblt', '#xqsleh', '#xnfycw', '#ckoujm', '#rntdzh', '#cxfgle', '#bdijen', '#hhlced', '#joksgx', '#bmrduo', '#qsntdc',
+            '#nbmzyr', '#vfztmt', '#jpzhgb', '#azxlhe', '#zpfrqc', '#rraqlw', '#psexoo', '#anjzdr', '#zhjwzf', '#nmfnhc', '#qzgjoh', '#ocnhuq', '#qehbds', '#tqhxpa', '#svfiuv', '#gqxxyf', '#bkpobp', '#vspmga', '#oralla', '#nzzwry',
+            '#arbpny', '#llgnyd', '#zqmgws', '#tjpyam', '#bzcroi', '#iiiytg', '#orabcl', '#cdlcfo', '#xrotjo', '#dkmizj', '#ekahuj', '#oyagbi', '#atkyhz', '#epcszz', '#lweuvu', '#mupjdh', '#jqcbvr', '#viwtig', '#fnupox', '#mfmsps',
+            '#aefvtb', '#eyfqhc', '#huxtgl', '#wzdkaq', '#lptbiz', '#jagxij', '#itnrbn', '#zfcqjh', '#sdhuui', '#gpuslw', '#brobqd', '#zelmcf', '#bxtaly', '#thmkje', '#irwscg', '#inizim', '#azvwqe', '#eyszrf', '#ffpebg', '#zcieuz',
+        );
+        */
+
+        /*
+        $tags = array(
+            '#jjfqee', '#pxwjll', '#fjcqfy', '#glxlly', '#lovhnw', '#nndnrx', '#dnjzgo', '#hrddfg', '#vdziff', '#lajvkz', '#etgpec', '#cuacsw', '#pbofls', '#ixmmgi', '#wrpsyr', '#qoeaqu', '#uxymvp', '#inojao', '#nokmpj', '#sumhcd',
+            '#xnljdm', '#zythwr', '#nmxypw', '#hgnegk', '#lkyteh', '#xjkbgq', '#bgrjox', '#fzioaq', '#nstcec', '#ibwufz', '#stxoxo', '#etspnt', '#npllzk', '#bukxcd', '#ogfspc', '#vlrfrt', '#hniwdy', '#oiefqo', '#yaugcx', '#joihpt',
+            '#ilyusj','#nmeupx','#fbwwji','#orzcvh','#oefnbz','#rgeond','#uqccvz','#tenyox','#sqhrwn','#kuhacr','#vnrehz','#tjsmxh','#irhnbv','#tuirqw','#qjsxmu','#evswmi','#ynrtqo','#muezqu','#brgjku','#fvxxli',
+            '#hkeaak','#nyysul','#yruizi','#klmeym','#avpltz','#qhiaxt','#scmuee','#ezukkr','#hhdpfc','#dvsdvj','#lnpspu','#yazcgd','#sgezfq','#atxkun','#peuewb','#fgjsoh','#dhekcc','#tqtljb','#caahjg','#wyfwuq',
+            '#xbcgby','#rnzgwt','#jnkqty','#sfdsbp','#xbetzc','#mewbkx','#fjqeyp','#wzwkps','#nzdjky','#sqambv','#dyrpoz','#dnatmu','#cswjet','#nbqier','#uswtjl','#lpzgag','#mabjlp','#pbrcxn','#cliwqy','#uakixz',
+            '#duwafr','#dkssqd','#jirosn','#feduzp','#phaqch','#chzrtr','#dxjnid','#balcdz','#sckooi','#yojogc','#tgkpyz','#nuxxei','#glcunt','#dfnzbc','#ovifyk','#pgdanv','#shxpna','#qnqpdz','#sidkaq','#avghlx',
+            '#gtrrbg','#jgmbkm','#kaowcf','#squsgn','#yuszcm','#tlieuv','#sotecr','#aflqxf','#xtgstx','#fxphgs','#gooefu','#xbhspv','#uwrtcg','#fqnbbe','#wqpzar','#fmlywp','#cdyelf','#evxvgu','#zgfcnx','#unhrmu',
+            '#qrnsew', '#pwltrq', '#juumud', '#ccsbzq', '#towwed', '#pyxzja', '#repzcq', '#rduwjw', '#bhvmae', '#vfaqxx', '#caxnel', '#qrtmht', '#qirqva', '#faewyy', '#axskdy', '#gumgog', '#bltjoq', '#pspqdo', '#oxfxzg', '#lfhjbj',
+            '#ffiwfl', '#viydoj', '#dkhdfq', '#ecjhcs', '#bdvkah', '#msqrev', '#twkxae', '#nivfmw', '#qmkvus', '#poxkoh', '#jlhehl', '#ssnahl', '#srsvdl', '#yuhkuf', '#igdrgd', '#iygdoo', '#ncigzd', '#fwzpcp', '#masjye', '#igmowt',
+            '#strsby', '#zfeuef', '#izlbue', '#qvrukw', '#fvkanb', '#jegzrs', '#fdwpcs', '#coxjms', '#wnrlfw', '#vsttpd', '#qdbvag', '#tnhaeh', '#sbvxsv', '#bbgcjp', '#fhtswp', '#bbvcpf', '#snvymv', '#maozqd', '#jgdlql', '#cvtvcx',
+            '#mbdoaj','#qqeypw','#azxtnh','#tpgvli','#vhgqzd','#olhowy','#vrqcvf','#farcjq','#rakqzz','#drgspd','#jsukwu','#omsdmt','#qoygeq','#yzoiuy','#btxfus','#lxzvon','#wfxoxx','#vdthsv','#eurjny','#yszojr',
+            '#kzkpat', '#igafkw', '#jpasmp', '#zrjtvi', '#sqrdwz', '#pmavmp', '#lxdyma', '#tnptmn', '#kgqupu', '#ldelyl', '#oupfys', '#fzqiqk', '#qxkypt', '#lgsgdl', '#mmdgzm', '#dqnxnl', '#tnaqpa', '#jocyld', '#oxwdpq', '#plvfqb',
+            '#srwilv', '#ldwxen', '#dddyyl', '#flqrvx', '#mukyeq', '#pixkcj', '#cvhyuw', '#jmwndb', '#aurpvh', '#mydbpf', '#onoctw', '#qwunfx', '#igtlnh', '#ubjfir', '#jfchsw', '#xonxln', '#mlyqqz', '#adchsv', '#hfouum', '#bnyvkf',
+            '#hrlohr', '#spyxhd', '#plqcyo', '#kxkqqt', '#vggvnj', '#ysjgan', '#omcrqp', '#chbymv', '#exsdzx', '#jijsgs', '#ucqssf', '#jffttl', '#rkczmg', '#alzgam', '#qrozgx', '#ehcnjy', '#yixabf', '#nzogbh', '#knvnxt', '#mgrqhr',
+            '#sqotqr', '#oeoxvi', '#cwvnbw', '#vtwwyr', '#hiejth', '#cqgtou', '#rdfzun', '#vqooky', '#iegjru', '#hstdcr', '#oksoje', '#heqrxq', '#wdxpfh', '#tfnmny', '#ggktmx', '#kcpbzq', '#dlgxmt', '#yqpkea', '#usctju', '#yelgcn',
+            '#mpqfdr', '#kqgajz', '#kvjbdx', '#xnzkev', '#ybmind', '#mgzksp', '#jyplzt', '#tppumr', '#eyzztj', '#stffdi', '#ixwltj', '#jpdlup', '#zickhc', '#avzoqr', '#zcuket', '#eboxzl', '#qelatu', '#dliovq', '#zgtmsu', '#fplupn',
+            '#cvpevp', '#qtctly', '#euytmq', '#mnibpj', '#djiydy', '#mwbrlo', '#gfyqhg', '#zbwdcv', '#qfstiy', '#ynqvyo', '#izcdki', '#eknsoj', '#fijyde', '#xhembv', '#ggvyhg', '#ouyvdb', '#czgzxf', '#pnwatn', '#lvdgor', '#jozufj',
+            '#czsulc', '#pxcwqt', '#hcitcg', '#snwxmg', '#qjtrjo', '#apzkmm', '#wfexdx', '#gqevjk', '#qcmgty', '#jitigd', '#eqtvqt', '#wthqtk', '#pjowaj', '#apxwcf', '#ytqhit', '#eoutqx', '#kmzryj', '#kijtcy', '#lahpdr', '#ovrxdq',
+            '#vffikm', '#srqvfe', '#elfrnl', '#hhdrpv', '#lyeskd', '#ibxpyv', '#mhnmmq', '#gtoawz', '#rgtaiw', '#ngbyac', '#quvbqv', '#afdlpj', '#kxjkdt', '#sfmykc', '#zgofvr', '#ugyukk', '#llcumd', '#ehtqjk', '#kxhtnb', '#pyzcsx',
+            '#tcrrrm', '#vybnae', '#xemyox', '#xefrfe', '#emekjb', '#dwbzlo', '#kizfnt', '#phjbgc', '#qvuvpx', '#vajmda', '#czvccr', '#mxevsh', '#rlfelb', '#zqmlry', '#cjdjib', '#lvhlto', '#ynbvxm', '#azbbmh', '#bpdfga', '#ismqak',
+            '#dazygi', '#upjswm', '#gcqtwo', '#budppp', '#sinndd', '#kiclyk', '#autfza', '#htbcmx', '#tgkmyl', '#yyspym', '#febogu', '#vhzxoo', '#dibpgy', '#lzenvs', '#ayhrql', '#nonatv', '#pobsvx', '#mivrwk', '#mysmcg', '#batqvk',
+            '#oiuzdw', '#btxiyy', '#swnskn', '#ubhejm', '#udwuox', '#jeurnr', '#npxzvl', '#jvdnfm', '#ziojdc', '#kmovec', '#sggsrd', '#sosmpp', '#gdgwmh', '#vtbxsi', '#cswdix', '#aayqpv', '#ledpuh', '#uvsunn', '#zeaiqn', '#yqovyh',
+            '#nrpqow', '#srazhb', '#gygoqn', '#xdxtdr', '#iseoum', '#yjckok', '#nxygvv', '#rhrbnu', '#momovr', '#ftfnou', '#ivbhhb', '#xlvgtn', '#jjfcxv', '#omcwzl', '#bkqodr', '#akgsjp', '#fxbltd', '#jfolwm', '#aniijv', '#mynrrr',
+            '#pqdsna', '#hlwdff', '#zpdrvj', '#fzurce', '#orkxcy', '#wiaroj', '#toplbp', '#kqfudw', '#ebancd', '#jemtdl', '#cncaff', '#vcyudv', '#yfzrat', '#ibstyx', '#jeeosd', '#cxlwec', '#kwlkfz', '#coaphp', '#glyulm', '#qnkuxo',
+            '#mpeksh', '#mxjzsw', '#gginbz', '#jvfuwb', '#zaoysj', '#ykseqb', '#cqfwqm', '#yndqou', '#mjnupk', '#hggwxa', '#sykhki', '#ybeovo', '#aerran', '#nmpibu', '#pxhuwf', '#rkuwky', '#codjjv', '#jyhhqi', '#bcbisb', '#jqupqe',
+            '#lejjre', '#fssbws', '#xbvvtm', '#ygencl', '#laqmvw', '#udfevy', '#pothoq', '#dkbdtp', '#zsspef', '#poksif', '#skbibp', '#rsbwgk', '#qwaolg', '#qhlkxd', '#rnntap', '#pmnkwq', '#heklai', '#xgjkbl', '#sollvd', '#ynsrft',
+            '#rutdxt', '#rozcvo', '#grtxcq', '#pjtihp', '#jconfs', '#yocqel', '#dmswtk', '#fsznsd', '#qjygwn', '#tbegpq', '#lfoyoh', '#xftkoo', '#rvcads', '#cqsekv', '#podmen', '#hnoxyi', '#ufjzyh', '#shzdhf', '#snfwbi', '#rsjasb',
+            '#wjxuol', '#xjqnlk', '#uuqpis', '#iclqet', '#escenf', '#dqrism', '#xsmgbt', '#fcrlnr', '#qcjnrh', '#zmgfmb', '#mbgkll', '#uvndly', '#etqcdd', '#guluss', '#xezdig', '#fcsabv', '#eoylug', '#apxrvw', '#bineco', '#dyylgu',
+            '#ypaxos', '#qftqgq', '#gdclmc', '#cmqmmj', '#dfqxft', '#xobygk', '#suocmm', '#fhbpxq', '#rjsoiq', '#qqtfkk', '#wnbeym', '#tbogpq', '#sfsxms', '#jzvemb', '#qgbguz', '#ugeygk', '#aprvkk', '#oqpnlc', '#ojoill', '#ynbouu',
+            '#asbdef', '#fpcnpa', '#hckvtr', '#braxhd', '#mhlelt', '#yywmkr', '#hsiydt', '#lmrfbl', '#gkvaat', '#gctuwg', '#busgrr', '#putmxy', '#flcqaz', '#mjpyue', '#tyysno', '#ofvbwf', '#oxkcfk', '#dojshu', '#hkbwki', '#rgxwew',
+            '#ulgtdd', '#zricte', '#snfqmq', '#jjgpel', '#disjfn', '#bpcxgv', '#yxqzmg', '#bxflwx', '#mjgiwv', '#kbnbqy', '#wlkwdj', '#tobpuy', '#wzqhou', '#lpcrkl', '#feupga', '#dvqcqu', '#ocxiuk', '#ezyfra', '#pwpyms', '#wsfzyd',
+            '#gvtfhp', '#hrgiyx', '#pqojcr', '#zozoiq', '#dnhmhi', '#eslkeh', '#xfoegc', '#khdbof', '#aceoqo', '#vmrjeb', '#kfmnbn', '#voweza', '#olncrp', '#lqmrhl', '#jovagl', '#mexvqf', '#tiyjuk', '#xlkxum', '#mqqeam', '#sdreoj',
+            '#utdnut', '#rerqqd', '#xuavyc', '#rkpzes', '#bxjeya', '#mqurwi', '#jratqp', '#mbvwqe', '#hbrilv', '#pvpfhd', '#unkvhq', '#robqmf', '#wnklqt', '#yxihvd', '#rnokvk', '#dshyvk', '#vumbvp', '#fpzkoe', '#abnpha', '#sodyei',
+            '#aqprng', '#yopbuk', '#uhyjeu', '#hryssz', '#flcvdk', '#ryrtjd', '#mnknjp', '#ksddug', '#cjfwqy', '#uarwkc', '#tyhlxb', '#uluygm', '#pganfv', '#dxjfoy', '#nciyvx', '#yffnjm', '#ckcbqo', '#jmmbtj', '#rkxhgn', '#fgwecf',
+            '#ymfemm', '#ventxs', '#vufgjz', '#gekrgg', '#zizhwn', '#ttfkpm', '#gwwpwg', '#oakeqk', '#hzbcnk', '#vthxus', '#gfbdwc', '#mzigmz', '#vubedc', '#nhkljg', '#ffifzr', '#siabdk', '#arbmxs', '#xgzixt', '#znkytx', '#bwfxcv',
+            '#anyudl', '#fppsvk', '#mbgipu', '#qfsdtr', '#xqpqra', '#yqjglw', '#lvjqux', '#mssnzr', '#dgeuml', '#ikukof', '#oqwmrv', '#eewclo', '#ofruuz', '#cuahqm', '#buiguc', '#bhkdcv', '#ifokqj', '#nnmmlg', '#jbnowm', '#bwcccm',
+            '#lesvfu', '#tesshs', '#mvrfxc', '#riorbf', '#eiwstu', '#lvzlew', '#cvxetw', '#fgtwkx', '#otaaww', '#xcacyp', '#caglya', '#uubvvo', '#aofhxq', '#wzlfti', '#tlmkym', '#bexxls', '#mrssuv', '#dnmact', '#ruyxxq',
+        );
+        */
         /*
         $tags = array(
             '#afglqr','#biktvw','#ahlnoy','#hjknvw','#fnoruv','#dfgklr','#depquw','#cdenrw','#afqrwz','#hijnuz','#fghlpr','#abdjvy','#chiovw','#iklstw','#lnoqwx','#abcmsv','#efmtwz','#fipqtu','#cfjoyz','#cilost',
@@ -562,7 +595,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
     }
     
     public function login(){
-        
+        $proxySetting = $this->useProxy();
         $this->setUseProxy( false );
         $redirectUri = 'https://api.instagram.com/oauth/authorize/';
         $params = array(
@@ -598,7 +631,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         );
         
         $response = $this->post( $formActionUrl, $args, false, $headers );
-        $this->setUseProxy( true );
+        $this->setUseProxy( $proxySetting );
         return $response;
     }
     
@@ -840,6 +873,11 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         return $ids;
     }
     
+    public static function releaseUser( $userId ){
+        $dao = new BIM_DAO_Mysql_Growth_Webstagram( BIM_Config::db() );
+        $dao->releaseUser($userId);
+    }
+    
     public static function canDoPing( $id ){
         $canPing = false;
         $data = explode( '_', $id );
@@ -850,9 +888,13 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
                 $dao = new BIM_DAO_Mysql_Growth_Webstagram( BIM_Config::db() );
                 $timeSpan = 86400 * 7;
                 $currentTime = time();
+                // the getlastContact call will insert the 
+                // user id so we do not end up contacting the same user twice
                 $lastContact = $dao->getLastContact( $userId );
                 if( ($currentTime - $lastContact) >= $timeSpan ){
-                    $canPing = true;
+                    if( $dao->retainUser($userId) ){
+                        $canPing = true;
+                    }
                 }
             }
         }
@@ -1051,10 +1093,10 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         }
     }
     
-    public static function loadPersonasInFile( $filename = '' ){
+    public static function loadPersonasInFile( $filename = '', $delim = ':' ){
         $fh = fopen($filename,'rb');
         while( $line = trim( fgets( $fh ) ) ){
-            $data = explode(':', $line);
+            $data = explode($delim, $line);
             if( $data ){
                 
                 $personaData = (object) array(
@@ -1541,5 +1583,124 @@ VALUES
             $sleep = 1;
             sleep($sleep);
         }
+    }
+    
+    /**
+     * we get the list of urls for the pics we want to monitor
+     * foreach pic
+     * 		we call the likers list
+     * 		foreach liker
+     * 			queue a job that will follow and like them
+     * 			the job will randomly select a persona
+     * 			the persona will then follow the user, like some stuff
+     * 			then drop a comment on the user with a hashtag to an ad
+     * 
+     * 
+     */
+    
+    public static function queueFollowAdLikers( $persona ){
+        $pics = array(
+            '599416995276106865_215574330',
+            '599399166192809286_721261436',
+            '599310340304185223_579655808',
+            '599095864833269607_215059790',
+            '598119909645542047_1040183',
+            '597936486023906824_29563280',
+            '597227346530046757_333446187',
+            '596455817331584224_215574330',
+            '596476990569285723_30196249',
+            '596427120247997281_10324767',
+            '596362411439777340_214764312',
+            '595990758773307113_298991612',
+            '595821305752904578_1040183',
+            '550580213585838295_4632335',
+            '595716046854532240_215574330',
+            '595041551826333699_8453371',
+            '591360082547063953_644806038',
+            '590914546625196038_8453371',
+            '589996970895244143_48934381',
+            '589428595405814945_49221982',
+            '600143161968628755_264120324',
+            '600050829058000136_53232960',
+            '600098974776578172_402972195',
+            '412256796987636349_7918085',
+            '599689444367205576_232390960',
+            '599593740679733555_275359311',
+            '599455275981020773_266146350',
+            '599500657469884287_412856728',
+        );
+        // http://web.stagram.com/p/
+        $me = new self( $persona );
+        if( $me->handleLogin() ){
+            $likeBaseUrl = 'http://web.stagram.com/get_likers/';
+            $time = time();
+            foreach( $pics as $picId ){
+                $url = "{$likeBaseUrl}{$picId}";
+                $likers = json_decode( $me->get( $url ) );
+                print_r( array( "likers : ", count($likers->message) ) );
+                if( !empty( $likers->message ) ){
+                    foreach( $likers->message as $liker ){
+                        if( self::canDoPing($liker->id) ){
+                            self::queueTargetedBlastJob( $liker );
+                        }
+                    }
+                }
+                self::sleep(5,"queued ad likers");
+            }
+        }
+    }
+    
+    public static function queueTargetedBlastJob( $liker ){
+        $personaId = self::getRandomPersonaId();
+        
+        mt_srand();
+        $seconds = mt_rand( 1, 86400 * 5 );
+        $targetDate = time() + $seconds;
+        
+        $date = new DateTime();
+        $date->setTimestamp($targetDate);
+        $targetDate = $date->format('Y-m-d H:i:s');
+        
+        $target = (object) array(
+            'id' => $liker->id,
+            'name' => $liker->username,
+            'url' => "http://web.stagram.com/n/$liker->username",
+        	'selfie' => ''
+        );
+        
+        $tag = self::getUniqueTag();
+        $comment = BIM_Utils::getGeneralSelfieClubComment( $tag );
+        
+        $job = (object) array(
+            'nextRunTime' => $targetDate,
+            'class' => 'BIM_Jobs_Growth',
+            'method' => 'doBlastJob',
+            'name' => 'do_blast_job',
+            'params' => array(
+                'persona_id' => $personaId,
+                'target' => $target,
+                'comment' => $comment,
+            ),
+            'is_temp' => true,
+            'disabled' => 0
+        );
+        
+        $j = new BIM_Jobs_Gearman();
+        error_log( "will follow, like and comment on $target->name commenting '$comment' with persona $personaId on $targetDate");
+        $j->createJbb($job);
+    }
+    
+    public static function getRandomPersonaId(){
+        $id = null;
+        if(empty(self::$personaNames)){
+            $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+            $sql = "select name from growth.persona where network = 'instagram'";
+    		$stmt = $dao->prepareAndExecute( $sql );
+    		self::$personaNames = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+        }
+        if( !empty(self::$personaNames) ){
+            $id = self::$personaNames[ array_rand( self::$personaNames ) ];
+        }
+        return $id;
     }
 }
