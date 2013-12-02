@@ -117,7 +117,10 @@ class BIM_Controller{
             $getSelfies = (strtolower( $request->controllerClass ) == 'bim_controller_challenges') 
                             && ( strtolower( $request->method ) == 'getselfies' );
 
-            if( $getSelfies || $newUser || BIM_Utils::getSessionUser(true) ){
+            $twilio = (strtolower( $request->controllerClass ) == 'bim_controller_users') 
+                            && ( strtolower( $request->method ) == 'twiliocallback' );
+                            
+            if( $twilio || $getSelfies || $newUser || BIM_Utils::getSessionUser(true) ){
                 $OK = true;
             }
 	    }
