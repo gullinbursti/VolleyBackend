@@ -56,7 +56,7 @@ class BIM_Push{
         BIM_Push::send( $tokens, $msg, $type, $volleyId, $userId );
     }
     
-    public static function send( $ids, $msg, $type = null, $volleyId = null, $userId = null ){
+    public static function send( $ids, $msg, $type = null, $volleyId = null, $userId = null, $queue = true ){
         if( !is_array($ids) ){
             $ids = array( $ids );
         }
@@ -79,10 +79,13 @@ class BIM_Push{
         if( $type !== null ){
             $push->type = $type;
         }
-        
-        self::queuePush($push); 
+        if( $queue ){
+            self::queuePush($push); 
+        } else {
+            BIM_Push_UrbanAirship_Iphone::sendPush($push);
+        }
     }
-    
+        
     public static function shoutoutPush( $volley ){
         $user = BIM_Model_User::get($volley->creator->id);
         $msg = "Yo! Your Selfie got a shoutout from Selfieclub!";
@@ -128,19 +131,19 @@ class BIM_Push{
         }
 	}
 	
-	public static function sendApprovePush( $targetId ){
+	public static function sendApprovePush( $targetId, $voterId ){
     	$target = BIM_Model_User::get( $targetId );
         if( $target->canPush() ){
+            $voter = BIM_Model_User::get( $voterId );
             if( $target->isApproved() ){
-                $msg = "Awesome! You have been Selfieclub verified! Would you like to share Selfieclub with your friends?";
+            	$msg = "Your Selfieclub profile has been Verified by $voter->username";
             } else {
-                $msg = "Your Selfieclub profile has been verified by another Selfieclub user! Would you like to share Selfieclub with your friends?";
+            	$msg = "Your Selfieclub profile has been Verified by $voter->username";
             }
-            $type = 2;
-            self::send($target->device_token, $msg, $type ); 
+            $type = 3;
+            self::send($target->device_token, $msg, $type, null, $voter->id ); 
         }
 	}
-	
 	/**
 	 * 
 	 * @param int $targetId usr bring flagged
