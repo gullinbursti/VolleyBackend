@@ -906,7 +906,7 @@ delete from tblUsers where username like "%yoosnapyoo";
                      'avatar_url' => $liker->user->avatar_url,
                 ),
                 'time' => $liker->added,
-                'message' => $liker->username.' liked your Selfie',
+                'message' => $liker->user->username.' liked your Selfie',
                 'goto' => 3
             );
         }
@@ -917,12 +917,12 @@ delete from tblUsers where username like "%yoosnapyoo";
             $activities[] = (object) array(
                 'type' => 1,
             	'user' => (object) array(
-                     'id' => $liker->user->id,
-                     'username' => $liker->user->username,
-                     'avatar_url' => $liker->user->avatar_url,
+                     'id' => $verifier->user->id,
+                     'username' => $verifier->user->username,
+                     'avatar_url' => $verifier->user->avatar_url,
                 ),
                 'time' => $date->format('Y-m-d H:i:s'),
-                'message' => $verifier->username.' gave you a shoutout',
+                'message' => $verifier->user->username.' gave you a shoutout',
                 'goto' => 3
             );
         }
