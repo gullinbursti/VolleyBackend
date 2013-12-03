@@ -881,12 +881,14 @@ delete from tblUsers where username like "%yoosnapyoo";
         );
         $friends = BIM_App_Social::getFollowers($params, false);
         
+        $tz = new DateTimeZone('UTC');
         $date = new DateTime();
-        $date->setTimezone( new DateTimeZone('UTC') );
+        $date->setTimezone( $tz );
         
         foreach( $friends as $friend ){
             $date->setTimestamp($friend->init_time);
             $activities[] = (object) array(
+                'id' => "2_{$friend->user->id}_{$friend->init_time}",
                 'type' => 2,
                 'user' => $friend->user,
                 'time' => $date->format('Y-m-d H:i:s'),
@@ -898,8 +900,11 @@ delete from tblUsers where username like "%yoosnapyoo";
         $likers = self::getLikers( $userId );
         
         foreach( $likers as $liker ){
+            $date = new DateTime( $liker->added );
+            $date->setTimezone( $tz );
             $activities[] = (object) array(
-                'type' => 3,
+                'id' => "3_{$liker->user->id}_{$date->getTimestamp()}",
+            	'type' => 3,
             	'user' => (object) array(
                      'id' => $liker->user->id,
                      'username' => $liker->user->username,
@@ -915,7 +920,8 @@ delete from tblUsers where username like "%yoosnapyoo";
         foreach( $verifiers as $verifier ){
             $date->setTimestamp($verifier->added);
             $activities[] = (object) array(
-                'type' => 1,
+                'id' => "1_{$verifier->user->id}_{$verifier->added}",
+            	'type' => 1,
             	'user' => (object) array(
                      'id' => $verifier->user->id,
                      'username' => $verifier->user->username,
