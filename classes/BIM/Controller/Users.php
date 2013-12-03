@@ -128,6 +128,16 @@ class BIM_Controller_Users extends BIM_Controller_Base {
 		return array();
     }
     
+    public function getActivity(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if (isset($input->userID)){
+            $input->userID = $this->resolveUserId($input->userID);
+            $users = new BIM_App_Users();
+            return $users->getActivity($input->userID);
+        }
+		return array();
+    }
+    
     public function getUser(){
         $input = (object) ($_POST ? $_POST : $_GET);
         if (isset($input->userID)){

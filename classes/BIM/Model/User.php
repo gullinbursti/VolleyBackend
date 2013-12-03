@@ -826,4 +826,111 @@ delete from tblUsers where username like "%yoosnapyoo";
         }
         return $result;
     }
+    
+    public static function getLikers( $userId ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        $likers = $dao->getLikers( $userId );
+        
+        $ids = array();
+        foreach( $likers as $liker ){
+            $ids[] = $liker->id;
+        }
+        $likerObjs = self::getMulti($ids, true);
+        
+        foreach( $likers as $liker ){
+            $liker->user = $likerObjs[ $liker->id ];
+        }
+        return $likers;
+    }
+    
+    public static function getVerifiers( $userId ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        $verifiers = $dao->getVerifiers( $userId );
+        $ids = array();
+        foreach( $verifiers as $verifier ){
+            $ids[] = $verifier->id;
+        }
+        $verifierObjs = self::getMulti($ids, true);
+        foreach( $verifiers as $verifier ){
+            $verifier->user = $verifierObjs[ $verifier->id ];
+        }
+        return $verifiers;
+    }
+    
+    /**
+     * 
+     * retrieves the latest X items for the users activity feed
+     * 
+     * we get their:
+     * 
+     * 		50 latest followers
+     * 		50 latest likers
+     * 		50 latest verifies
+     * 
+     * and collate them together according to date and return the top 50
+     * 
+     * @param int $userId
+     */
+    public static function getActivity( $userId ){
+        $activities = array();
+        
+        $params = (object) array(
+            'from' => 0,
+            'size' => 50,
+            'userID' => $userId,
+        );
+        $friends = BIM_App_Social::getFollowers($params, false);
+        
+        foreach( $friends as $friend ){
+            $activities[] = (object) array(
+                'type' => 2,
+                'user' => $friend->user,
+                'time' => $friend->init_time,
+                'message' => 'message for following',
+                'goto' => 3
+            );
+        }
+        
+        $likers = self::getLikers( $userId );
+        
+        foreach( $likers as $liker ){
+            $activities[] = (object) array(
+                'type' => 3,
+            	'user' => (object) array(
+                     'id' => $liker->user->id,
+                     'username' => $liker->user->username,
+                     'avatar_url' => $liker->user->avatar_url,
+                ),
+                'time' => $liker->added,
+                'message' => 'message for liking',
+                'goto' => 3
+            );
+        }
+        
+        $verifiers = self::getVerifiers( $userId );
+        foreach( $verifiers as $verifier ){
+            $activities[] = (object) array(
+                'type' => 1,
+            	'user' => (object) array(
+                     'id' => $liker->user->id,
+                     'username' => $liker->user->username,
+                     'avatar_url' => $liker->user->avatar_url,
+                ),
+                'time' => $verifier->added,
+                'message' => 'message for verified by',
+                'goto' => 3
+            );
+        }
+        
+        usort($activities, 
+            function($a, $b){ 
+                if ($a->time == $b->time) {
+                    return 0;
+                }
+                return ($a->time < $b->time ) ? 1 : -1;            
+            } 
+        );
+        
+        return array_splice($activities, 0, 50);
+    }
 }
