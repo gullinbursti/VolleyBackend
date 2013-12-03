@@ -196,7 +196,7 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         if( $linked ){
             $to = $input->From; // we switch the meaning of to and from so we can send an sms back
             $from = $input->To; // we switch the meaning of to and from so we can send an sms back
-            echo "<?xml version='1.0' encoding='UTF-8'?><Response><Sms from='$from' to='$to'>Volley On!</Sms></Response>";
+            echo "<?xml version='1.0' encoding='UTF-8'?><Response><Sms from='$from' to='$to'>Selfieclub rocks!</Sms></Response>";
             exit();
         }
     }

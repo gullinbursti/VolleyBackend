@@ -229,7 +229,7 @@ class BIM_App_Users extends BIM_App_Base{
     	        $purge = true;
         	    $target->flag( $verifyVolley->id, $userId, $approves );
         	    if( $approves < 0 ){
-        	        BIM_Push::sendApprovePush($targetId, $user);
+        	        BIM_Push::sendApprovePush($targetId, $userId);
         	    } else if( $approves > 0 ){
                     //BIM_Push::sendFlaggedPush($targetId);
         	    }
