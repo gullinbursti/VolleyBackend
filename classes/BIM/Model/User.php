@@ -881,12 +881,16 @@ delete from tblUsers where username like "%yoosnapyoo";
         );
         $friends = BIM_App_Social::getFollowers($params, false);
         
+        $date = new DateTime();
+        $date->setTimezone( new DateTimeZone('UTC') );
+        
         foreach( $friends as $friend ){
+            $date->setTimestamp($friend->init_time);
             $activities[] = (object) array(
                 'type' => 2,
                 'user' => $friend->user,
-                'time' => $friend->init_time,
-                'message' => 'message for following',
+                'time' => $date->format('Y-m-d H:i:s'),
+                'message' => $friend->user->username.' followed you.',
                 'goto' => 3
             );
         }
@@ -902,13 +906,14 @@ delete from tblUsers where username like "%yoosnapyoo";
                      'avatar_url' => $liker->user->avatar_url,
                 ),
                 'time' => $liker->added,
-                'message' => 'message for liking',
+                'message' => $liker->username.' liked your Selfie',
                 'goto' => 3
             );
         }
         
         $verifiers = self::getVerifiers( $userId );
         foreach( $verifiers as $verifier ){
+            $date->setTimestamp($verifier->added);
             $activities[] = (object) array(
                 'type' => 1,
             	'user' => (object) array(
@@ -916,8 +921,8 @@ delete from tblUsers where username like "%yoosnapyoo";
                      'username' => $liker->user->username,
                      'avatar_url' => $liker->user->avatar_url,
                 ),
-                'time' => $verifier->added,
-                'message' => 'message for verified by',
+                'time' => $date->format('Y-m-d H:i:s'),
+                'message' => $verifier->username.' gave you a shoutout',
                 'goto' => 3
             );
         }
