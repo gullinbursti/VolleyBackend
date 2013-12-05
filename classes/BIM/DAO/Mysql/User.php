@@ -228,7 +228,7 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         return $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
     }
     
-    public function getShoutouts( $userId ){
+    public function getShoutouts( $targetUserId ){
         $count = 0;
 		$sql = "
 			SELECT c.creator_id as id, c.added
@@ -239,7 +239,7 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
 			ORDER by c.added desc
 			LIMIT 50
 		";
-		$params = array( $userId );
+		$params = array( $targetUserId );
 		$stmt = $this->prepareAndExecute($sql,$params);
         return $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
     }
