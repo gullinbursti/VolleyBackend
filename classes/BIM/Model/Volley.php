@@ -914,11 +914,6 @@ class BIM_Model_Volley{
         $dao->deleteImageByUserIdAndImage( $userId, $imgPrefix );
     }
     
-    public static function deleteImageByUserIdAndImage( $userId, $imgPrefix ){
-        $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-        $dao->deleteImageByUserIdAndImage( $userId, $imgPrefix );
-    }
-    
     public static function deleteParticipantByImage( $imgUrl ){
 		$dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
 		$dao->deleteParticipantByImage( $imgUrl );
@@ -952,28 +947,5 @@ class BIM_Model_Volley{
             BIM_Push::shoutoutPush( $creatorId, $volley->creator->id, $shoutout->id );
         }
         return $shoutout;
-    }
-    
-    public static function makeShoutoutVolley($volleyId, $creatorId){
-        $volley = BIM_Model_Volley::get( $volleyId );
-        if( $volley->isExtant() && !preg_match('@defaultAvatar@',$volley->creator->img) ){
-            $suffix = 'Large_640x1136.jpg';
-            
-            $namePrefix = 'Shoutout_Volley_Image-'.uniqid(true);
-            $name = "{$namePrefix}{$suffix}";
-            $imgUrlPrefix = "https://d1fqnfrnudpaz6.cloudfront.net/$namePrefix";
-            
-            $imgUrl = $volley->creator->img;
-            $imgUrl = preg_replace('@\.jpg|Large_640x1136|_o\.jpg@','', $imgUrl);
-            $imgUrl = $imgUrl.$suffix;
-            
-            BIM_Utils::copyImage( $imgUrl, $name );
-            BIM_Utils::processImage($imgUrlPrefix);
-            
-            $hashTag = "#shoutout";
-            
-            $volley = BIM_Model_Volley::create( $creatorId, $hashTag, $imgUrlPrefix, array(), 'N', -1, false, 2, true );
-            //BIM_Push::UserShoutoutPush( $volley );
-        }
     }
 }
