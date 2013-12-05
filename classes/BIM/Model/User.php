@@ -857,6 +857,20 @@ delete from tblUsers where username like "%yoosnapyoo";
         return $verifiers;
     }
     
+    public static function getShoutouts( $userId ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        $shouters = $dao->getShoutouts( $userId );
+        $ids = array();
+        foreach( $shouters as $shouter ){
+            $ids[] = $shouter->id;
+        }
+        $shouterObjs = self::getMulti($ids, true);
+        foreach( $shouters as $shouter ){
+            $shouter->user = $shouterObjs[ $shouter->id ];
+        }
+        return $shouters;
+    }
+    
     /**
      * 
      * retrieves the latest X items for the users activity feed
@@ -928,7 +942,24 @@ delete from tblUsers where username like "%yoosnapyoo";
                      'avatar_url' => $verifier->user->avatar_url,
                 ),
                 'time' => $date->format('Y-m-d H:i:s'),
-                'message' => $verifier->user->username.' gave you a shoutout',
+                'message' => $verifier->user->username.' verified your profile.',
+                'type' => 3
+            );
+        }
+        
+        $shouters = self::getShoutouts( $userId );
+        foreach( $shouters as $shouter ){
+            $date->setTimestamp($shouter->added);
+            $activities[] = (object) array(
+                'id' => "4_{$shouter->user->id}_{$shouter->added}",
+            	'activity_type' => 4,
+            	'user' => (object) array(
+                     'id' => $shouter->user->id,
+                     'username' => $shouter->user->username,
+                     'avatar_url' => $shouter->user->avatar_url,
+                ),
+                'time' => $date->format('Y-m-d H:i:s'),
+                'message' => $shouter->user->username.' gave you a shoutout',
                 'type' => 3
             );
         }

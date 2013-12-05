@@ -1157,4 +1157,14 @@ WHERE is_verify != 1
         $this->prepareAndExecute( $sql, $params );
     }
     
+    public function logShoutout( $volleyId, $targetVolleyId, $targetUserId ){
+        $sql = "
+        	insert ignore into `hotornot-dev`.tblShoutouts
+        	( challenge_id, target_challenge_id, target_user_id )
+        	values
+        	( ?, ?, ? )
+        ";
+        $params = array( $volleyId, $targetVolleyId, $targetUserId );
+        $this->prepareAndExecute( $sql, $params );
+    }
 }

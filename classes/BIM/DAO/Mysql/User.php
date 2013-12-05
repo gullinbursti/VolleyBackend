@@ -228,6 +228,22 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         return $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
     }
     
+    public function getShoutouts( $userId ){
+        $count = 0;
+		$sql = "
+			SELECT c.creator_id as id, c.added
+			FROM  `hotornot-dev`.`tblShoutouts` as s
+				JOIN `hotornot-dev`.`tblChallenges` as c
+				ON s.challenge_id = c.id
+			WHERE s.target_user_id = ?
+			ORDER by c.added desc
+			LIMIT 50
+		";
+		$params = array( $userId );
+		$stmt = $this->prepareAndExecute($sql,$params);
+        return $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+    }
+    
     public function setTotalVotes( $userId, $count ){
         $sql = 'UPDATE `hotornot-dev`.tblUsers SET total_votes = ? where id = ?';
         $params = array( $count, $userId );
