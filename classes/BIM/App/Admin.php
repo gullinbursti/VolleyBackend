@@ -120,7 +120,7 @@ class BIM_App_Admin{
             $imgUrlPrefix = "https://d1fqnfrnudpaz6.cloudfront.net/$namePrefix";
             
             //echo("BIM_Utils::putImage( $volleyImagePath, $name )\n");
-            BIM_Utils::putImage( $volleyImagePath, $name );
+            BIM_Utils::copyImage( $volleyImagePath, $name );
             //echo("BIM_Utils::processImage(".$volley->creator->img.")\n");
             BIM_Utils::processImage($imgUrlPrefix);
             //echo "updating image to $imgUrlPrefix\n";
