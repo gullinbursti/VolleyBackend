@@ -170,9 +170,9 @@ class BIM_App_Admin{
                 
                 $hashTag = "#shoutout";
                 $teamVolleyId = BIM_Config::app()->team_volley_id;
-                $volley = BIM_Model_Volley::create( $teamVolleyId, $hashTag, $imgUrlPrefix );
-                BIM_Push::shoutoutPush( $volley );
-                print_r( json_encode( $volley ) );
+                $shoutout = BIM_Model_Volley::create( $teamVolleyId, $hashTag, $imgUrlPrefix );
+                BIM_Push::shoutoutPush( $teamVolleyId, $volley->creator->id, $shoutout->id );
+                print_r( json_encode( $shoutout ) );
             }
         }
     }
@@ -192,7 +192,7 @@ class BIM_App_Admin{
             $imgUrlPrefix = "https://d1fqnfrnudpaz6.cloudfront.net/$namePrefix";
             
             //echo("BIM_Utils::putImage( $volleyImagePath, $name )\n");
-            BIM_Utils::putImage( $volleyImagePath, $name );
+            BIM_Utils::copyImage( $volleyImagePath, $name );
             //echo("BIM_Utils::processImage(".$volley->creator->img.")\n");
             BIM_Utils::processImage($imgUrlPrefix);
             //echo "updating image to $imgUrlPrefix\n";

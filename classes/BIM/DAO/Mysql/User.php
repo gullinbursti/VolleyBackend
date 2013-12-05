@@ -194,11 +194,38 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
 		$sql = "SELECT count(*) as count FROM `hotornot-dev`.`tblChallengeVotes` WHERE `challenger_id` = ?";
 		$params = array( $userId );
 		$stmt = $this->prepareAndExecute($sql,$params);
-        $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
-        if( $data ){
-            $count = $data[0]->count;
-        }
-        return $count;
+        return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+    }
+    
+    public function getLikers( $userId ){
+        $count = 0;
+		$sql = "
+			SELECT user_id as id, added
+			FROM `hotornot-dev`.`tblChallengeVotes` 
+			WHERE `challenger_id` = ?
+			ORDER by added desc
+			LIMIT 50
+		";
+		$params = array( $userId );
+		$stmt = $this->prepareAndExecute($sql,$params);
+        return $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+    }
+    
+    public function getVerifiers( $userId ){
+        $count = 0;
+		$sql = "
+			SELECT a.user_id as id, added
+			FROM `hotornot-dev`.`tblChallenges` as c
+				JOIN `hotornot-dev`.`tblFlaggedUserApprovals` as a
+				ON c.id = a.challenge_id
+			WHERE c.creator_id = ?
+				AND c.is_verify = 1
+			ORDER by a.added desc
+			LIMIT 50
+		";
+		$params = array( $userId );
+		$stmt = $this->prepareAndExecute($sql,$params);
+        return $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
     }
     
     public function setTotalVotes( $userId, $count ){
@@ -625,4 +652,5 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
         return $data;
 	}
+
 }

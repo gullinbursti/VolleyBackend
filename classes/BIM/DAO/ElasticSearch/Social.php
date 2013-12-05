@@ -60,6 +60,11 @@ class BIM_DAO_ElasticSearch_Social extends BIM_DAO_ElasticSearch {
         $query = array(
             "from" => $from,
             "size" => $size,
+            "sort" => array(
+                'init_time' => array(
+                    'order' => 'desc'
+                )
+            ),
             "query" => array(
                 "bool" => array(
                     "should" => $should,

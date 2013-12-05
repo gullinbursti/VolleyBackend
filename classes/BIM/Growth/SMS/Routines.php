@@ -24,7 +24,6 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
             //'To' => '+18085559876', // ...or by 'To'
         ));
         
-        // Write rows
         $conf = BIM_Config::twilio();
         $from = $conf->api->number;
         $msg = 'Selfieclub is LIVE on the App Store! GET THE APP NOW!!!! Get the app to #1!!http://taps.io/JZ5Q';
@@ -44,7 +43,70 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
                 print_r( $e );
             }
         }
-    }    
+    }
+    
+    public static function getMobileNumbers( ){
+        
+        $es = new BIM_DAO_ElasticSearch( BIM_Config::elasticSearch()  );
+        $query = array(
+            "from" => 0,
+            "size" => 20000,
+        );
+        $urlSuffix = "contact_lists_bkp/phone/_search";
+        $lists = json_decode( $es->call('POST', $urlSuffix, $query) );
+        
+        $caliCodes = array( 209,213,310,323,408,415,424,442,510,530,559,562,619,626,650,657,661,707,714,747,760,805,818,831,858,909,916,925,949,951);
+        $count = 0;
+        
+        foreach( $lists->hits->hits as $hit ){
+            if( !empty( $hit->_source->hashed_number ) ){
+                $number = $hit->_source->hashed_number;
+                $rawNumber = preg_replace('@\+1@','',$number);
+                $areaCode = substr($rawNumber, 0, 3);
+                if( !in_array( $areaCode, $caliCodes ) && strlen( $rawNumber ) == 10 ){
+                    $count++;
+                    echo "$number\n";
+                }
+            }
+            if( !empty( $hit->_source->hashed_list ) ){
+                foreach( $hit->_source->hashed_list as $number  ){
+                    $rawNumber = preg_replace('@\+1@','',$number);
+                    $areaCode = substr($rawNumber, 0, 3);
+                    if( !in_array( $areaCode, $caliCodes ) && strlen( $rawNumber ) == 10 ){
+                        $count++;
+                        echo "$number\n";
+                    }
+                }
+            }
+        }
+        echo $count."\n";
+    }
+    
+    public static function sendMarketingBlast( $filename ){
+        $self = new BIM_Growth();
+        $client = $self->getTwilioClient();
+        $conf = BIM_Config::twilio();
+        
+        $from = '6475577873';
+        $msg = 
+'
+The Selfieclub App is live for iOS! Tap the link to get it or search "Selfieclub" on the App Store now!
+http://taps.io/Jbtw
+';
+        $numbers = file( $filename );
+        foreach( $numbers as &$number ){
+            $number = trim( $number );
+        }
+        
+        foreach( $numbers as $number ){
+            try{
+                $client->account->sms_messages->create( $from, $number, $msg );
+                echo "$number\n";
+            } catch( Exception $e ){
+                echo $e->getMessage()."\n";
+            }
+        }
+    }
     
     public function sendSMSInvite( $number ){
         $client = $this->getTwilioClient();

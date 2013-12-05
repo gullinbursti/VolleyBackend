@@ -95,6 +95,12 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         			'userID' => $userId,
         		);
         		BIM_App_Social::addFriend($friendRelation);
+        		
+        		$friendRelation = (object) array( 
+        			'target' => $userId, 
+        			'userID' => $target,
+        		);
+        		BIM_App_Social::addFriend($friendRelation);
             }
         }
     }
@@ -125,6 +131,16 @@ class BIM_Controller_Users extends BIM_Controller_Base {
             $users = new BIM_App_Users();
 		    return $users->pokeUser($input->pokerID, $input->pokeeID);
 		}
+		return array();
+    }
+    
+    public function getActivity(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if (isset($input->userID)){
+            $input->userID = $this->resolveUserId($input->userID);
+            $users = new BIM_App_Users();
+            return $users->getActivity($input->userID);
+        }
 		return array();
     }
     
@@ -196,7 +212,7 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         if( $linked ){
             $to = $input->From; // we switch the meaning of to and from so we can send an sms back
             $from = $input->To; // we switch the meaning of to and from so we can send an sms back
-            echo "<?xml version='1.0' encoding='UTF-8'?><Response><Sms from='$from' to='$to'>Volley On!</Sms></Response>";
+            echo "<?xml version='1.0' encoding='UTF-8'?><Response><Sms from='$from' to='$to'>Selfieclub rocks!</Sms></Response>";
             exit();
         }
     }

@@ -294,4 +294,32 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
         }
         return true;
     }
+    
+    public function deleteImage(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        $user = BIM_Utils::getSessionUser();
+        if( $user && $user->isExtant() && !empty( $input->imgURL ) && !empty( $input->challengeID ) ){
+            $volley = BIM_Model_Volley::get( $input->challengeID );
+            if( $volley->isExtant() ){
+                if( $volley->isCreator($user->id) ){
+                    BIM_Model_Volley::deleteVolleys( array( $volley->id ), $user->id );
+                } else {
+                    $volley->deleteImageByUserIdAndImage( $user->id, $input->imgURL );
+                }
+                $volley->purgeFromCache();
+                $user->purgeFromCache();
+            }
+        }
+        return true;
+    }
+    
+    public function shoutout(){
+        $volley = null;
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty( $input->challengeID ) && !empty( $input->userID ) ){
+            $userId = $this->resolveUserId( $input->userID );
+            $volley = BIM_Model_Volley::makeShoutoutVolley($input->challengeID, $userId);
+        }
+        return $volley;
+    }
 }

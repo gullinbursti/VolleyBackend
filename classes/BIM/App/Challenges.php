@@ -561,6 +561,46 @@ If most or all of the images in a volley are missing, then do not make the call 
             if( $volleys ){
                 foreach( $volleys as $volley ){
                     error_log( "checking volley $volley->id" );
+                    
+                    $added = new DateTime( $volley->added );
+                    $added->setTimezone( new DateTimeZone('UTC') );
+                    $added = $added->getTimestamp();
+                    
+                    if( $added >= $time ){
+                        error_log( "checking creator image $challenger->img" );
+                        $a->missingImage($volley->creator->img);
+                    }
+                    if( $volley->challengers ){
+                        foreach( $volley->challengers as $challenger ){
+                            if( $challenger->joined_timestamp >= $time ){
+                                error_log( "checking challenger image $challenger->img" );
+                                $a->missingImage( $challenger->img );
+                            }
+                        }
+                    }
+                    $volley->purgeFromCache();
+                }
+            }
+            error_log( count( $volleyIds )." remaining\n" );
+        }
+    }
+    
+    public static function checkVolleyImagesFromLastXSeconds2( $seconds = 1800 ){
+		$dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
+		$time = time() - $seconds;
+		$d = new DateTime( "@$time" );
+		$d = $d->format('Y-m-d H:i:s');
+        $volleyIds = $dao->getVolleyIdsByUpdatedTime( $d );
+        
+        error_log("processing volleys that were updated since $d");
+        
+        $a = new self();
+        while( $volleyIds ){
+            $ids = array_splice($volleyIds, 0, 250);
+            $volleys = BIM_Model_Volley::getMulti($ids);
+            if( $volleys ){
+                foreach( $volleys as $volley ){
+                    error_log( "checking volley $volley->id" );
                     $a->missingImage($volley->creator->img);
                     if( $volley->challengers ){
                         foreach( $volley->challengers as $challenger ){

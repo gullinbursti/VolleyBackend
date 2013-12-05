@@ -143,12 +143,21 @@ class BIM_App_Users extends BIM_App_Base{
 	}
 	
 	/**
+	 * Gets activity for a user
+	 * @param $user_id The ID for the user (integer)
+	 * @return An associative object representing a user (array)
+	**/
+	public function getActivity($userId) {
+		return BIM_Model_User::getActivity($userId);
+	}
+	
+	/**
 	 * Gets a user
 	 * @param $user_id The ID for the user (integer)
 	 * @return An associative object representing a user (array)
 	**/
-	public function getUserObj($user_id) {
-		$user = BIM_Model_User::get($user_id);
+	public function getUserObj($userId) {
+		$user = BIM_Model_User::get($userId);
 		return $user;
 	}
 	
@@ -209,8 +218,10 @@ class BIM_App_Users extends BIM_App_Base{
     	    $approves = (int) $approves;
 	        if( $approves > 0 ){
 	            $approves = -1;
-	        } else if( $approves <= 0 ) {
+	        } else if( $approves == 0 ) {
 	            $approves = 1;
+	        } else if( $approves < 0 ){
+	            $approves = 0;
 	        }
     	    $c = BIM_Config::app();
     	    if( $user->isSuperUser() ){
@@ -223,15 +234,15 @@ class BIM_App_Users extends BIM_App_Base{
     	        $purge = true;
                 $verifyVolley = BIM_Model_Volley::createVerifyVolley( $targetId, 10 );
         	    $target->flag( $verifyVolley->id, $userId, $approves );
-                BIM_Push::sendFlaggedPush($targetId);
+                //BIM_Push::sendFlaggedPush($targetId);
                 $this->sendFlaggedEmail($userId);
     	    } else if( $verifyVolley->isExtant() && !$verifyVolley->hasApproved($userId) ){
     	        $purge = true;
         	    $target->flag( $verifyVolley->id, $userId, $approves );
         	    if( $approves < 0 ){
-        	        BIM_Push::sendApprovePush($targetId);
+        	        BIM_Push::sendApprovePush($targetId, $userId);
         	    } else if( $approves > 0 ){
-                    BIM_Push::sendFlaggedPush($targetId);
+                    //BIM_Push::sendFlaggedPush($targetId);
         	    }
     	    }
     	    if( $purge ){
