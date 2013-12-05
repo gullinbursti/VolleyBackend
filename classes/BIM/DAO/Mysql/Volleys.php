@@ -1016,13 +1016,23 @@ WHERE is_verify != 1
         return $data;
     }
     
-    public function deleteVolleys( $ids ){
+    public function deleteVolleys( $ids, $userId = null ){
         $placeHolders = join(',',array_fill(0, count( $ids ), '?') );
         $sql = "delete from `hotornot-dev`.tblChallengeParticipants where challenge_id IN ( $placeHolders )";
         $stmt = $this->prepareAndExecute( $sql, $ids );
         
         $sql = "delete from `hotornot-dev`.tblChallenges where id IN ( $placeHolders )";
         $stmt = $this->prepareAndExecute( $sql, $ids );
+        
+        if( $userId ){
+            $sql = "
+            	update `hotornot-dev`.tblUsers
+            	set total_challenges = -1
+            	where id = ?
+            ";
+            $params = array( $userId );
+            $this->prepareAndExecute($sql, $params);
+        }
     }
     
     public function updateExploreIds( $volleyData ){
@@ -1130,4 +1140,21 @@ WHERE is_verify != 1
         $params = array( $imgUrl );
         $this->prepareAndExecute( $sql, $params );
     }
+    
+    public function deleteImageByUserIdAndImage( $userId, $imgUrl ){
+        $sql = "
+        	delete from `hotornot-dev`.tblChallengeParticipants
+        	where img = ? and user_id = ?
+        ";
+        $params = array( $imgUrl, $userId );
+        $this->prepareAndExecute( $sql, $params );
+        
+        $sql = "
+        	delete from `hotornot-dev`.tblChallenges
+        	where creator_img = ? and creator_id = ?
+        ";
+        $params = array( $imgUrl, $userId );
+        $this->prepareAndExecute( $sql, $params );
+    }
+    
 }

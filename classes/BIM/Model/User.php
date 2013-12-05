@@ -889,11 +889,11 @@ delete from tblUsers where username like "%yoosnapyoo";
             $date->setTimestamp($friend->init_time);
             $activities[] = (object) array(
                 'id' => "2_{$friend->user->id}_{$friend->init_time}",
-                'type' => 2,
+                'activity_type' => 2,
                 'user' => $friend->user,
                 'time' => $date->format('Y-m-d H:i:s'),
                 'message' => $friend->user->username.' followed you.',
-                'goto' => 3
+                'type' => 3
             );
         }
         
@@ -904,7 +904,7 @@ delete from tblUsers where username like "%yoosnapyoo";
             $date->setTimezone( $tz );
             $activities[] = (object) array(
                 'id' => "3_{$liker->user->id}_{$date->getTimestamp()}",
-            	'type' => 3,
+            	'activity_type' => 3,
             	'user' => (object) array(
                      'id' => $liker->user->id,
                      'username' => $liker->user->username,
@@ -912,7 +912,7 @@ delete from tblUsers where username like "%yoosnapyoo";
                 ),
                 'time' => $liker->added,
                 'message' => $liker->user->username.' liked your Selfie',
-                'goto' => 3
+                'type' => 3
             );
         }
         
@@ -921,7 +921,7 @@ delete from tblUsers where username like "%yoosnapyoo";
             $date->setTimestamp($verifier->added);
             $activities[] = (object) array(
                 'id' => "1_{$verifier->user->id}_{$verifier->added}",
-            	'type' => 1,
+            	'activity_type' => 1,
             	'user' => (object) array(
                      'id' => $verifier->user->id,
                      'username' => $verifier->user->username,
@@ -929,7 +929,7 @@ delete from tblUsers where username like "%yoosnapyoo";
                 ),
                 'time' => $date->format('Y-m-d H:i:s'),
                 'message' => $verifier->user->username.' gave you a shoutout',
-                'goto' => 3
+                'type' => 3
             );
         }
         

@@ -226,6 +226,10 @@ class BIM_Utils{
         }
 	}
 	
+    public static function copyImage( $image, $name, $bucket = 'hotornot-challenges' ){
+        return self::putImage($image, $name, $bucket);  
+    }
+	
     public static function putImage( $image, $name, $bucket = 'hotornot-challenges' ){
             if( is_string($image) ){
                 $image = new Imagick( $image );

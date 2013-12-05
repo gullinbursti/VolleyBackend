@@ -95,6 +95,12 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         			'userID' => $userId,
         		);
         		BIM_App_Social::addFriend($friendRelation);
+        		
+        		$friendRelation = (object) array( 
+        			'target' => $userId, 
+        			'userID' => $target,
+        		);
+        		BIM_App_Social::addFriend($friendRelation);
             }
         }
     }

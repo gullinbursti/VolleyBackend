@@ -95,6 +95,25 @@ class BIM_Jobs_Challenges extends BIM_Jobs{
     }
     
     /*
+     * DELETE IMAGE
+     */
+    public static function queueDeleteImage( $userId, $imgUrl ){
+        $job = array(
+        	'class' => 'BIM_Jobs_Challenges',
+        	'method' => 'deleteImage',
+        	'data' => array( 
+        		'img_url' => $imgUrl, 
+                'user_id' => $userId,
+            ),
+        );
+        return self::queueBackground( $job, 'delete_image' );
+    }
+    
+    public function deleteImage( $workload ){
+        BIM_Utils::deleteImage( $workload->data->user_id, $workload->data->img_url );
+    }
+    
+    /*
      * PROCESS VOLLEY IMAGES
      */
     public static function queueProcessVolleyImages( $volleyId, $imgUrl = '' ){
