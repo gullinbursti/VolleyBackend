@@ -949,9 +949,10 @@ delete from tblUsers where username like "%yoosnapyoo";
         
         $shouters = self::getShoutouts( $userId );
         foreach( $shouters as $shouter ){
-            $date->setTimestamp($shouter->added);
+            $date = new DateTime( $shouter->added );
+            $date->setTimezone( $tz );
             $activities[] = (object) array(
-                'id' => "4_{$shouter->user->id}_{$shouter->added}",
+                'id' => "4_{$shouter->user->id}_{$date->getTimestamp()}",
             	'activity_type' => 4,
             	'user' => (object) array(
                      'id' => $shouter->user->id,
