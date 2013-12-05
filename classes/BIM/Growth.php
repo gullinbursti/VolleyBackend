@@ -5,7 +5,7 @@ class BIM_Growth{
     protected $curl = null;
     protected $instagramApiClient = null; 
     protected $twilioApiClient = null; 
-    protected $useProxy = true;
+    protected $useProxy = false;
     
 	public function testProxies( $url ){
 	    
@@ -112,10 +112,14 @@ class BIM_Growth{
 	    return $this->handleRequest( $url, $options, $fullResponse, $headers );
 	}
 	
-	public function post( $url, $args = array(), $fullResponse = false, $headers = array() ){
-        $queryStr = http_build_query($args);
+	public function post( $url, $args = array(), $fullResponse = false, $headers = array(), $isJson = false ){
+	    if( !$isJson ){
+            $queryStr = http_build_query($args);
+	    } else {
+            $queryStr = $args[0];
+	    }
         $headers[] = 'Content-Length: '.strlen($queryStr);
-        $options = $this->getCurlParams( $headers );
+	    $options = $this->getCurlParams( $headers );
 		$options[CURLOPT_POSTFIELDS] = $queryStr;
 		$options[CURLOPT_POST] = true;
 		return $this->handleRequest($url, $options, $fullResponse );
@@ -344,5 +348,11 @@ class BIM_Growth{
             unlink( $file );
         }
         rmdir( $dir );
+    }
+    
+    public static function sleep( $seconds = 0, $msg = '' ){
+        if($msg) $msg = " - $msg";
+        error_log( "sleeping for $seconds seconds.$msg" );
+        sleep($seconds);
     }
 }

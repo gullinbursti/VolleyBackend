@@ -1,6 +1,78 @@
 <?php 
 class BIM_App_Admin{
     
+    public static function showIGPromoters(){
+        $input = (object)( $_POST? $_POST : $_GET);
+        
+        $sql = "
+	        select * from growth.ig_promoters 
+	        where email is not null and email != ''
+	        order by time desc
+        ";
+        
+        $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+        $stmt = $dao->prepareAndExecute( $sql );
+        $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+        
+        /**
+            [time] => 1384471859
+            [url] => 589314179606345900_38865605
+            [type] => photo
+            [comment] => gimme a shoutout? #dgoqvw
+            [network] => webstagram
+            [name] => RyanBr909
+            [logged] => 2013-11-14 23:29:22
+            [target_img] => http://web.stagram.com/p/589314179606345900_38865605
+         */
+        
+        echo("
+        <html>
+        <head>
+		<script src='http://code.jquery.com/jquery-1.10.1.min.js'></script>
+        </head>
+        <body>
+        
+		<hr>IG Promoters - ".count( $data )."<hr>\n
+		
+        <table border=1 cellpadding=10>
+        <tr>
+        <th>Name</th>
+        <th>Followers</th>
+        <th>Url</th>
+        <th>Email</th>
+        <th>Date Found</th>
+        </tr>
+        ");
+        // now get the flag counts for each user
+        foreach( $data as $info ){
+            echo "
+                <tr>
+                <td>
+                    $info->name
+                </td>
+                <td>
+                	$info->followers
+            	</td>
+                <td>
+                    <a href='$info->url'>$info->url</a>
+                </td>
+                <td>
+                	$info->email
+            	</td>
+                <td>
+                	$info->time
+            	</td>
+            	</tr>
+            ";
+        }
+        echo("
+        </table>
+        </body>
+        </html>
+        ");
+        exit;
+    }
+    
     public static function showWebstaContacts(){
         $input = (object)( $_POST? $_POST : $_GET);
         

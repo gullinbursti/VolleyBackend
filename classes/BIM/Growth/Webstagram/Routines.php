@@ -316,12 +316,6 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         }
     }
 
-    public static function sleep( $seconds = 0, $msg = '' ){
-        if($msg) $msg = " - $msg";
-        error_log( "sleeping for $seconds seconds. \n$msg\n" );
-        sleep($seconds);
-    }
-    
     public function likeXPhotos( $pageUrl, $total ){
         $photoIds = $this->getXPhotos($pageUrl, $total);
         foreach( $photoIds as $photoId ){
