@@ -906,7 +906,7 @@ delete from tblUsers where username like "%yoosnapyoo";
                 'activity_type' => 2,
                 'user' => $friend->user,
                 'time' => $date->format('Y-m-d H:i:s'),
-                'message' => $friend->user->username.' followed you.',
+                'message' => 'followed you',
                 'type' => 3
             );
         }
@@ -925,7 +925,7 @@ delete from tblUsers where username like "%yoosnapyoo";
                      'avatar_url' => $liker->user->avatar_url,
                 ),
                 'time' => $liker->added,
-                'message' => $liker->user->username.' liked your Selfie',
+                'message' => 'liked your Selfie',
                 'type' => 3
             );
         }
@@ -942,7 +942,7 @@ delete from tblUsers where username like "%yoosnapyoo";
                      'avatar_url' => $verifier->user->avatar_url,
                 ),
                 'time' => $date->format('Y-m-d H:i:s'),
-                'message' => $verifier->user->username.' verified your profile.',
+                'message' => 'verified your profile',
                 'type' => 3
             );
         }
@@ -960,7 +960,7 @@ delete from tblUsers where username like "%yoosnapyoo";
                      'avatar_url' => $shouter->user->avatar_url,
                 ),
                 'time' => $date->format('Y-m-d H:i:s'),
-                'message' => $shouter->user->username.' gave you a shoutout',
+                'message' => 'gave you a shoutout',
                 'type' => 3
             );
         }
