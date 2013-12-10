@@ -646,6 +646,9 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
     public function getVerificationVolleyIds( $userId ){
         $teamVolleyId = BIM_Config::app()->team_volley_id;
         
+        mt_srand();
+        $limit = mt_rand(0, 1000);
+        
         $sql = "
 			SELECT tc.id 
 			FROM `hotornot-dev`.tblChallenges as tc 
@@ -662,7 +665,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
 				
 			GROUP BY tc.id
 			ORDER BY tc.updated DESC, tc.id DESC 
-			LIMIT 100
+			LIMIT $limit, 100
         ";
         
         $params = array( $userId, $userId );
