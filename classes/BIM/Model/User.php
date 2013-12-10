@@ -119,6 +119,11 @@ class BIM_Model_User{
         }
         return $smsVerified == 0 ? false : true;
     }
+
+    public static function getAllPushTokens(){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        return $dao->getAllPushTokens( );
+    }
     
     public function getTotalVotes(){
         if( ! property_exists($this, 'total_votes') || $this->total_votes < 0 ){

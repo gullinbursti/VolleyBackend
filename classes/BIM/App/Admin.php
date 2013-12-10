@@ -171,7 +171,7 @@ class BIM_App_Admin{
                 $hashTag = "#shoutout";
                 $teamVolleyId = BIM_Config::app()->team_volley_id;
                 $shoutout = BIM_Model_Volley::create( $teamVolleyId, $hashTag, $imgUrlPrefix );
-                //BIM_Push::shoutoutPushToAll( $teamVolleyId, $volley->creator->id, $shoutout->id );
+                BIM_Push::shoutoutPushToAll( $teamVolleyId, $volley->creator->id, $shoutout->id );
                 if( !empty($input->addLikes) ){
                     $likers = BIM_Model_User::getRandomIds($input->addLikes,array(),"2013-09-01");
                     $likers = BIM_Model_User::getMulti($likers);

@@ -782,4 +782,18 @@ stdClass Object
         $params = array( $input->source, $input->target );
         $this->prepareAndExecute( $sql, $params );
 	}
+	
+	// getAllPushTokens
+	public function getAllPushTokens( $input ){
+	    $sql = "
+            select device_token 
+            from `hotornot-dev`.tblUsers 
+            where device_token is not null 
+                and device_token != '' 
+                and added > '2013-11-25'
+                and notifications = 'Y'
+	    ";
+        $stmt = $this->prepareAndExecute( $sql, $params );
+        return $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+	}
 }

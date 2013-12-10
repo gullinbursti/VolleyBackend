@@ -133,6 +133,18 @@ class BIM_Push{
         }
     }
     
+    public static function shoutoutPushToAll( $userId ){
+        $user = BIM_Model_User::get( $userId );
+        if( $user->isExtant() ){
+            $tokens = BIM_Model_User::getAllPushTokens();
+            foreach( $tokens as $token ){
+                $token = trim($token);
+                $msg = "**SELFIE SHOUTOUT** - $user->username)";
+                BIM_Push::send( $token, $msg );
+            }
+        }
+    }    
+    
     public static function pushCreators( $volleys ){
         if( !is_array($volleys)){
             $volleys = array( $volleys );
