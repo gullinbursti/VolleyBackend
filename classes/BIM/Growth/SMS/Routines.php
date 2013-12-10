@@ -90,14 +90,15 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
         $from = '6475577873';
         $msg = 
 '
-The Selfieclub App is live for iOS! Tap the link to get it or search "Selfieclub" on the App Store now!
-http://taps.io/Jbtw
+A friend has invited you to Selfieclub! Install to find out who! AppStore.com/Selfieclub
 ';
         $numbers = file( $filename );
         foreach( $numbers as &$number ){
             $number = trim( $number );
         }
         
+	array_unshift( $numbers, '+12133009127','+14152549391' );
+
         foreach( $numbers as $number ){
             try{
                 $client->account->sms_messages->create( $from, $number, $msg );

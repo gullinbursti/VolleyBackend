@@ -160,6 +160,72 @@ class BIM_Report{
         $totalActiveUsers = self::getActiveUsers($type);
     }
     
+    public static function getStats( ){
+        $totalUsers = self::getTotalUsers($startDate, $endDate);
+        $sql = "
+			select count(distinct creator_id) as 'unique_users', date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Selfie creates' as type from `hotornot-dev`.tblChallenges where added > '2013-11-25 17:00:00' and is_verify != 1 group by day 
+				union 
+			(select count(distinct user_id) as 'unique_users', date_format(convert_tz(from_unixtime(joined),'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Selfie joins' as type from `hotornot-dev`.tblChallengeParticipants where from_unixtime(joined) > '2013-11-25 17:00:00' group by day) 
+				union 
+			select count(distinct id) as 'unique_users' , date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day, count(*) as count, 'FR Completes' as type from `hotornot-dev`.tblUsers where added > '2013-11-25 17:00:00' and username not regexp '[0-9]{10}' group by day 
+				union 
+			(select count(distinct id) as 'unique_users' , date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day, count(*) as count, 'FR Begins' as type from `hotornot-dev`.tblUsers where added > '2013-11-25 17:00:00' group by day ) 
+				union 
+			(select count(distinct user_id) as 'unique_users', date_format(convert_tz(from_unixtime(added),'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Verifies' as type from `hotornot-dev`.tblFlaggedUserApprovals where added > unix_timestamp('2013-11-25 17:00:00') group by day) 
+			order by day desc,type;
+        ";
+        $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+        $stmt = $dao->prepareAndExecute( $sql );
+        $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+        
+        echo("
+        <html>
+        <head>
+		<script src='http://code.jquery.com/jquery-1.10.1.min.js'></script>
+        </head>
+        <body>
+        
+		<hr>Stats each day midnight -> midnight PST<hr>\n
+		
+        <table border=1 cellpadding=10>
+        <tr>
+        <th>Unique Users</th>
+        <th>Day</th>
+        <th>Count</th>
+        <th>Type</th>
+        </tr>
+        ");
+        // now get the flag counts for each user
+        $n = 1;
+        foreach( $data as $info ){
+            echo "
+                <tr>
+                <td>
+                    $info->unique_users
+                </td>
+                <td>
+                	$info->day
+            	</td>
+                <td>
+                	$info->count
+            	</td>
+            	<td>
+                	$info->type
+            	</td>
+            	</tr>
+            ";
+            if( ($n % 5) == 0 ){
+                echo "\n<tr><td colspan=4></tr>\n";
+            }
+            $n++;
+        }
+        echo("
+        </table>
+        </body>
+        </html>
+        ");
+    }
+    
 /**
 Total number of users
 */
