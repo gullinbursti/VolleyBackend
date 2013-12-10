@@ -358,9 +358,9 @@ class BIM_Model_Volley{
         return $vv;
     }
     
-    public static function getVerifyVolley( $targetId ){
+    public static function getVerifyVolley( $creatorId ){
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-        $id = $dao->getVerifyVolleyIdForUser( $targetId );
+        $id = $dao->getVerifyVolleyIdForUser( $creatorId );
         return BIM_Model_Volley::get( $id );
     }
     
@@ -944,7 +944,34 @@ class BIM_Model_Volley{
             $hashTag = "#shoutout";
             
             $shoutout = BIM_Model_Volley::create( $creatorId, $hashTag, $imgUrlPrefix );
+            self::logShoutout($shoutout, $volley->creator->id);
             BIM_Push::shoutoutPush( $creatorId, $volley->creator->id, $shoutout->id );
+        }
+        return $shoutout;
+    }
+    
+    public static function shoutoutVerifyVolley($creatorId, $targetId){
+        $user = BIM_Model_User::get( $targetId );
+        $shoutout = null;
+        if( !empty( $user->img_url ) && !preg_match('@default@i', $user->img_url ) ) {
+            
+            $suffix = 'Large_640x1136.jpg';
+            $namePrefix = 'Shoutout_Volley_Image-'.uniqid(true);
+            $imgUrlPrefix = "https://d1fqnfrnudpaz6.cloudfront.net/$namePrefix";
+            
+            $imgUrl = $user->img_url;
+            $imgUrl = preg_replace('@\.jpg|Large_640x1136|_o\.jpg@','', $imgUrl);
+            $imgUrl = $imgUrl.$suffix;
+            
+            $name = "{$namePrefix}{$suffix}";
+            BIM_Utils::copyImage( $imgUrl, $name );
+            BIM_Utils::processImage($imgUrlPrefix);
+            
+            $hashTag = "#shoutout";
+            
+            $shoutout = BIM_Model_Volley::create( $creatorId, $hashTag, $imgUrlPrefix );
+            BIM_Push::shoutoutPush( $creatorId, $user->id, $shoutout->id );
+            self::logShoutout($shoutout, $user->id);
         }
         return $shoutout;
     }

@@ -322,4 +322,13 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
         }
         return $volley;
     }
+    
+    public function selfieshoutout(){
+        $volley = null;
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty( $input->userID ) && !empty( $input->targetID ) ){
+            $volley = BIM_Model_Volley::shoutoutVerifyVolley($input->userID, $input->targetID);
+        }
+        return $volley;
+    }
 }
