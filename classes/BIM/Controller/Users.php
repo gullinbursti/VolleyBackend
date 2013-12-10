@@ -338,4 +338,33 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         }
         return true;
     }
+    
+    public function randomKikUser(){
+        return BIM_Model_User::getRandomKikUser();
+        //return 'aishaincali';
+    }
+    
+    public function createKikUser(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty($input->username) ){
+            return BIM_Model_User::createKikUser( $input );
+        }
+	return true;
+    }
+    
+    public function logKikSend(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty($input->source)  && !empty( $input->target ) ){
+            return BIM_Model_User::logKikSend( $input );
+        }
+	return true;
+    }
+    
+    public function logKikOpen(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty($input->source) && !empty( $input->target ) ){
+            return BIM_Model_User::logKikOpen( $input );
+        }
+	return true;
+    }
 }

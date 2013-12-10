@@ -467,11 +467,11 @@ delete from tblUsers where username like "%yoosnapyoo";
         return self::getMulti($ids);
     }
     
-    public static function getRandomIds( $total = 1, $exclude = array() ){
+    public static function getRandomIds( $total = 1, $exclude = array(), $date  ){
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
-        return $dao->getRandomIds( $total, $exclude );
+        return $dao->getRandomIds( $total, $exclude, $date );
     }
-    
+
     public function archive(){
         if( $this->isExtant() ){
             $this->purgeVolleys();
@@ -975,5 +975,25 @@ delete from tblUsers where username like "%yoosnapyoo";
         );
         
         return array_splice($activities, 0, 50);
+    }
+    
+    public static function getRandomKikUser( ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        return $dao->getRandomKikUser( );
+    }
+    
+    public static function createKikUser( $input ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        return $dao->createKikUser( $input );
+    }
+    
+    public static function logKikSend( $input ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        return $dao->logKikSend( $input );
+    }
+    
+    public static function logKikOpen( $input ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        return $dao->logKikOpen( $input );
     }
 }

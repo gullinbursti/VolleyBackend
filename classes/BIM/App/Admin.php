@@ -171,7 +171,14 @@ class BIM_App_Admin{
                 $hashTag = "#shoutout";
                 $teamVolleyId = BIM_Config::app()->team_volley_id;
                 $shoutout = BIM_Model_Volley::create( $teamVolleyId, $hashTag, $imgUrlPrefix );
-                BIM_Push::shoutoutPush( $teamVolleyId, $volley->creator->id, $shoutout->id );
+                //BIM_Push::shoutoutPushToAll( $teamVolleyId, $volley->creator->id, $shoutout->id );
+                if( !empty($input->addLikes) ){
+                    $likers = BIM_Model_User::getRandomIds($input->addLikes,array(),"2013-09-01");
+                    $likers = BIM_Model_User::getMulti($likers);
+                    foreach( $likers as $liker ){
+                        $shoutout->upvote( $shoutout->creator->id, $liker->id, $imgUrlPrefix );
+                    }
+                }
                 print_r( json_encode( $shoutout ) );
             }
         }
@@ -600,8 +607,14 @@ class BIM_App_Admin{
     		}
             
         	function shoutout( volleyId ){
+        	
+        		var likes = 0;
+        		el = $('#addLikes_' + volleyId );
+        		if( el ){
+        			likes = el.val();
+        		}
                 $.ajax({
-                    url: '/admin/shoutout.php?volleyId=' + volleyId,
+                    url: '/admin/shoutout.php?volleyId=' + volleyId + '&addLikes=' + likes,
                     dataType: 'json',
                     type: 'GET',
                     context: this,
@@ -641,7 +654,7 @@ class BIM_App_Admin{
             if( $volley->isExtant() ){
                 echo "
                 <tr>
-                <td>$volley->id - <input type='button' onClick='shoutout($volley->id);' value='shout out'></td>
+                <td>$volley->id - <input type='button' onClick='shoutout($volley->id);' value='shout out'>&nbsp;Add Likes: <input type='text' size='3' id='addLikes_$volley->id'></td>
                 <td><img src='$img'></td>
                 <td>$creator->username</td>
                 <td>$volley->subject</td>
@@ -690,7 +703,7 @@ class BIM_App_Admin{
             if( $volley->isExtant() ){
                 echo "
                 <tr>
-                <td>$volley->id - <input type='button' onClick='shoutout($volley->id);' value='shout out'></td>
+                <td>$volley->id - <input type='button' onClick='shoutout($volley->id);' value='shout out'>&nbsp;Add Likes: <input type='text' size='3' id='addLikes_$volley->id'></td>
                 <td><img src='$img'></td>
                 <td>$creator->username</td>
                 <td>$volley->subject</td>
@@ -732,7 +745,7 @@ class BIM_App_Admin{
             if( $volley->isExtant() ){
                 echo "
                 <tr>
-                <td>$volley->id - <input type='button' onClick='shoutout($volley->id);' value='shout out'></td>
+                <td>$volley->id - <input type='button' onClick='shoutout($volley->id);' value='shout out'>&nbsp;Add Likes: <input type='text' size='3' id='addLikes_$volley->id'></td>
                 <td><img src='$img'></td>
                 <td>$creator->username</td>
                 <td>$volley->subject</td>

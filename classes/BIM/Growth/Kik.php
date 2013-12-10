@@ -39,10 +39,10 @@ class BIM_Growth_Kik extends BIM_Growth{
                     $timeParam = $lastShout->created_at;
                     $url = 'http://kik.heyhey.us/zerver/API/getMoreHeyHeys';
                     $args = array('{"args":["'.$lastShout->created_at.'"]}');
-                    self::sleep(2,"getting $url next");
+                    self::sleep(1,"getting $url next");
                 } else {
-                    echo "no more kik ids.  starting over!\n";
-                    $url = "http://kik.heyhey.us/zerver/API/getFirstHeyHeys";
+                    echo "no more kik ids.  done!\n";
+                    $url = null; //"http://kik.heyhey.us/zerver/API/getFirstHeyHeys";
                     $args = array('{"args":[]}');
                 }
             }

@@ -112,12 +112,22 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         
     }
     
-    public function getRandomIds( $total = 1, $exclude = array() ){
+    public function getRandomIds( $total = 1, $exclude = array(), $beforeDate = null ){
         $sql = "SELECT id FROM `hotornot-dev`.`tblUsers` ";
+        
+        $where = array();
         if( $exclude ){
             $placeHolders = trim(join('',array_fill(0, count( $exclude ), '?,') ),',' );
-            $sql = "$sql where id not in ($placeHolders)";
+            $where[] = "id not in ($placeHolders)";
         }
+        if( $beforeDate ){
+            $where[] = " added <= '$beforeDate' ";            
+        }
+        if( count( $where ) ){
+            $where = join( ' and ', $where );
+            $sql = "$sql where $where";
+        }
+        
         $total = (int) $total;
         $sql = "$sql ORDER BY RAND() limit $total";
         
@@ -669,4 +679,107 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         return $data;
 	}
 
+	private function chooseKikUser( ){
+	    $letters = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','z');
+	    $letterIdxs = array_rand( $letters, 1 );
+	    if(!is_array($letterIdxs) ) $letterIdxs = array( $letterIdxs );
+	    $where = array();
+	    foreach( $letterIdxs as $idx ){
+	        $letter = $letters[ $idx ];
+	        $where[] = " username like '$letter%'";
+	    }
+	    $where = join( ' or ', $where );
+	    
+	    $oneWeekAgo = time() - (86400 * 7);
+        $sql = "
+            select k.username 
+            from growth.kik_users as k
+            where last_update <= $oneWeekAgo
+            and ($where)
+            limit 1 
+        ";
+        
+        $stmt = $this->prepareAndExecute( $sql );
+        return $stmt->fetchColumn(0);
+	}
+	
+	public function getRandomKikUser( ){
+	    $kikUser = null;
+        $sql = "
+        	insert into growth.kik_checkout
+        	(username)
+        	values
+        	(?)
+        ";
+	    $maxAttempts = 10;
+        while( !$kikUser && $maxAttempts-- > 0 ){
+	        $anyUser = $this->chooseKikUser();
+	        if( $anyUser ){
+	            $this->beginTransaction();
+	            try{
+	                $params = array( $anyUser );
+                    $stmt = $this->prepareAndExecute( $sql, $params );
+                    $this->commit();
+                    $time = time();
+                    $sql = "
+                    	update growth.kik_users set last_update = $time
+                    	where username = ?
+                    ";
+                    $params = array( $anyUser );
+                    $stmt = $this->prepareAndExecute( $sql, $params );
+                    $kikUser = $anyUser;
+	            } catch( Exception $e ){
+	                $this->rollback();
+	            }
+	        } else {
+	            // break;
+	        }
+	    }
+        
+        return $kikUser;
+	}
+/*	
+stdClass Object
+(    
+ 	[username] => woggywoowoo
+    [pic] => 
+    [thumbnail] => 
+    [fullName] => woogy Woowoo
+    [firstName] => woogy
+    [lastName] => Woowoo
+)
+*/
+	public function createKikUser( $input ){
+	    $sql = "
+	    	insert into growth.kik_reg_users
+	    	( username, pic, thumbnail, firstName, lastName )
+	    	values
+	    	(?,?,?,?,?)
+	    	on duplicate key update appOpens = appOpens + 1
+	    ";
+        $params = array( $input->username, $input->pic, $input->thumbnail, $input->firstName, $input->lastName );
+        $this->prepareAndExecute( $sql, $params );
+	}
+	
+	public function logKikSend( $input ){
+	    $sql = "
+	    	insert ignore into growth.kik_sends
+	    	( source, target )
+	    	values
+	    	(?,?)
+	    ";
+        $params = array( $input->source, $input->target );
+        $this->prepareAndExecute( $sql, $params );
+	}
+	
+	public function logKikOpen( $input ){
+	    $sql = "
+	    	insert ignore into growth.kik_opens
+	    	( source, target )
+	    	values
+	    	(?,?)
+	    ";
+        $params = array( $input->source, $input->target );
+        $this->prepareAndExecute( $sql, $params );
+	}
 }
