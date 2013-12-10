@@ -163,16 +163,20 @@ class BIM_Report{
     public static function getStats( ){
         $totalUsers = self::getTotalUsers($startDate, $endDate);
         $sql = "
-			select count(distinct creator_id) as 'unique_users', date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Selfie creates' as type from `hotornot-dev`.tblChallenges where added > '2013-11-25 17:00:00' and is_verify != 1 group by day 
-				union 
-			(select count(distinct user_id) as 'unique_users', date_format(convert_tz(from_unixtime(joined),'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Selfie joins' as type from `hotornot-dev`.tblChallengeParticipants where from_unixtime(joined) > '2013-11-25 17:00:00' group by day) 
-				union 
-			select count(distinct id) as 'unique_users' , date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day, count(*) as count, 'FR Completes' as type from `hotornot-dev`.tblUsers where added > '2013-11-25 17:00:00' and username not regexp '[0-9]{10}' group by day 
-				union 
-			(select count(distinct id) as 'unique_users' , date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day, count(*) as count, 'FR Begins' as type from `hotornot-dev`.tblUsers where added > '2013-11-25 17:00:00' group by day ) 
-				union 
-			(select count(distinct user_id) as 'unique_users', date_format(convert_tz(from_unixtime(added),'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Verifies' as type from `hotornot-dev`.tblFlaggedUserApprovals where added > unix_timestamp('2013-11-25 17:00:00') group by day) 
-			order by day desc,type;
+            (select count(distinct creator_id) as 'unique_users', date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Selfie creates' as type from `hotornot-dev`.tblChallenges where added > '2013-11-25 17:00:00' and is_verify != 1 group by day)
+                union 
+            (select count(distinct user_id) as 'unique_users', date_format(convert_tz(from_unixtime(joined),'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Selfie joins' as type from `hotornot-dev`.tblChallengeParticipants where from_unixtime(joined) > '2013-11-25 17:00:00' group by day)
+                union 
+            (select count(distinct id) as 'unique_users' , date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day, count(*) as count, 'FR Completes' as type from `hotornot-dev`.tblUsers where added > '2013-11-25 17:00:00' and username not regexp '[0-9]{10}' group by day)
+                union 
+            (select count(distinct id) as 'unique_users' , date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day, count(*) as count, 'FR Begins' as type from `hotornot-dev`.tblUsers where added > '2013-11-25 17:00:00' group by day )
+                union 
+            (select count(distinct user_id) as 'unique_users', date_format(convert_tz(from_unixtime(added),'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Verifies' as type from `hotornot-dev`.tblFlaggedUserApprovals where added > unix_timestamp('2013-11-25 17:00:00') group by day)
+            	union
+			(select count(distinct user_id) as 'unique_users', date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Likes' as type from `hotornot-dev`.tblChallengeVotes where added > '2013-11-25 17:00:00' group by day)
+				union
+			(select count(distinct user_id) as 'unique_users', date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Deactivates' as type from `hotornot-dev`.user_archive where added > '2013-11-25 17:00:00' group by day)
+            order by day desc,type;
         ";
         $dao = new BIM_DAO_Mysql( BIM_Config::db() );
         $stmt = $dao->prepareAndExecute( $sql );
@@ -214,7 +218,7 @@ class BIM_Report{
             	</td>
             	</tr>
             ";
-            if( ($n % 5) == 0 ){
+            if( ($n % 7) == 0 ){
                 echo "\n<tr><td colspan=4></tr>\n";
             }
             $n++;
