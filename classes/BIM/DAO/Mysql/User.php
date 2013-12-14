@@ -688,14 +688,15 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
 	        $letter = $letters[ $idx ];
 	        $where[] = " username like '$letter%'";
 	    }
+	    // $where = array(); uncommenting this will turn off the random nature
 	    $where = join( ' or ', $where );
-	    
 	    $oneWeekAgo = time() - (86400 * 7);
         $sql = "
             select k.username 
             from growth.kik_users as k
             where last_update <= $oneWeekAgo
-            and ($where)
+            -- and ($where)
+            order by added desc
             limit 1 
         ";
         
