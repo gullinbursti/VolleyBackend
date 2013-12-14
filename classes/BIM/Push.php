@@ -96,26 +96,35 @@ class BIM_Push{
      */
     public static function shoutoutPush( $shouterId, $shouteeId, $volleyId ){
         $conf = BIM_Config::app();
+        $shouter = BIM_Model_User::get($shouterId);
+        $shoutee = BIM_Model_User::get($shouteeId);
         if( empty( $conf->team_volley_id  ) || $shouter->id != $conf->team_volley_id ){
-            $shouter = BIM_Model_User::get($shouterId);
             $shouterNsg = "Selfieclub: @$shouter->username gave a shoutout to @$shoutee->username!";
             $params = (object) array('userID' => $shouterId);
             $shouterFollowers = BIM_App_Social::getFollowers( $params );
+            $ids = array();
             foreach( $shouterFollowers as $follower ){
-                $type = 3;
+                $ids[] = $follower->user->id;
+            }
+            $shouterFollowers = BIM_Model_User::getMulti( $ids );
+            $type = 3;
+            foreach( $shouterFollowers as $follower ){
                 if( $follower->canPush() && !empty( $follower->device_token ) ){
                     self::send($follower->device_token, $shouterNsg, $type, $volleyId ); 
                 }
             }
         }
         
-        $shoutee = BIM_Model_User::get($shouteeId);
         $shouteeNsg = "Yo! Your Selfie got a shoutout from @$shouter->username!";
         $params->userID = $shouteeId;
         $shouteeFollowers = BIM_App_Social::getFollowers($params);
-        $type = 3;
+        $ids = array();
         foreach( $shouteeFollowers as $follower ){
-            $type = 1;
+            $ids[] = $follower->user->id;
+        }
+        $shouteeFollowers = BIM_Model_User::getMulti( $ids );
+        $type = 1;
+        foreach( $shouteeFollowers as $follower ){
             if( $follower->canPush() && !empty( $follower->device_token ) ){
                 self::send($follower->device_token, $shouterNsg, $type, $volleyId ); 
             }

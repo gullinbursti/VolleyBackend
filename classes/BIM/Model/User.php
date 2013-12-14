@@ -13,6 +13,9 @@ class BIM_Model_User{
             foreach( $params as $prop => $value ){
                 $this->$prop = $value;
             }
+            
+            $this->abuse_ct = 0;
+            
             if( $this->age < 0 ){
                 //set the default age to 17
                 $date = new DateTime();
@@ -141,7 +144,8 @@ class BIM_Model_User{
     }
         
     public function isSuspended(){
-        return (!empty( $this->abuse_ct ) && $this->abuse_ct >= 20);
+        return false;
+        // return (!empty( $this->abuse_ct ) && $this->abuse_ct >= 20);
     }
     
     public function isApproved(){
@@ -155,7 +159,7 @@ class BIM_Model_User{
 	 */
 	public function flag( $volleyId, $userId, $count ){
         $count = (int) $count;
-        $this->abuse_ct += $count;
+        $this->abuse_ct = 0; //+= $count;
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
         $dao->flag( $volleyId, $this->id, $userId, $count );
         $this->purgeFromCache();
@@ -386,7 +390,7 @@ delete from tblUsers where username like "%yoosnapyoo";
     public function updateAbuseCount( $count ){
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
         $dao->updateAbuseCount( $this->id, $count );
-        $this->abuse_ct = $count;
+        $this->abuse_ct = 0; //$count;
         $this->purgeFromCache();
     }
     
