@@ -944,7 +944,7 @@ class BIM_Model_Volley{
             $hashTag = "#SHOUTOUT >> ".$volley->creator->username;
             
             $shoutout = BIM_Model_Volley::create( $creatorId, $hashTag, $imgUrlPrefix );
-            self::logShoutout($shoutout, $volley->creator->id);
+            self::logShoutout($shoutout->id, $volley->id, $volley->creator->id);
             BIM_Push::shoutoutPush( $creatorId, $volley->creator->id, $shoutout->id );
         }
         return $shoutout;
@@ -967,17 +967,17 @@ class BIM_Model_Volley{
             BIM_Utils::copyImage( $imgUrl, $name );
             BIM_Utils::processImage($imgUrlPrefix);
             
-            $hashTag = "#shoutout";
+            $hashTag = "#SHOUTOUT >> ".$user->username;
             
             $shoutout = BIM_Model_Volley::create( $creatorId, $hashTag, $imgUrlPrefix );
             BIM_Push::shoutoutPush( $creatorId, $user->id, $shoutout->id );
-            self::logShoutout($shoutout, $user->id);
+            self::logShoutout( $shoutout->id, 0, $user->id );
         }
         return $shoutout;
     }
     
-    private static function logShoutout( $shoutout, $targetId ){
+    private static function logShoutout( $shoutoutId, $targetVolleyId, $targetId ){
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-        $dao->logShoutout( $shoutout->id, $shoutout->creator->id, $targetId );
+        $dao->logShoutout( $shoutoutId, $targetVolleyId, $targetId );
     }
 }
