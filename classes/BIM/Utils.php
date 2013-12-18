@@ -43,7 +43,7 @@ class BIM_Utils{
         $c = BIM_Config::sms();
         $iv = base64_decode($c->blowfish->b64iv);
         $dec = mcrypt_decrypt( MCRYPT_BLOWFISH, $c->blowfish->key, base64_decode( $encryptedNumber ), MCRYPT_MODE_CBC, $iv );
-        return $dec;
+        return trim($dec);
     }
     
     public static function getRequest(){

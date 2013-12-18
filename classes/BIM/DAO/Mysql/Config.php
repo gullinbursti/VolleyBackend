@@ -18,7 +18,7 @@ class BIM_DAO_Mysql_Config extends BIM_DAO_Mysql{
 		$sql = "
 			insert into `hotornot-dev`.boot_conf
 			(data, type) values (?,?)
-			on duplicate key update data = ?, last_update = now()
+			on duplicate key update data = ?
 		";
 		$params = array( $data, $type, $data );
 		$this->prepareAndExecute( $sql, $params );

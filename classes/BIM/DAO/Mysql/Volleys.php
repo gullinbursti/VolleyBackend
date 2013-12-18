@@ -1145,18 +1145,18 @@ WHERE is_verify != 1
     }
     
     public function deleteImageByUserIdAndImage( $userId, $imgUrl ){
-        $sql = "
-        	delete from `hotornot-dev`.tblChallengeParticipants
-        	where img = ? and user_id = ?
-        ";
         $params = array( $imgUrl, $userId );
-        $this->prepareAndExecute( $sql, $params );
         
         $sql = "
-        	delete from `hotornot-dev`.tblChallenges
-        	where creator_img = ? and creator_id = ?
+            delete from `hotornot-dev`.tblChallengeParticipants
+            where img = ? and user_id = ?
         ";
-        $params = array( $imgUrl, $userId );
+        $stmt = $this->prepareAndExecute( $sql, $params );
+        
+        $sql = "
+            delete from `hotornot-dev`.tblChallenges
+            where creator_img = ? and creator_id = ?
+        ";
         $this->prepareAndExecute( $sql, $params );
     }
     

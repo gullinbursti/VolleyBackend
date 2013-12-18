@@ -565,8 +565,8 @@ class BIM_App_Admin{
     }
     
     public static function suspendUser( $params ){
-        $userId = $params[0];
-        BIM_Model_User::purgeById($userId);
+        $userId = trim($params[0]);
+        BIM_Model_User::archiveUser($userId);
     }
     
     public static function manageVolleyContent(){

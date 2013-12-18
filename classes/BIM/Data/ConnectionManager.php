@@ -23,7 +23,7 @@ class BIM_Data_ConnectionManager
 	 *
 	 * @var BIM_VO
 	 */
-	protected static $conns = null;
+	public static $conns = null;
 
 	/**
 	 * Singleton pattern implementation makes "new" unavailable

@@ -680,23 +680,12 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
 	}
 
 	private function chooseKikUser( ){
-	    $letters = array('a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','z');
-	    $letterIdxs = array_rand( $letters, 1 );
-	    if(!is_array($letterIdxs) ) $letterIdxs = array( $letterIdxs );
-	    $where = array();
-	    foreach( $letterIdxs as $idx ){
-	        $letter = $letters[ $idx ];
-	        $where[] = " username like '$letter%'";
-	    }
-	    // $where = array(); uncommenting this will turn off the random nature
-	    $where = join( ' or ', $where );
 	    $oneWeekAgo = time() - (86400 * 7);
         $sql = "
             select k.username 
             from growth.kik_users as k
             where last_update <= $oneWeekAgo
-            -- and ($where)
-            order by added desc
+            order by created_at desc
             limit 1 
         ";
         

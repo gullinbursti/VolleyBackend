@@ -22,11 +22,11 @@ class BIM_DAO_Mysql_Growth_Kik extends BIM_DAO_Mysql_Growth{
     public function saveKikUser( $data ){
         $sql = "
         	INSERT IGNORE INTO growth.kik_users
-        	(id,username,avatar,shout_pic)
+        	(id,username,avatar,shout_pic,created_at,network)
         	values
-        	(?,?,?,?)
+        	(?,?,?,?,?,?)
         ";
-        $params = array( $data->id, $data->username, $data->avatar, $data->shout_pic );
+        $params = array( $data->id, $data->username, $data->avatar, $data->shout_pic, $data->created_at, $data->network );
         $this->prepareAndExecute( $sql, $params );
     }
     
