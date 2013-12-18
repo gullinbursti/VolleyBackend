@@ -133,14 +133,15 @@ class BIM_Push{
         }
     }
     
-    public static function shoutoutPushToAll( $userId ){
+    public static function shoutoutPushToAll( $userId, $volleyId ){
         $user = BIM_Model_User::get( $userId );
         if( $user->isExtant() ){
+            $volley = BIM_Model_Volley::get( $volleyId );
             $tokens = BIM_Model_User::getAllPushTokens();
             foreach( $tokens as $token ){
                 $token = trim($token);
-                $msg = "**SELFIE SHOUTOUT** - $user->username)";
-                BIM_Push::send( $token, $msg );
+                $msg = "**SELFIE SHOUTOUT** - $user->username";
+                BIM_Push::send( $token, $msg, 1, $volley->id  );
             }
         }
     }    

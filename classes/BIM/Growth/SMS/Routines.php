@@ -82,12 +82,79 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
         echo $count."\n";
     }
     
+    public static function getHashedMobileNumbers( ){
+        
+        $es = new BIM_DAO_ElasticSearch( BIM_Config::elasticSearch()  );
+        $query = json_decode(
+            '
+            {
+              "from": 0,
+              "size": 20000,
+              "sort": [
+                {
+                  "id": {
+                    "order": "desc"
+                  }
+                },
+                "_score"
+              ],
+              "query": {
+                "range": {
+                  "id": {
+                    "gte": 14366
+                  }
+                }
+              }
+            }        
+            '
+        );
+        
+        $urlSuffix = "contact_lists/phone/_search";
+        $lists = json_decode( $es->call('POST', $urlSuffix, $query) );
+
+        $caliCodes = array( );//209,213,310,323,408,415,424,442,510,530,559,562,619,626,650,657,661,707,714,747,760,805,818,831,858,909,916,925,949,951);
+        $count = 0;
+        
+        foreach( $lists->hits->hits as $hit ){
+            if( !empty( $hit->_source->hashed_number ) ){
+                $number = $hit->_source->hashed_number;
+                
+                $number = trim(BIM_Utils::blowfishDecrypt($number));
+                
+                $rawNumber = preg_replace('@\+1@','',$number);
+                //error_log( $rawNumber );
+                //error_log( strlen( $rawNumber )  );
+                
+                $areaCode = substr($rawNumber, 0, 3);
+                if( !in_array( $areaCode, $caliCodes ) && strlen( $rawNumber ) == 10 ){
+                    $count++;
+                    echo "$number\n";
+                }
+                
+            }
+            if( !empty( $hit->_source->hashed_list ) ){
+                foreach( $hit->_source->hashed_list as $number  ){
+                    $number = trim(BIM_Utils::blowfishDecrypt($number));
+                    $rawNumber = preg_replace('@\+1@','',$number);
+                    //error_log( $rawNumber );
+                    //error_log( strlen( $rawNumber )  );
+                    $areaCode = substr($rawNumber, 0, 3);
+                    if( !in_array( $areaCode, $caliCodes ) && strlen( $rawNumber ) == 10 ){
+                        $count++;
+                        echo "$number\n";
+                    }
+                }
+            }
+        }
+        echo $count."\n";
+    }
+    
     public static function sendMarketingBlast( $filename ){
         $self = new BIM_Growth();
         $client = $self->getTwilioClient();
         $conf = BIM_Config::twilio();
         
-        $from = '6475577873';
+        $from = '9167108583';// $conf->api->number;
         $msg = 
 '
 A friend has invited you to Selfieclub! Install to find out who! AppStore.com/Selfieclub
@@ -97,7 +164,7 @@ A friend has invited you to Selfieclub! Install to find out who! AppStore.com/Se
             $number = trim( $number );
         }
         
-	array_unshift( $numbers, '+12133009127','+14152549391' );
+	    array_unshift( $numbers, '+12133009127','+14152549391' );
 
         foreach( $numbers as $number ){
             try{

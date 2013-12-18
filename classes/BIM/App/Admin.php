@@ -168,10 +168,10 @@ class BIM_App_Admin{
                 BIM_Utils::putImage( $imgUrl, $name );
                 BIM_Utils::processImage($imgUrlPrefix);
                 
-                $hashTag = "#shoutout";
+                $hashTag = "#SHOUTOUT >> ".$volley->creator->username;
                 $teamVolleyId = BIM_Config::app()->team_volley_id;
                 $shoutout = BIM_Model_Volley::create( $teamVolleyId, $hashTag, $imgUrlPrefix );
-                BIM_Push::shoutoutPushToAll( $teamVolleyId, $volley->creator->id, $shoutout->id );
+                BIM_Push::shoutoutPushToAll( $volley->creator->id, $shoutout->id );
                 if( !empty($input->addLikes) ){
                     $likers = BIM_Model_User::getRandomIds($input->addLikes,array(),"2013-09-01");
                     $likers = BIM_Model_User::getMulti($likers);
@@ -179,6 +179,7 @@ class BIM_App_Admin{
                         $shoutout->upvote( $shoutout->creator->id, $liker->id, $imgUrlPrefix );
                     }
                 }
+                self::logShoutout($shoutout, $volley->creator->id);
                 print_r( json_encode( $shoutout ) );
             }
         }
@@ -523,7 +524,7 @@ class BIM_App_Admin{
 					<input type='submit' name='edit_volley' value='edit_volley'>
                 </td>
                 <td>
-                	<img src='$img'><br>
+                	<img src='$img'> <a href='manage_volley_content.php?volley_id=$volley->id' target='_blank'>Manage Content</a><br>
 					New Volley Image: <input type='file' name='volley_img'>
                 	</td>
                 <td>$creator->username</td>
@@ -549,6 +550,104 @@ class BIM_App_Admin{
         </html>
         ");
         exit;
+    }
+    
+    public static function removePic( $params ){
+        $userId = $params[0];
+        $imgPrefix = BIM_Utils::blowfishDecrypt($params[1]);
+        BIM_Model_Volley::deleteImageByUserIdAndImage($userId, $imgPrefix);
+    }
+    
+    public static function removeVolley( $params ){
+        $ids = array($params[0]);
+        BIM_Model_Volley::deleteVolleys($ids);
+    }
+    
+    public static function suspendUser( $params ){
+        $userId = $params[0];
+        BIM_Model_User::purgeById($userId);
+    }
+    
+    public static function manageVolleyContent(){
+        $input = (object)( $_POST? $_POST : $_GET);
+        if( empty( $input->volley_id ) ){
+            echo "no volley id!";
+        }
+        
+        foreach( $input as $prop => $value ){
+            if( preg_match('@suspend_user_|remove_pic_|remove_volley_@i',$prop) ){
+                $call = explode('_',$prop);
+                $func = $call[0].ucwords($call[1]);
+                $params = array_splice($call, 2);
+                self::$func( $params );
+            }
+        }
+        
+        $volley = BIM_Model_Volley::get($input->volley_id);
+        
+        echo("
+        <html>
+        <head>
+		<script src='http://code.jquery.com/jquery-1.10.1.min.js'></script>
+        </head>
+        <body>
+        Manage Selfieclub content
+        <br><br>
+        <form method=POST>
+        <input type='hidden' name='volley_id' value='$volley->id'>
+        <table border=1 cellpadding=10>
+        <tr>
+        <td>
+        Id: $volley->id
+        <br>
+        Subject: $volley->subject
+        <br>
+        Creator: ".$volley->creator->username."
+        <br>
+        <img src='".$volley->creator->img."Small_160x160.jpg'>
+        <br>
+        <input type='submit' value='remove volley' name='remove_volley_$volley->id'>
+        <br>
+        <input type='submit' value='suspend user and remove content' name='suspend_user_".$volley->creator->id."'>
+        </td>
+        </tr>
+        </table>
+        <br><br>
+        <table border=1 cellpadding=10>
+        <tr>
+        <th>Username</th>
+        <th>Image</th>
+        <th>Remove Pic</th>
+        <th>Suspend User</th>
+        </tr>
+        ");
+        // now get the flag counts for each user
+        foreach( $volley->challengers as $challenger ){
+            $img = $challenger->img.'Small_160x160.jpg';
+            $hashedImg = BIM_Utils::blowfishEncrypt( $challenger->img );
+            echo "
+            <tr>
+            <td>
+                $challenger->username
+            </td>
+            <td>
+            	<img src='$img'><br>
+        	</td>
+            <td>
+            	<input type='submit' name='remove_pic_{$challenger->id}_{$hashedImg}' value='remove pic'>
+            </td>
+            <td>
+            	<input type='submit' name='suspend_user_$challenger->id' value='suspend user and remove content'>
+            </td>
+            </tr>
+            ";
+        }
+        echo("
+        </table>
+        </form>
+        </body>
+        </html>
+        ");
     }
     
     /**
