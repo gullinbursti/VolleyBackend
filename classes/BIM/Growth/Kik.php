@@ -13,6 +13,46 @@ Accept-Language: en-US,en;q=0.8
  *
  */
 class BIM_Growth_Kik extends BIM_Growth{
+    
+    public static function crawlStickerfy(){
+        $self = new self();
+        $url = "https://kik.stickerfy.us/find_users.json?before=null";
+        $args = array();
+        
+        $headers = array(
+            'Content-Type: text/plain;charset=UTF-8',
+            'Referer: https://kik.stickerfy.us/',
+            'Host: kik.stickerfy.us',
+            'Accept: application/jsom',
+            'Accept-Encoding: gzip,deflate,sdch',
+            'Accept-Language: en-US,en;q=0.8'
+        );
+        
+        $dao = new BIM_DAO_Mysql_Growth_Kik( BIM_Config::db() );
+        while( $url ){
+            $data = $self->get( $url, $args, false, $headers );
+            $data = json_decode( $data );
+            if( !empty( $data->users ) ){
+                foreach( $data->users as $user ){
+                    $userData = (object) array(
+                        'id' => $user->id,
+                        'username' => $user->username,
+                        'avatar' => $user->pic,
+                        'shout_pic' => '',
+                    );
+                    //print_r( $userData );
+                    $dao->saveKikUser($userData);
+                }
+                $lastUser = end($data->users);
+                $timeParam = $lastUser->timestamp;
+                $url = "https://kik.stickerfy.us/find_users.json?before=$timeParam";
+                self::sleep(1,"getting $url next");
+            } else {
+                break;
+            }
+        }
+    }
+    
     public static function getHeyHeys(){
         $self = new self();
         $url = "http://kik.heyhey.us/zerver/API/getFirstHeyHeys";
@@ -27,11 +67,11 @@ class BIM_Growth_Kik extends BIM_Growth{
             'Accept-Language: en-US,en;q=0.8'
         );
         
+        $dao = new BIM_DAO_Mysql_Growth_Kik( BIM_Config::db() );
         while( $url ){
             $data = json_decode( $self->post( $url, $args, false, $headers, true ) );
             if( !empty( $data->data[0]->shouts ) ){
                 foreach( $data->data[0]->shouts as $shout ){
-                    $dao = new BIM_DAO_Mysql_Growth_Kik( BIM_Config::db() );
                     $dao->saveKikUser($shout);
                 }
                 if( $data->data[0]->has_more_results ){

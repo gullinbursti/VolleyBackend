@@ -113,9 +113,10 @@ class BIM_Growth{
 	}
 	
 	public function post( $url, $args = array(), $fullResponse = false, $headers = array(), $isJson = false ){
+        $queryStr = '';
 	    if( !$isJson ){
             $queryStr = http_build_query($args);
-	    } else {
+	    } else if(!empty( $args[0] )) {
             $queryStr = $args[0];
 	    }
         $headers[] = 'Content-Length: '.strlen($queryStr);
