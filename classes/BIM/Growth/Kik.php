@@ -113,7 +113,7 @@ class BIM_Growth_Kik extends BIM_Growth{
         );
         
         $dao = new BIM_DAO_Mysql_Growth_Kik( BIM_Config::db() );
-        $daysAgo = time() - (86400 * 7);
+        $daysAgo = time() - (86400 / 8);
         while( $url ){
             $data = $self->get( $url, $args, false, $headers );
             $data = json_decode( $data );
