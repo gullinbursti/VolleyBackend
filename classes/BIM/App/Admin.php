@@ -168,7 +168,7 @@ class BIM_App_Admin{
                 BIM_Utils::putImage( $imgUrl, $name );
                 BIM_Utils::processImage($imgUrlPrefix);
                 
-                $hashTag = "#SHOUTOUT >> ".$volley->creator->username;
+                $hashTag = "#shoutout";
                 $teamVolleyId = BIM_Config::app()->team_volley_id;
                 $shoutout = BIM_Model_Volley::create( $teamVolleyId, $hashTag, $imgUrlPrefix );
                 self::logShoutout( $shoutout->id, $volley->id, $volley->creator->id );
