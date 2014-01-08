@@ -355,6 +355,7 @@ class BIM_Controller_Users extends BIM_Controller_Base {
     }
     
     public function logKikSend(){
+        //return true;
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty($input->source)  && !empty( $input->target ) ){
             return BIM_Model_User::logKikSend( $input );
@@ -363,6 +364,7 @@ class BIM_Controller_Users extends BIM_Controller_Base {
     }
     
     public function logKikOpen(){
+        //return true;
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty($input->source) && !empty( $input->target ) ){
             return BIM_Model_User::logKikOpen( $input );

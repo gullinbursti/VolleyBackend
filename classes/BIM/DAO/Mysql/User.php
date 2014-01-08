@@ -681,12 +681,13 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
 
 	private function chooseKikUser( ){
 	    $oneWeekAgo = time() - (86400 * 7);
+	    $randLimit = mt_rand(0,20);
         $sql = "
             select k.username 
             from growth.kik_users as k
             where last_update <= $oneWeekAgo
             order by created_at desc
-            limit 1 
+            limit $randLimit,1
         ";
         
         $stmt = $this->prepareAndExecute( $sql );
@@ -701,7 +702,7 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         	values
         	(?)
         ";
-	    $maxAttempts = 10;
+	    $maxAttempts = 2;
         while( !$kikUser && $maxAttempts-- > 0 ){
 	        $anyUser = $this->chooseKikUser();
 	        if( $anyUser ){
