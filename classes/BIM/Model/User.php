@@ -994,6 +994,17 @@ delete from tblUsers where username like "%yoosnapyoo";
     public static function createKikUser( $input ){
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
         return $dao->createKikUser( $input );
+        /*
+        $email = $input->username.'@builtinmenlo.com';
+        $adId = 'kik_'.uniqid(true);
+        $user = BIM_Model_User::create($adId);
+        $app = new BIM_App_Users();
+        $deviceToken = !empty($input->device_token) ? $input->device_token : 'kik_'.uniqid(true);
+        $birthdate = '1970-01-01';
+        $app->updateUsernameAvatarFirstRun($user->id, $input->username, $input->pic, $birthdate, $email, false, $deviceToken);
+        $user->username = $input->username;
+        return $user;
+        */
     }
     
     public static function logKikSend( $input ){

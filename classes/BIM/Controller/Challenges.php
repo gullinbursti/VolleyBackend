@@ -189,6 +189,15 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
     public function join(){
         $uv = null;
         $input = (object) ($_POST ? $_POST : $_GET);
+        
+        file_put_contents('/tmp/upload', print_r(array($input),1) );
+        file_put_contents('/tmp/uploadImg', $input->imgData );
+        file_put_contents('/tmp/uploadDecoded', base64_decode( $input->imgData ) );
+        
+        if( !empty($input->imgData) ){
+            // here we need to upload the data to amazon
+        }
+        
         if (!empty( $input->userID) && !empty($input->challengeID) && !empty($input->imgURL)) {
             $input->imgURL = $this->normalizeVolleyImgUrl($input->imgURL);
             $userId = $this->resolveUserId( $input->userID );

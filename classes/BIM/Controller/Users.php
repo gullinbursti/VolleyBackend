@@ -347,7 +347,9 @@ class BIM_Controller_Users extends BIM_Controller_Base {
     public function createKikUser(){
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty($input->username) ){
-            return BIM_Model_User::createKikUser( $input );
+            if( BIM_API_Kik::authKikUser($input) ){
+                return BIM_Model_User::createKikUser( $input );
+            }
         }
 	    return true;
     }
