@@ -111,6 +111,10 @@ class BIM_Controller{
 	    if( !empty( $sessionConf->use ) ){
             $OK = false;	        
             $request = BIM_Utils::getRequest();
+            
+            $createUser = (strtolower( $request->controllerClass ) == 'bim_controller_users') 
+                            && ( strtolower( $request->method ) == 'create' );
+                            
             $newUser = (strtolower( $request->controllerClass ) == 'bim_controller_users') 
                             && ( strtolower( $request->method ) == 'submitnewuser' );
 
@@ -120,7 +124,7 @@ class BIM_Controller{
             $twilio = (strtolower( $request->controllerClass ) == 'bim_controller_users') 
                             && ( strtolower( $request->method ) == 'twiliocallback' );
                             
-            if( $twilio || $getSelfies || $newUser || BIM_Utils::getSessionUser(true) ){
+            if( $createUser || $twilio || $getSelfies || $newUser || BIM_Utils::getSessionUser(true) ){
                 $OK = true;
             }
 	    }
