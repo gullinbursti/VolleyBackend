@@ -531,7 +531,27 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         return $this->lastInsertId;
     }
     
-    public function create( $username, $adId ){
+    public function create( $username, $adId, $email = null ){
+		// add new user	
+        $params = array( $username, $adId );
+        $cols = "username, device_token, fb_id, gender, bio, website, paid, points, notifications, last_login, added, adid";
+		$vals = "?, null, '', 'N', '', '', 'N', '0', 'Y', CURRENT_TIMESTAMP, NOW(), ?";
+		if( $email ){
+		    $cols = "$cols, email";
+		    $vals = "$vals, ?";
+		    $params[] = $email;
+		}		
+		$query = "
+			INSERT INTO `hotornot-dev`.tblUsers 
+			( $cols ) 
+			VALUES ( $vals )
+		";
+        $stmt = $this->prepareAndExecute($query, $params);
+        
+		return $this->lastInsertId;
+    }
+    
+    public function createOld( $username, $adId ){
 		// add new user			
 		$query = "
 			INSERT INTO `hotornot-dev`.tblUsers 
