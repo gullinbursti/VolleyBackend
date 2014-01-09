@@ -180,14 +180,14 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
      */
     public function flag( $volleyId, $targetId, $userId, $count ){
         // give the target the appropriate nu,ber of flags
-        $count = (int) $count;
-		$sql = "update `hotornot-dev`.tblUsers set abuse_ct = abuse_ct + ? where id = ?";
-		$params = array( $count, $targetId );
-		$stmt = $this->prepareAndExecute($sql,$params);
+        //$count = (int) $count;
+		//$sql = "update `hotornot-dev`.tblUsers set abuse_ct = abuse_ct + ? where id = ?";
+		//$params = array( $count, $targetId );
+		//$this->prepareAndExecute($sql,$params);
 		
 		$sql = "update `hotornot-dev`.tblChallenges set updated = now() where id = ?";
 		$params = array( $volleyId );
-		$stmt = $this->prepareAndExecute($sql,$params);
+		$this->prepareAndExecute($sql,$params);
 		
 		// update the users participant record that they have voted
 		$sql = "
@@ -196,7 +196,7 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
 			 VALUES (?,?,?,?)
 		";
 		$params = array( $count, $userId, $volleyId, time() );
-		$stmt = $this->prepareAndExecute($sql,$params);
+		$this->prepareAndExecute($sql,$params);
     }
     
     public function getTotalVotes( $userId ){
@@ -580,6 +580,7 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
 		$query = '
 			SELECT id from `hotornot-dev`.tblUsers 
 			WHERE username LIKE ? 
+				and username not regexp "[0-9]{10}"
 			order by last_login desc
 			limit 64
 		';

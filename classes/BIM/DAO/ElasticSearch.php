@@ -107,16 +107,25 @@ class BIM_DAO_ElasticSearch
             }
             $end = microtime(1);
             if( empty( self::$profile ) ){
-                self::$profile = array();
+                self::$profile = array(
+                    '__total__' => 0,
+                    '__time__' => 0
+                );
             }
             if( empty( self::$profile[ $q ] ) ){
                 self::$profile[ $q ] = array();
                 self::$profile[ $q ]['total'] = 0;
                 self::$profile[ $q ]['time'] = 0;
             }
+            
+            $time = ($end - $start);
+            
             self::$profile[ $q ]['total']++;
-            self::$profile[ $q ]['time'] += ($end - $start);
+            self::$profile[ $q ]['time'] += $time;
 
+            self::$profile['__total__']++;
+            self::$profile['__time__'] += $time;
+            
             $bt = debug_backtrace();
             $callTree = join( ' => ', array( $bt[2]['class'].':'.$bt[2]['function'], $bt[1]['class'].':'.$bt[1]['function'] ) );
             if( !isset( self::$profile[ $q ][$callTree] ) ){
