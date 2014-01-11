@@ -231,15 +231,48 @@ class BIM_Utils{
     }
 	
     public static function putImage( $image, $name, $bucket = 'hotornot-challenges' ){
-            if( is_string($image) ){
-                $image = new Imagick( $image );
-            }
-            $conf = BIM_Config::aws();
-            S3::setAuth($conf->access_key, $conf->secret_key);
-            S3::putObjectString($image->getImageBlob(), $bucket, $name, S3::ACL_PUBLIC_READ, array(), 'image/jpeg' );
+        if( is_string($image) ){
+            $image = new Imagick( $image );
+        }
+        $conf = BIM_Config::aws();
+        S3::setAuth($conf->access_key, $conf->secret_key);
+        S3::putObjectString($image->getImageBlob(), $bucket, $name, S3::ACL_PUBLIC_READ, array(), 'image/jpeg' );
 	}            
 	
-    public static function processImage( $imgPrefix, $bucket = 'hotornot-challenges' ){
+    public static function putBase64Image( &$imgStr, $name, $bucket = 'hotornot-challenges' ){
+        $blob = base64_decode( 
+            str_replace('data:image/jpeg;base64,', '', $imgStr )
+        );
+        self::putImageBlob($blob, $name, $bucket);
+	}
+	
+    public static function putBase64ChallengeImage( &$imgStr, $extra = '' ){
+        $base = 'https://d1fqnfrnudpaz6.cloudfront.net/';
+        $name = uniqid().'_'.time();
+        if($extra) $name .= "_$extra";
+        $extension = 'Large_640x1136.jpg';
+        
+        $imageName = "{$name}{$extension}";
+        self::putBase64Image($imgStr, $imageName);
+        
+        $data = (object) array(
+            'base' => $base,
+            'name' => $name,
+            'extension' => $extension,
+        	'url' => "{$base}{$name}{$extension}",
+        	'urlSuffix' => "{$base}{$name}",
+        	'imageName' => "{$name}{$extension}",
+        );
+        return $data;
+	}
+	
+	public static function putImageBlob( &$blob, $name, $bucket = 'hotornot-challenges' ){
+        $image = new Imagick();
+        $image->readimageblob($blob);
+        self::putImage($image, $name, $bucket);
+	}            
+	
+	public static function processImage( $imgPrefix, $bucket = 'hotornot-challenges' ){
         $image = self::getImage($imgPrefix);
         if( $image ){
             $conf = BIM_Config::aws();
@@ -253,6 +286,12 @@ class BIM_Utils{
             }
         }
         return (bool) $image;
+    }
+    
+    public static function processBase64Upload( &$imgStr, $allInfo = false ){
+        $data = self::putBase64ChallengeImage( $imgStr );
+        BIM_Jobs_Challenges::queueProcessImage($data->urlSuffix);
+        return $allInfo ? $data : $data->urlSuffix;
     }
     
     public static function processUserImage( $imgPrefix, $bucket = 'hotornot-avatars' ){

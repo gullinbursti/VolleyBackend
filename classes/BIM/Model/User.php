@@ -149,8 +149,8 @@ class BIM_Model_User{
     }
         
     public function isSuspended(){
-        return false;
-        // return (!empty( $this->abuse_ct ) && $this->abuse_ct >= 20);
+        //return false;
+        return (!empty( $this->abuse_ct ) && $this->abuse_ct >= 20);
     }
     
     public function isApproved(){
@@ -277,32 +277,73 @@ delete from tblUsers where username like "%yoosnapyoo";
      * @param unknown_type $adId
      */
     
-    public static function create( $adId ){
+    public static function create( $adId, $params = null ){
 			// default names
-			$defaultName_arr = array(
-				"snap4snap",
-				"picchampX",
-				"swagluver",
-				"coolswagger",
-				"yoloswag",
-				"tumblrSwag",
-				"instachallenger",
-				"hotbitchswaglove",
-				"lovepeaceswaghot",
-				"hotswaglover",
-				"snapforsnapper",
-				"snaphard",
-				"snaphardyo",
-				"yosnaper",
-				"yoosnapyoo"
-			);
-			
-			$rnd_ind = mt_rand(0, count($defaultName_arr) - 1);
-			$username = $defaultName_arr[$rnd_ind] . time();
+			$username = '';
+			if( empty( $params->username ) ){
+    			$defaultName_arr = array(
+    				"snap4snap",
+    				"picchampX",
+    				"swagluver",
+    				"coolswagger",
+    				"yoloswag",
+    				"tumblrSwag",
+    				"instachallenger",
+    				"hotbitchswaglove",
+    				"lovepeaceswaghot",
+    				"hotswaglover",
+    				"snapforsnapper",
+    				"snaphard",
+    				"snaphardyo",
+    				"yosnaper",
+    				"yoosnapyoo"
+    			);
+    			
+    			$rnd_ind = mt_rand(0, count($defaultName_arr) - 1);
+    			$username = $defaultName_arr[$rnd_ind] . time();
+			    $username = $username.'.'.uniqid(true);
+			} else {
+			    $username = $params->username;
+			}
         
-			$username = $username.'.'.uniqid(true);
 			$dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
-			$id = $dao->create($username, $adId);
+			$email = empty( $params->email ) ? null : $params->email;
+			$id = $dao->create($username, $adId, $email);
+			return self::get($id);
+    }
+    
+    public static function createOld( $adId ){
+			// default names
+			$username = '';
+			if( empty( $params->username ) ){
+    			$defaultName_arr = array(
+    				"snap4snap",
+    				"picchampX",
+    				"swagluver",
+    				"coolswagger",
+    				"yoloswag",
+    				"tumblrSwag",
+    				"instachallenger",
+    				"hotbitchswaglove",
+    				"lovepeaceswaghot",
+    				"hotswaglover",
+    				"snapforsnapper",
+    				"snaphard",
+    				"snaphardyo",
+    				"yosnaper",
+    				"yoosnapyoo"
+    			);
+    			
+    			$rnd_ind = mt_rand(0, count($defaultName_arr) - 1);
+    			$username = $defaultName_arr[$rnd_ind] . time();
+			    $username = $username.'.'.uniqid(true);
+			} else {
+			    $username = $params->username;
+			}
+        
+			$dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+			$email = empty( $params->email ) ? null : $params->email;
+			$id = $dao->create($username, $adId, $email);
 			return self::get($id);
     }
     
@@ -831,7 +872,28 @@ delete from tblUsers where username like "%yoosnapyoo";
                     $prop = $row->property;
                     $result->$prop = $row->value;
                 }
+            } else {
+                $result->ok = true;
             }
+        } else {
+            $result->email = $input->email;
+        }
+        return $result;
+    }
+    
+    public static function usernameOrEmailExistsOld( $input ){
+        $result = (object) array();
+        if( filter_var( $input->email, FILTER_VALIDATE_EMAIL) ){
+            $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+            $data = $dao->usernameOrEmailExists( $input );
+            if( $data ){
+                foreach( $data as $row ){
+                    $prop = $row->property;
+                    $result->$prop = $row->value;
+                }
+            }
+        } else {
+            $result->email = $input->email;
         }
         return $result;
     }
@@ -991,9 +1053,31 @@ delete from tblUsers where username like "%yoosnapyoo";
         return $dao->getRandomKikUser( );
     }
     
-    public static function createKikUser( $input ){
+    public static function getKikUser( $kikId ){
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
-        return $dao->createKikUser( $input );
+        $id = $dao->getKikUserId( $kikId );
+        $user = BIM_Model_User::get( $id );
+        $user->kik_id = $kikId;
+        return $user;
+    }
+    
+    public static function createKikUser( $input ){
+        $user = self::getKikUser( $input->username );
+        if( !$user->isExtant() ){
+            $email = $input->username.'@builtinmenlo.com';
+            $adId = 'kik_'.uniqid(true);
+            $user = self::create($adId);
+            $app = new BIM_App_Users();
+            $deviceToken = !empty($input->device_token) ? $input->device_token : 'kik_'.uniqid(true);
+            $birthdate = '1970-01-01';
+            $app->updateUsernameAvatarFirstRun($user->id, $input->username, $input->pic, $birthdate, $email, true, $deviceToken);
+            $user->username = $input->username;
+            
+            $input->bim_id = $user->id;
+            $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+            $dao->createKikUser( $input );
+        }
+        return $user;
     }
     
     public static function logKikSend( $input ){
@@ -1004,5 +1088,37 @@ delete from tblUsers where username like "%yoosnapyoo";
     public static function logKikOpen( $input ){
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
         return $dao->logKikOpen( $input );
+    }
+    
+    public static function getLatestKikUsers( ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        $kikUsers = $dao->getLatestKikUsers( );
+        
+        $bimIds = array();
+        foreach( $kikUsers as $kikUser )
+            $bimIds[] = $kikUser->bim_id;
+        $volleyDao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
+        $verifyVolleyIds = $volleyDao->getVerifyVolleyIdForUser($bimIds);
+        $volleys = BIM_Model_Volley::getMulti($verifyVolleyIds, true);
+        foreach( $kikUsers as $kikUser ){
+            foreach( $volleys as $volley ){
+                if( $volley->creator->id == $kikUser->bim_id ){
+                    $volley->creator->kik_id = $kikUser->username;
+                    $volley->creator->last_login = $kikUser->last_login;
+                    break;
+                }
+            }
+        }
+        return array_values($volleys);
+    }
+    
+    public static function getKikNames( $ids ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        $kikUsers = $dao->getKikNames( $ids );
+        $names = array();
+        foreach( $kikUsers as $user ){
+            $names[$user->id] = $user->kik_id;
+        }
+        return $names;
     }
 }

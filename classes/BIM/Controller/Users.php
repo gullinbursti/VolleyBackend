@@ -347,12 +347,77 @@ class BIM_Controller_Users extends BIM_Controller_Base {
     public function createKikUser(){
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty($input->username) ){
-            return BIM_Model_User::createKikUser( $input );
+            if( BIM_API_Kik::authKikUser($input) ){
+                return BIM_Model_User::createKikUser( $input );
+            }
         }
-	    return true;
+	    return false;
+    }
+    
+    // a better way to create() would be to
+    // have an "add" function that would attemopt to add the user 
+    // and if that failed due to a unique constraint, 
+    // then we would run th check to see what existed
+    // oh well, this is what we have.
+    public function create(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty($input->username) && !empty( $input->password ) && !empty( $input->email )){
+            $check = BIM_Model_User::usernameOrEmailExists($input);
+            if( empty( $check->ok ) ){
+                if( !empty( $check->username ) ){
+                    echo "username <b>$input->username</b> taken!<br>";
+                }
+                if( !empty( $check->username ) ){
+                    echo "email <b>$input->email</b> taken!<br>";
+                }
+                echo "Please go back and try again";
+                exit;
+            } else {
+                $salt = sha1( md5( $input->username ) );
+                $password = md5( $input->password.$salt );
+                $user = BIM_Model_User::create($password, $input);
+                if(!empty( $input->redirect ) ){
+                    header('Location: '.$input->redirect);
+                    exit;
+                }
+                return $user;
+            }
+        }
+    }
+    
+    // a better way to create() would be to
+    // have an "add" function that would attemopt to add the user 
+    // and if that failed due to a unique constraint, 
+    // then we would run th check to see what existed
+    // oh well, this is what we have.
+    public function create(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty($input->username) && !empty( $input->password ) && !empty( $input->email )){
+            $check = BIM_Model_User::usernameOrEmailExists($input);
+            if( empty( $check->ok ) ){
+                if( !empty( $check->username ) ){
+                    echo "username <b>$input->username</b> taken!<br>";
+                }
+                if( !empty( $check->email ) ){
+                    echo "email <b>$input->email</b> taken!<br>";
+                }
+                echo "Please go back and try again";
+                exit;
+            } else {
+                $salt = sha1( md5( $input->username ) );
+                $password = md5( $input->password.$salt );
+                $user = BIM_Model_User::create($password, $input);
+                if(!empty( $input->redirect ) ){
+                    header('Location: '.$input->redirect);
+                    exit;
+                }
+                return $user;
+            }
+        }
     }
     
     public function logKikSend(){
+        //return true;
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty($input->source)  && !empty( $input->target ) ){
             return BIM_Model_User::logKikSend( $input );
@@ -361,10 +426,45 @@ class BIM_Controller_Users extends BIM_Controller_Base {
     }
     
     public function logKikOpen(){
+        //return true;
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty($input->source) && !empty( $input->target ) ){
             return BIM_Model_User::logKikOpen( $input );
         }
 	    return true;
+    }
+    
+    public function upload(){
+        $imgURL = '';
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty($input->imgData[0]) && !empty($input->userID) ){
+            $imgURL = BIM_Utils::processBase64Upload($input->imgData[0]);
+        }
+        return array('img' => $imgURL);
+    }
+    
+    public function latestKikUsers(){
+        return BIM_Model_User::getLatestKikUsers( );
+    }
+    
+    public function kikUserConvos(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty($input->userID) ){
+            $input->userID = $this->resolveUserId( $input->userID );
+            $volley = BIM_Model_Volley::getVerifyVolley($input->userID);
+            $ids = array();
+            foreach( $volley->challengers as $challenger ){
+                $ids[] = $challenger->id;
+            }
+            $ids = array_values(array_unique($ids));
+            $kikNames = BIM_Model_User::getKikNames( $ids );
+            
+            foreach( $volley->challengers as $idx => $challenger ){
+                if( !empty( $kikNames[$challenger->id] ) ){
+                    $challenger->kik_id = $kikNames[$challenger->id];
+                }
+            }
+            return $volley;
+        }        
     }
 }

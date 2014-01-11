@@ -10,16 +10,26 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         return $data ? true : false;
     }
     
-    public function getVerifyVolleyIdForUser( $userId ){
+    public function getVerifyVolleyIdForUser( $userIds ){
+        $wantArray = true;
+        if( !is_array($userIds) ){
+            $userIds = array( $userIds );
+            $wantArray = false;
+        }
+        $placeHolders = join(',',array_fill(0, count( $userIds ), '?') );
+        
         $sql = "
             select id
             from `hotornot-dev`.tblChallenges
             where is_verify = 1
-            	and creator_id = ?
+            	and creator_id in ( $placeHolders )
         ";
-        $params = array( $userId );
-        $stmt = $this->prepareAndExecute( $sql, $params );
-        return $stmt->fetchColumn();
+        $stmt = $this->prepareAndExecute( $sql, $userIds );
+        $ids = $stmt->fetchAll(PDO::FETCH_COLUMN,0);
+        if(!$wantArray){
+            $ids = $ids[0];
+        }
+        return $ids;
     }
     
     public function getUnjoined( ){

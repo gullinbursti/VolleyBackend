@@ -373,7 +373,7 @@ class BIM_Model_Volley{
 	        $imgUrl = preg_replace('/defaultAvatar\.png/i', 'defaultAvatar_o.jpg', $imgUrl);
 	    } else if( preg_match('/orig\.jpg/',$imgUrl) ){ 
 	        $imgUrl = 'https://d3j8du2hyvd35p.cloudfront.net/defaultAvatar_o.jpg';
-        } else {
+	    } else {
     	    $imgUrl = preg_replace('/Large_640x1136/i', '', $imgUrl);
 	    }
 	    return self::create($targetId, '#__verifyMe__', $imgUrl, array(), 'N', -1, true, $status);
@@ -595,7 +595,7 @@ class BIM_Model_Volley{
      * to reduce trips to the db and network 
      * 
     **/
-    public static function getMulti( $ids ) {
+    public static function getMulti( $ids, $assoc = false ) {
         $volleyKeys = self::makeCacheKeys( $ids );
         $cache = new BIM_Cache( BIM_Config::cache() );
         $volleys = $cache->getMulti( $volleyKeys );
@@ -636,7 +636,7 @@ class BIM_Model_Volley{
             }
         }
         
-        return array_values($volleys);
+        return $assoc ? $volleys : array_values($volleys);
     }
     
     private static function populateVolleyUsers( $volleys ){
@@ -943,7 +943,7 @@ class BIM_Model_Volley{
             BIM_Utils::copyImage( $imgUrl, $name );
             BIM_Utils::processImage($imgUrlPrefix);
             
-            $hashTag = "#SHOUTOUT >> ".$volley->creator->username;
+            $hashTag = "#shoutout";
             
             $shoutout = BIM_Model_Volley::create( $creatorId, $hashTag, $imgUrlPrefix );
             self::logShoutout($shoutout->id, $volley->id, $volley->creator->id);
@@ -969,7 +969,7 @@ class BIM_Model_Volley{
             BIM_Utils::copyImage( $imgUrl, $name );
             BIM_Utils::processImage($imgUrlPrefix);
             
-            $hashTag = "#SHOUTOUT >> ".$user->username;
+            $hashTag = "#shoutout";
             
             $shoutout = BIM_Model_Volley::create( $creatorId, $hashTag, $imgUrlPrefix );
             BIM_Push::shoutoutPush( $creatorId, $user->id, $shoutout->id );
