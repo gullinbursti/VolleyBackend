@@ -371,7 +371,9 @@ class BIM_Model_Volley{
 	    // create the a url that points to the large version
 	    if( preg_match('/defaultAvatar/',$imgUrl) ){
 	        $imgUrl = preg_replace('/defaultAvatar\.png/i', 'defaultAvatar_o.jpg', $imgUrl);
-	    } else {
+	    } else if( preg_match('/orig\.jpg/',$imgUrl) ){ 
+	        $imgUrl = 'https://d3j8du2hyvd35p.cloudfront.net/defaultAvatar_o.jpg';
+        } else {
     	    $imgUrl = preg_replace('/Large_640x1136/i', '', $imgUrl);
 	    }
 	    return self::create($targetId, '#__verifyMe__', $imgUrl, array(), 'N', -1, true, $status);
