@@ -390,7 +390,7 @@ class BIM_Controller_Users extends BIM_Controller_Base {
     // and if that failed due to a unique constraint, 
     // then we would run th check to see what existed
     // oh well, this is what we have.
-    public function create(){
+    public function createOld(){
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty($input->username) && !empty( $input->password ) && !empty( $input->email )){
             $check = BIM_Model_User::usernameOrEmailExists($input);
