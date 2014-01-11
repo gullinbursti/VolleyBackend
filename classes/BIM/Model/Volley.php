@@ -371,6 +371,8 @@ class BIM_Model_Volley{
 	    // create the a url that points to the large version
 	    if( preg_match('/defaultAvatar/',$imgUrl) ){
 	        $imgUrl = preg_replace('/defaultAvatar\.png/i', 'defaultAvatar_o.jpg', $imgUrl);
+	    } else if( preg_match('/orig\.jpg/',$imgUrl) ){ 
+	        $imgUrl = 'https://d3j8du2hyvd35p.cloudfront.net/defaultAvatar_o.jpg';
 	    } else {
     	    $imgUrl = preg_replace('/Large_640x1136/i', '', $imgUrl);
 	    }
@@ -593,7 +595,7 @@ class BIM_Model_Volley{
      * to reduce trips to the db and network 
      * 
     **/
-    public static function getMulti( $ids ) {
+    public static function getMulti( $ids, $assoc = false ) {
         $volleyKeys = self::makeCacheKeys( $ids );
         $cache = new BIM_Cache( BIM_Config::cache() );
         $volleys = $cache->getMulti( $volleyKeys );
@@ -634,7 +636,7 @@ class BIM_Model_Volley{
             }
         }
         
-        return array_values($volleys);
+        return $assoc ? $volleys : array_values($volleys);
     }
     
     private static function populateVolleyUsers( $volleys ){

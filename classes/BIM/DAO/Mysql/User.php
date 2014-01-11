@@ -375,7 +375,7 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         $id = null;
         $sql = "select id from `hotornot-dev`.tblUsers";
         if( $exclude ){
-            $placeHolders = join('',array_fill(0, count( $exclude ), '?') );
+            $placeHolders = join(',',array_fill(0, count( $exclude ), '?') );
             $sql = "$sql where id not in ($placeHolders)";
         }
         $stmt = $this->prepareAndExecute( $sql, $exclude );
@@ -531,15 +531,21 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         return $this->lastInsertId;
     }
     
-    public function create( $username, $adId ){
-		// add new user			
+    public function create( $username, $adId, $email = null ){
+		// add new user	
+        $params = array( $username, $adId );
+        $cols = "username, device_token, fb_id, gender, bio, website, paid, points, notifications, last_login, added, adid";
+		$vals = "?, null, '', 'N', '', '', 'N', '0', 'Y', CURRENT_TIMESTAMP, NOW(), ?";
+		if( $email ){
+		    $cols = "$cols, email";
+		    $vals = "$vals, ?";
+		    $params[] = $email;
+		}		
 		$query = "
 			INSERT INTO `hotornot-dev`.tblUsers 
-			( username, device_token, fb_id, gender, bio, website, paid, points, notifications, last_login, added, adid ) 
-			VALUES ( ?, null, '', 'N', '', '', 'N', '0', 'Y', CURRENT_TIMESTAMP, NOW(), ? )
+			( $cols ) 
+			VALUES ( $vals )
 		";
-		
-        $params = array( $username, $adId );
         $stmt = $this->prepareAndExecute($query, $params);
         
 		return $this->lastInsertId;
@@ -549,7 +555,7 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         $id = null;
 		$query = "SELECT `id` FROM `hotornot-dev`.`tblInvitedUsers` WHERE `fb_id` = ?";
 		$params = array( $fbId );
-        $stmt = $this->prepareAndExecute($sql, $params);
+        $stmt = $this->prepareAndExecute($query, $params);
         $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
         if( $data ){
             $id = $data[0]->id;
@@ -743,13 +749,24 @@ stdClass Object
 	public function createKikUser( $input ){
 	    $sql = "
 	    	insert into growth.kik_reg_users
-	    	( username, pic, thumbnail, firstName, lastName )
+	    	( username, pic, thumbnail, firstName, lastName, bim_id, last_login )
 	    	values
-	    	(?,?,?,?,?)
-	    	on duplicate key update appOpens = appOpens + 1
+	    	(?,?,?,?,?,?,now())
+	    	on duplicate key update appOpens = appOpens + 1, last_login = now()
 	    ";
-        $params = array( $input->username, $input->pic, $input->thumbnail, $input->firstName, $input->lastName );
+        $params = array( $input->username, $input->pic, $input->thumbnail, $input->firstName, $input->lastName, $input->bim_id );
         $this->prepareAndExecute( $sql, $params );
+	}
+	
+	public function getKikUserId( $kikId ){
+	    $sql = "
+	    	select bim_id 
+	    	from growth.kik_reg_users 
+	    	where username = ?
+	    ";
+        $params = array( $kikId );
+        $stmt = $this->prepareAndExecute( $sql, $params );
+        return $stmt->fetchColumn(0);
 	}
 	
 	public function logKikSend( $input ){
@@ -774,8 +791,31 @@ stdClass Object
         $this->prepareAndExecute( $sql, $params );
 	}
 	
+	public function getLatestKikUsers( ){
+	    $sql = "
+	    	select * from growth.kik_reg_users
+	    	where bim_id is not null
+	    	order by last_login desc
+	    	limit 20; 
+	    ";
+        $stmt = $this->prepareAndExecute( $sql );
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'stdClass' );
+	}
+	
+	public function getKikNames( $ids ){
+        $placeHolders = join(',',array_fill(0, count( $ids ), '?') );
+	    
+	    $sql = "
+	    	select bim_id as id, username as kik_id
+	    	from growth.kik_reg_users
+	    	where bim_id in ($placeHolders)
+	    ";
+        $stmt = $this->prepareAndExecute( $sql, $ids );
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'stdClass' );
+	}
+	
 	// getAllPushTokens
-	public function getAllPushTokens( $input ){
+	public function getAllPushTokens( ){
 	    $sql = "
             select device_token 
             from `hotornot-dev`.tblUsers 
@@ -784,7 +824,7 @@ stdClass Object
                 and added > '2013-11-25'
                 and notifications = 'Y'
 	    ";
-        $stmt = $this->prepareAndExecute( $sql, $params );
+        $stmt = $this->prepareAndExecute( $sql );
         return $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
 	}
 }

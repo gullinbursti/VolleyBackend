@@ -190,12 +190,8 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
         $uv = null;
         $input = (object) ($_POST ? $_POST : $_GET);
         
-        file_put_contents('/tmp/upload', print_r(array($input),1) );
-        file_put_contents('/tmp/uploadImg', $input->imgData );
-        file_put_contents('/tmp/uploadDecoded', base64_decode( $input->imgData ) );
-        
-        if( !empty($input->imgData) ){
-            // here we need to upload the data to amazon
+        if( !empty($input->imgData[0]) && empty($input->imgURL) ){
+            $input->imgURL = BIM_Utils::processBase64Upload($input->imgData[0]);
         }
         
         if (!empty( $input->userID) && !empty($input->challengeID) && !empty($input->imgURL)) {
@@ -207,13 +203,14 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
             $volley = BIM_Model_Volley::get( $input->challengeID );
             if( $volley->isExtant() ){
                 $ptrn = "@$volley->subject\s*:@";
-                $hashTag = trim(preg_replace( $ptrn, '', $hashTag, 1 ));           
+                $hashTag = trim(preg_replace( $ptrn, '', $hashTag, 1 ));
                 $uv = $challenges->join( $userId, $input->challengeID, $input->imgURL, $hashTag );
             }
         }
         if( $uv ){
             return array(
-                'id' => $uv->id
+                'id' => $uv->id,
+                'img' => $input->imgURL
             );
         }
     }
@@ -339,5 +336,22 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
             $volley = BIM_Model_Volley::shoutoutVerifyVolley($input->userID, $input->targetID);
         }
         return $volley;
+    }
+    
+    public function kikreply(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty( $input->userID ) && !empty( $input->targetID ) ){
+            $verifyVolley = BIM_Model_Volley::getVerifyVolley( $input->targetID );
+            if( $verifyVolley->isExtant() ){
+                $var = 'challengeID';
+                $value = $verifyVolley->id;
+                if( $_POST ){
+                    $_POST[$var] = $value;
+                } else {
+                    $_GET[$var] = $value;
+                }
+                return $this->join();
+            }
+        }
     }
 }
