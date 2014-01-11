@@ -149,8 +149,8 @@ class BIM_Model_User{
     }
         
     public function isSuspended(){
-        return false;
-        // return (!empty( $this->abuse_ct ) && $this->abuse_ct >= 20);
+        //return false;
+        return (!empty( $this->abuse_ct ) && $this->abuse_ct >= 20);
     }
     
     public function isApproved(){
@@ -278,6 +278,41 @@ delete from tblUsers where username like "%yoosnapyoo";
      */
     
     public static function create( $adId, $params = null ){
+			// default names
+			$username = '';
+			if( empty( $params->username ) ){
+    			$defaultName_arr = array(
+    				"snap4snap",
+    				"picchampX",
+    				"swagluver",
+    				"coolswagger",
+    				"yoloswag",
+    				"tumblrSwag",
+    				"instachallenger",
+    				"hotbitchswaglove",
+    				"lovepeaceswaghot",
+    				"hotswaglover",
+    				"snapforsnapper",
+    				"snaphard",
+    				"snaphardyo",
+    				"yosnaper",
+    				"yoosnapyoo"
+    			);
+    			
+    			$rnd_ind = mt_rand(0, count($defaultName_arr) - 1);
+    			$username = $defaultName_arr[$rnd_ind] . time();
+			    $username = $username.'.'.uniqid(true);
+			} else {
+			    $username = $params->username;
+			}
+        
+			$dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+			$email = empty( $params->email ) ? null : $params->email;
+			$id = $dao->create($username, $adId, $email);
+			return self::get($id);
+    }
+    
+    public static function createOld( $adId ){
 			// default names
 			$username = '';
 			if( empty( $params->username ) ){
@@ -839,6 +874,23 @@ delete from tblUsers where username like "%yoosnapyoo";
                 }
             } else {
                 $result->ok = true;
+            }
+        } else {
+            $result->email = $input->email;
+        }
+        return $result;
+    }
+    
+    public static function usernameOrEmailExistsOld( $input ){
+        $result = (object) array();
+        if( filter_var( $input->email, FILTER_VALIDATE_EMAIL) ){
+            $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+            $data = $dao->usernameOrEmailExists( $input );
+            if( $data ){
+                foreach( $data as $row ){
+                    $prop = $row->property;
+                    $result->$prop = $row->value;
+                }
             }
         } else {
             $result->email = $input->email;

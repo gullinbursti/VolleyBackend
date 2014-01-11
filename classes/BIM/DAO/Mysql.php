@@ -175,16 +175,25 @@ class BIM_DAO_Mysql extends BIM_DAO{
         if( BIM_Utils::isProfiling() ){
             $end = microtime(1);
             if( empty( self::$profile ) ){
-                self::$profile = array();
+                self::$profile = array(
+                    '__total__' => 0,
+                    '__time__' => 0
+                );
             }
             if( empty( self::$profile[ $sql ] ) ){
                 self::$profile[ $sql ] = array();
                 self::$profile[ $sql ]['total'] = 0;
                 self::$profile[ $sql ]['time'] = 0;
             }
+            
+            $time = ($end - $start);
+            
             self::$profile[ $sql ]['total']++;
-            self::$profile[ $sql ]['time'] += ($end - $start);
+            self::$profile[ $sql ]['time'] += $time;
 
+            self::$profile['__total__']++;
+            self::$profile['__time__'] += $time;
+            
             $bt = debug_backtrace();
             $callTree = join( ' => ', array( $bt[2]['class'].':'.$bt[2]['function'], $bt[1]['class'].':'.$bt[1]['function'] ) );
             if( !isset( self::$profile[ $sql ][$callTree] ) ){

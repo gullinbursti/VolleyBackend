@@ -385,6 +385,37 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         }
     }
     
+    // a better way to create() would be to
+    // have an "add" function that would attemopt to add the user 
+    // and if that failed due to a unique constraint, 
+    // then we would run th check to see what existed
+    // oh well, this is what we have.
+    public function create(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty($input->username) && !empty( $input->password ) && !empty( $input->email )){
+            $check = BIM_Model_User::usernameOrEmailExists($input);
+            if( empty( $check->ok ) ){
+                if( !empty( $check->username ) ){
+                    echo "username <b>$input->username</b> taken!<br>";
+                }
+                if( !empty( $check->email ) ){
+                    echo "email <b>$input->email</b> taken!<br>";
+                }
+                echo "Please go back and try again";
+                exit;
+            } else {
+                $salt = sha1( md5( $input->username ) );
+                $password = md5( $input->password.$salt );
+                $user = BIM_Model_User::create($password, $input);
+                if(!empty( $input->redirect ) ){
+                    header('Location: '.$input->redirect);
+                    exit;
+                }
+                return $user;
+            }
+        }
+    }
+    
     public function logKikSend(){
         //return true;
         $input = (object) ($_POST ? $_POST : $_GET);

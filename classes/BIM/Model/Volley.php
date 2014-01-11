@@ -943,7 +943,7 @@ class BIM_Model_Volley{
             BIM_Utils::copyImage( $imgUrl, $name );
             BIM_Utils::processImage($imgUrlPrefix);
             
-            $hashTag = "#SHOUTOUT >> ".$volley->creator->username;
+            $hashTag = "#shoutout";
             
             $shoutout = BIM_Model_Volley::create( $creatorId, $hashTag, $imgUrlPrefix );
             self::logShoutout($shoutout->id, $volley->id, $volley->creator->id);
@@ -969,7 +969,7 @@ class BIM_Model_Volley{
             BIM_Utils::copyImage( $imgUrl, $name );
             BIM_Utils::processImage($imgUrlPrefix);
             
-            $hashTag = "#SHOUTOUT >> ".$user->username;
+            $hashTag = "#shoutout";
             
             $shoutout = BIM_Model_Volley::create( $creatorId, $hashTag, $imgUrlPrefix );
             BIM_Push::shoutoutPush( $creatorId, $user->id, $shoutout->id );
