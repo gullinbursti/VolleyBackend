@@ -836,6 +836,7 @@ stdClass Object
                 and device_token != '' 
                 and added > '2013-11-25'
                 and notifications = 'Y'
+            order by added desc
 	    ";
         $stmt = $this->prepareAndExecute( $sql );
         return $stmt->fetchAll(PDO::FETCH_COLUMN, 0);

@@ -101,7 +101,7 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
               "query": {
                 "range": {
                   "id": {
-                    "gte": 14366
+                    "gte": 57319
                   }
                 }
               }
@@ -112,7 +112,7 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
         $urlSuffix = "contact_lists/phone/_search";
         $lists = json_decode( $es->call('POST', $urlSuffix, $query) );
 
-        $caliCodes = array( );//209,213,310,323,408,415,424,442,510,530,559,562,619,626,650,657,661,707,714,747,760,805,818,831,858,909,916,925,949,951);
+        $caliCodes = array( 209,213,310,323,408,415,424,442,510,530,559,562,619,626,650,657,661,707,714,747,760,805,818,831,858,909,916,925,949,951);
         $count = 0;
         
         foreach( $lists->hits->hits as $hit ){
@@ -157,13 +157,11 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
         $from = '9167108583';// $conf->api->number;
         $msg = 
 '
-A friend has invited you to Selfieclub! Install to find out who! AppStore.com/Selfieclub
 ';
         $numbers = file( $filename );
         foreach( $numbers as &$number ){
             $number = trim( $number );
         }
-        
 	    array_unshift( $numbers, '+12133009127','+14152549391' );
 
         foreach( $numbers as $number ){

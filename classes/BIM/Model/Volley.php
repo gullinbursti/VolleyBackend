@@ -978,7 +978,7 @@ class BIM_Model_Volley{
         return $shoutout;
     }
     
-    private static function logShoutout( $shoutoutId, $targetVolleyId, $targetId ){
+    public static function logShoutout( $shoutoutId, $targetVolleyId, $targetId ){
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
         $dao->logShoutout( $shoutoutId, $targetVolleyId, $targetId );
     }

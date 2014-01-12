@@ -1,6 +1,22 @@
 <?php 
 class BIM_Maint_User{
     
+    public static function createKikUsers(){
+        $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+        $sql = "
+        	select * 
+        	from growth.kik_reg_users
+        	where bim_id is null
+        	order by last_login desc
+        	limit 100;
+        ";
+        $stmt = $dao->prepareAndExecute($sql);
+        $kikUsers = $stmt->fetchAll(PDO::FETCH_CLASS, 'stdClass');
+        foreach( $kikUsers as $user ){
+            BIM_Model_User::createKikUser($user);
+        }
+    }
+    
     public static function remindNewUsers(){
         $dao = new BIM_DAO_Mysql( BIM_Config::db() );
         $sql = "
