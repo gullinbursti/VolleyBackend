@@ -870,13 +870,13 @@ delete from tblUsers where username like "%yoosnapyoo";
             if( $data ){
                 foreach( $data as $row ){
                     $prop = $row->property;
-                    $result->$prop = $row->value;
+                    $result->$prop = 1;
                 }
             } else {
                 $result->ok = true;
             }
         } else {
-            $result->email = $input->email;
+            $result->email = 2;
         }
         return $result;
     }
