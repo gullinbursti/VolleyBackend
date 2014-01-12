@@ -1064,18 +1064,32 @@ delete from tblUsers where username like "%yoosnapyoo";
     public static function createKikUser( $input ){
         $user = self::getKikUser( $input->username );
         if( !$user->isExtant() ){
-            $email = $input->username.'@builtinmenlo.com';
-            $adId = 'kik_'.uniqid(true);
-            $user = self::create($adId);
-            $app = new BIM_App_Users();
-            $deviceToken = !empty($input->device_token) ? $input->device_token : 'kik_'.uniqid(true);
-            $birthdate = '1970-01-01';
-            $app->updateUsernameAvatarFirstRun($user->id, $input->username, $input->pic, $birthdate, $email, true, $deviceToken);
-            $user->username = $input->username;
-            
-            $input->bim_id = $user->id;
-            $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
-            $dao->createKikUser( $input );
+            $username = '';
+            $ct = 0;
+            $maxAttempts = 10;
+            while( !$username && $ct < $maxAttempts ){
+                $username = $ct ? $input->username."_$ct" : $input->username;
+                $user = BIM_Model_User::getByUsername($username);
+                if( $user && $user->isExtant() ){
+                    $username = '';
+                    $ct++;
+                }
+            }
+            if( $username ){
+                $email = "$username@kik.builtinmenlo.com";
+                $adId = 'kik_'.uniqid(true);
+                $user = self::create($adId);
+                $app = new BIM_App_Users();
+                $deviceToken = !empty($input->device_token) ? $input->device_token : 'kik_'.uniqid(true);
+                $birthdate = '1970-01-01';
+                
+                $app->updateUsernameAvatarFirstRun($user->id, $username, $input->pic, $birthdate, $email, true, $deviceToken);
+                $user->username = $input->username;
+                
+                $input->bim_id = $user->id;
+                $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+                $dao->createKikUser( $input );
+            }
         }
         return $user;
     }
