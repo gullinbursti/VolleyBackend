@@ -362,6 +362,8 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         if( !empty($input->username) && !empty( $input->password ) && !empty( $input->email )){
             $check = BIM_Model_User::usernameOrEmailExists($input);
             if( empty( $check->ok ) ){
+                return array('error' => $check);
+                /**
                 if( !empty( $check->username ) ){
                     echo "username <b>$input->username</b> taken!<br>";
                 }
@@ -370,14 +372,17 @@ class BIM_Controller_Users extends BIM_Controller_Base {
                 }
                 echo "Please go back and try again";
                 exit;
+                */
             } else {
                 $salt = sha1( md5( $input->username ) );
                 $password = md5( $input->password.$salt );
                 $user = BIM_Model_User::create($password, $input);
+                /*
                 if(!empty( $input->redirect ) ){
                     header('Location: '.$input->redirect);
                     exit;
                 }
+                */
                 return $user;
             }
         }
