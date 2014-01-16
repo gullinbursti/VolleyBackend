@@ -14,7 +14,7 @@ class BIM_Model_User{
                 $this->$prop = $value;
             }
             
-            $this->abuse_ct = 0;
+            // $this->abuse_ct = 0;
             
             if( $this->age < 0 ){
                 //set the default age to 17
