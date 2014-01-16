@@ -954,6 +954,13 @@ delete from tblUsers where username like "%yoosnapyoo";
      * 
      * and collate them together according to date and return the top 50
      * 
+     * verikfy - 1
+     * follow - 2
+     * like - 3 
+     * shoutout - 4
+     * reply - 5
+     * 
+     * 
      * @param int $userId
      */
     public static function getActivity( $userId ){
@@ -995,6 +1002,7 @@ delete from tblUsers where username like "%yoosnapyoo";
                      'username' => $liker->user->username,
                      'avatar_url' => $liker->user->avatar_url,
                 ),
+            	'challengeID' => $liker->challenge_id,
                 'time' => $liker->added,
                 'message' => 'liked your Selfie',
                 'type' => 3
@@ -1036,6 +1044,27 @@ delete from tblUsers where username like "%yoosnapyoo";
             );
         }
         
+        $userVolleys = BIM_Model_Volley::getVolleys( $userId );
+        
+        $replies = array();
+        foreach( $userVolleys as $userVolley ){
+            foreach( $userVolley->challengers as $challenger ){
+                $activities[] = (object) array(
+                    'id' => "5_{$challenger->id}_{$date->getTimestamp()}",
+                	'activity_type' => 5,
+                	'user' => (object) array(
+                         'id' => $challenger->id,
+                         'username' => $challenger->username,
+                         'avatar_url' => $challenger->img,
+                    ),
+                    'challengeID' => $userVolley->id,
+                    'time' => $challenger->joined,
+                    'message' => 'replied to your Selfie',
+                    'type' => 3
+                );
+            }
+        }
+
         usort($activities, 
             function($a, $b){ 
                 if ($a->time == $b->time) {

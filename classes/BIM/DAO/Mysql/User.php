@@ -210,7 +210,7 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
     public function getLikers( $userId ){
         $count = 0;
 		$sql = "
-			SELECT user_id as id, added
+			SELECT user_id as id, added, challenge_id
 			FROM `hotornot-dev`.`tblChallengeVotes` 
 			WHERE `challenger_id` = ?
 			ORDER by added desc
