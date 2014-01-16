@@ -85,7 +85,7 @@ class BIM_App_Votes extends BIM_App_Base{
 	    $user = BIM_Model_User::getByUsername($username);
 		if ( $user && $user->isExtant() ) {
             $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-            $ids = $dao->getVolleysForUserId( $user->id );
+            $ids = $dao->getVolleysForUserId( $user->id, 20 );
             $volleys = BIM_Model_Volley::getMulti($ids);
 		}
 		return $volleys;
