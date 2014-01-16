@@ -551,18 +551,6 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
 		return $this->lastInsertId;
     }
     
-    public function createOld( $username, $adId ){
-		// add new user			
-		$query = "
-			INSERT INTO `hotornot-dev`.tblUsers 
-			( $cols ) 
-			VALUES ( $vals )
-		";
-        $stmt = $this->prepareAndExecute($query, $params);
-        
-		return $this->lastInsertId;
-    }
-    
     public function getFbInviteId( $fbId ){
         $id = null;
 		$query = "SELECT `id` FROM `hotornot-dev`.`tblInvitedUsers` WHERE `fb_id` = ?";

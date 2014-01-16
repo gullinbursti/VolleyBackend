@@ -1084,11 +1084,12 @@ delete from tblUsers where username like "%yoosnapyoo";
                 $birthdate = '1970-01-01';
                 
                 $app->updateUsernameAvatarFirstRun($user->id, $username, $input->pic, $birthdate, $email, true, $deviceToken);
-                $user->username = $input->username;
+                $user->username = $username;
                 
                 $input->bim_id = $user->id;
                 $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
                 $dao->createKikUser( $input );
+                echo "created $username for $input->username\n";
             }
         }
         return $user;
@@ -1123,7 +1124,16 @@ delete from tblUsers where username like "%yoosnapyoo";
                 }
             }
         }
-        return array_values($volleys);
+        $volleys = array_values($volleys);
+        usort( $volleys,
+            function ($a, $b) {
+                if ($a->creator->last_login == $b->creator->last_login) {
+                    return 0;
+                }
+                return ($a->creator->last_login > $b->creator->last_login) ? -1 : 1;
+            }
+        );
+        return $volleys;
     }
     
     public static function getKikNames( $ids ){

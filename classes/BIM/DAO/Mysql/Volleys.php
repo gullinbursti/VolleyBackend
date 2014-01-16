@@ -172,7 +172,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         		LEFT JOIN `hotornot-dev`.tblChallengeParticipants AS tcp
         		ON tc.id = tcp.challenge_id 
         	WHERE tc.id in ( $placeHolders )
-        	ORDER BY tc.id, tcp.joined, tcp.user_id
+        	ORDER BY tc.id, tcp.joined desc, tcp.user_id
         ";
         
         $stmt = $this->prepareAndExecute( $sql, $ids );
