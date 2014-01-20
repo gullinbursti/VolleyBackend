@@ -16,16 +16,8 @@ class BIM_Model_User{
             
             // $this->abuse_ct = 0;
             
-            if( $this->age < 0 ){
-                //set the default age to 17
-                $date = new DateTime();
-                $date = $date->sub( new DateInterval('P17Y') );
-                $this->age = $date->format('Y-m-d H:i:s');
-                $this->age = '0000-00-00 00:00:00';
-            } else if( $this->age >= 0 ){
-                $birthdate = new DateTime( "@$this->age" );
-                $this->age = $birthdate->format('Y-m-d H:i:s');
-            }
+            $birthdate = new DateTime( "@$this->age" );
+            $this->age = $birthdate->format('Y-m-d H:i:s');
             
             $votes = $this->getTotalVotes();
             $pics = $this->getTotalVolleys();

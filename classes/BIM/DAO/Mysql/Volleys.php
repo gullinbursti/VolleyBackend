@@ -186,7 +186,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                     $challengerCounts[ $row->id ] = 0;
                     //print "making counts for $row->id";
                 }
-                if( $challengerCounts[ $row->id ] >= 20 ){
+                if( $challengerCounts[ $row->id ] >= 50 ){
                     continue;
                 }
                 if( empty( $volleys[ $row->id ] ) ){
@@ -603,6 +603,20 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         $params = array( $userId, $userId, $opponentId, $opponentId, $lastDate );
         $stmt = $this->prepareAndExecute( $sql, $params );
         return $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+    }
+    
+    public function getIdsForCreator( $userId  ){
+        $sql = "
+            SELECT tc.id 
+            FROM `hotornot-dev`.tblChallenges as tc
+            WHERE tc.is_verify != 1 
+            	AND tc.creator_id = ?
+            ORDER BY tc.updated DESC
+        ";
+        
+        $params = array( $userId );
+        $stmt = $this->prepareAndExecute( $sql, $params );
+        return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
     }
     
     public function getIds( $userId, $private ){
