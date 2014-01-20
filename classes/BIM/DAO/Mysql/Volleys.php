@@ -162,18 +162,27 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         		LEFT JOIN `hotornot-dev`.tblChallengeParticipants AS tcp
         		ON tc.id = tcp.challenge_id 
         	WHERE tc.id in ( $placeHolders )
-        	ORDER BY tc.id, tcp.joined, tcp.user_id
+        	ORDER BY tc.id, tcp.joined desc, tcp.user_id
         ";
         
         $stmt = $this->prepareAndExecute( $sql, $ids );
         $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
         
         $volleys = array();
+        $challengerCounts = array();
         if( $data ){
             foreach( $data as $row ){
+                if( !isset( $challengerCounts[ $row->id ] ) ){
+                    $challengerCounts[ $row->id ] = 0;
+                    //print "making counts for $row->id";
+                }
+                if( $challengerCounts[ $row->id ] >= 20 ){
+                    continue;
+                }
                 if( empty( $volleys[ $row->id ] ) ){
                     if( !empty( $row->challenger_id ) ){
                         $row->challengers = array( ( object ) array( 'challenger_id' => $row->challenger_id, 'challenger_img' => $row->challenger_img,  'joined' => $row->joined, 'likes' => $row->likes, 'subject' => $row->reply ) );
+                        $challengerCounts[$row->id]++;
                     } else {
                         $row->challengers = array();
                     }
@@ -185,6 +194,8 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                 } else {
                     $volley = $volleys[ $row->id ];
                     $volley->challengers[] = ( object ) array( 'challenger_id' => $row->challenger_id, 'challenger_img' => $row->challenger_img, 'joined' => $row->joined, 'likes' => $row->likes, 'subject' => $row->reply );
+                    $challengerCounts[$row->id]++;
+                    //print "making counts for $row->id";
                 }
             }
         }
@@ -205,7 +216,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         
         return $volleys;
     }
-    
+
     /**
      * Helper function to get the subject for a challenge
      * @param $subject_id The ID of the subject (integer)
@@ -724,7 +735,7 @@ WHERE is_verify != 1
 		$fIdPlaceholders = trim( str_repeat('?,', $fIdct ), ',' );
 		
 		$query = "
-            SELECT tc.id as id, tc.updated as updated
+            SELECT tc.id as id, tc.added as added
             FROM `hotornot-dev`.`tblChallenges` as tc 
             WHERE
                 tc.is_verify != 1
@@ -742,7 +753,7 @@ WHERE is_verify != 1
                 AND tc.status_id IN (1,2,4)
                 AND tcp.`user_id` IN ( $fIdPlaceholders )
             GROUP BY tc.id, tc.updated
-            ORDER BY updated DESC, id DESC LIMIT 25		
+            ORDER BY added DESC, id DESC LIMIT 25		
 		";
 		
 		$dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
@@ -791,20 +802,24 @@ WHERE is_verify != 1
     public function getVolleysForUserId( $userId ){
 		// get latest 10 challenges for user
         $query = "
+			( 
 			SELECT id 
 			FROM `hotornot-dev`.`tblChallenges`
 			WHERE `creator_id` = ? AND is_verify != 1
+			)
 			UNION
+			( 
 			SELECT challenge_id 
 			FROM `hotornot-dev`.`tblChallengeParticipants`
 			WHERE `user_id` = ?
-		";
+			)
+			limit 40
+			";
 		$params = array( $userId, $userId );
         $stmt = $this->prepareAndExecute( $query, $params );
-        $ids = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
-        return array_unique($ids);        
+        return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
     }
-    
+        
     public function getVolleysForProfile( $userId, $private ){
 		// get latest 10 challenges for user
 	    $privateSql = ' AND tc.`is_private` != "Y" ';
