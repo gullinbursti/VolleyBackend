@@ -162,18 +162,27 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         		LEFT JOIN `hotornot-dev`.tblChallengeParticipants AS tcp
         		ON tc.id = tcp.challenge_id 
         	WHERE tc.id in ( $placeHolders )
-        	ORDER BY tc.id, tcp.joined, tcp.user_id
+        	ORDER BY tc.id, tcp.joined desc, tcp.user_id
         ";
         
         $stmt = $this->prepareAndExecute( $sql, $ids );
         $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
         
         $volleys = array();
+        $challengerCounts = array();
         if( $data ){
             foreach( $data as $row ){
+                if( !isset( $challengerCounts[ $row->id ] ) ){
+                    $challengerCounts[ $row->id ] = 0;
+                    //print "making counts for $row->id";
+                }
+                if( $challengerCounts[ $row->id ] >= 50 ){
+                    continue;
+                }
                 if( empty( $volleys[ $row->id ] ) ){
                     if( !empty( $row->challenger_id ) ){
                         $row->challengers = array( ( object ) array( 'challenger_id' => $row->challenger_id, 'challenger_img' => $row->challenger_img,  'joined' => $row->joined, 'likes' => $row->likes, 'subject' => $row->reply ) );
+                        $challengerCounts[$row->id]++;
                     } else {
                         $row->challengers = array();
                     }
@@ -185,6 +194,8 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                 } else {
                     $volley = $volleys[ $row->id ];
                     $volley->challengers[] = ( object ) array( 'challenger_id' => $row->challenger_id, 'challenger_img' => $row->challenger_img, 'joined' => $row->joined, 'likes' => $row->likes, 'subject' => $row->reply );
+                    $challengerCounts[$row->id]++;
+                    //print "making counts for $row->id";
                 }
             }
         }
@@ -791,14 +802,19 @@ WHERE is_verify != 1
     public function getVolleysForUserId( $userId ){
 		// get latest 10 challenges for user
         $query = "
+			( 
 			SELECT id 
 			FROM `hotornot-dev`.`tblChallenges`
 			WHERE `creator_id` = ? AND is_verify != 1
+			)
 			UNION
+			( 
 			SELECT challenge_id 
 			FROM `hotornot-dev`.`tblChallengeParticipants`
 			WHERE `user_id` = ?
-		";
+			)
+			limit 40
+			";
 		$params = array( $userId, $userId );
         $stmt = $this->prepareAndExecute( $query, $params );
         $ids = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
