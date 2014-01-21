@@ -3,7 +3,12 @@
 class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
     
     public function hasApproved( $volleyId, $userId ){
-        $sql = "select flag from `hotornot-dev`.tblFlaggedUserApprovals where user_id = ? and challenge_id = ?";
+        $sql = "
+        	select flag 
+        	from `hotornot-dev`.tblFlaggedUserApprovals 
+        	where user_id = ? 
+        	and challenge_id = ?
+        ";
         $params = array( $userId, $volleyId );
         $stmt = $this->prepareAndExecute( $sql, $params );
         $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
@@ -61,22 +66,30 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         $this->prepareAndExecute( $sql, $params );
     }
     
-    public function add( $userId, $targetIds, $hashTagId, $hashTag, $imgUrl, $isPrivate, $expires, $isVerify = false, $status = 2 ){
-        if( !is_array($targetIds) ) $targetIds = array();
+    public function add( $userId, $targetIds = array(), $hashTagId, $hashTag, $imgUrl, $isPrivate = false, $expires, $isVerify = false, $status = 2 ){
+        // cast isPrivate and isverify to an int
+        // to be compatible with the db
+        $isPrivate = (int) $isPrivate;
         $isVerify = (int) $isVerify;
+        
         // add the new challenge
         $sql = '
             INSERT INTO `hotornot-dev`.tblChallenges 
-                ( status_id, subject_id, subject, creator_id, creator_img, hasPreviewed, votes, updated, started, added, is_private, expires, is_verify )
+                ( status_id, subject_id, subject, creator_id, creator_img, votes, updated, started, added, is_private, expires, is_verify )
             VALUES 
-                (?, ?, ?, ?, ?, "N", "0", NOW(), NOW(), NOW(), ?, ?, ? )
+                (?, ?, ?, ?, ?, "0", NOW(), NOW(), NOW(), ?, ?, ? )
         ';
+        
         $params = array($status, $hashTagId, $hashTag, $userId, $imgUrl, $isPrivate, $expires, $isVerify);
         $this->prepareAndExecute( $sql, $params );
         $volleyId = $this->lastInsertId;
         
         if( !$isVerify ){
-            $sql = 'UPDATE `hotornot-dev`.tblUsers SET total_challenges = total_challenges + 1 WHERE id = ? ';
+            $sql = '
+            	UPDATE `hotornot-dev`.tblUsers 
+            	SET total_challenges = total_challenges + 1 
+            	WHERE id = ?
+            ';
             $params = array( $userId );
             $this->prepareAndExecute($sql, $params);
         }
@@ -96,7 +109,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                 INSERT IGNORE INTO `hotornot-dev`.tblChallengeParticipants
                     ( challenge_id, user_id, joined )
                 VALUES 
-                	$insertSql;
+                	$insertSql
             ";
             $this->prepareAndExecute( $sql, $params );
         }
@@ -167,7 +180,8 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         		tcp.img AS challenger_img,
         		tcp.joined as joined,
         		tcp.likes as likes,
-        		tcp.subject as reply
+        		tcp.subject as reply,
+        		tcp.has_viewed as viewed
         	FROM `hotornot-dev`.tblChallenges AS tc 
         		LEFT JOIN `hotornot-dev`.tblChallengeParticipants AS tcp
         		ON tc.id = tcp.challenge_id 
@@ -190,8 +204,17 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                     continue;
                 }
                 if( empty( $volleys[ $row->id ] ) ){
-                    if( !empty( $row->challenger_id ) ){
-                        $row->challengers = array( ( object ) array( 'challenger_id' => $row->challenger_id, 'challenger_img' => $row->challenger_img,  'joined' => $row->joined, 'likes' => $row->likes, 'subject' => $row->reply ) );
+                    if( !empty( $row->challenger_id )  ){
+                        $row->challengers = array( 
+                            ( object ) array( 
+                        		'challenger_id' => $row->challenger_id, 
+                        		'challenger_img' => $row->challenger_img,  
+                        		'joined' => $row->joined, 
+                        		'likes' => $row->likes, 
+                        		'subject' => $row->reply,
+                                'has_viewed' => $row->viewed
+                            ) 
+                        );
                         $challengerCounts[$row->id]++;
                     } else {
                         $row->challengers = array();
@@ -203,7 +226,14 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                     $volleys[ $row->id ] = $row;
                 } else {
                     $volley = $volleys[ $row->id ];
-                    $volley->challengers[] = ( object ) array( 'challenger_id' => $row->challenger_id, 'challenger_img' => $row->challenger_img, 'joined' => $row->joined, 'likes' => $row->likes, 'subject' => $row->reply );
+                    $volley->challengers[] = ( object ) array( 
+                    	'challenger_id' => $row->challenger_id, 
+                    	'challenger_img' => $row->challenger_img, 
+                    	'joined' => $row->joined,
+                    	'likes' => $row->likes,
+                    	'subject' => $row->reply,
+                        'has_viewed' => $row->viewed
+                    );
                     $challengerCounts[$row->id]++;
                     //print "making counts for $row->id";
                 }
@@ -360,11 +390,23 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
 
         if( $this->rowCount ){
             $sql = '
-            	UPDATE `hotornot-dev`.tblChallenges 
-            	SET status_id = 4, updated = NOW(), started = NOW() 
-            	WHERE id = ?
+            	UPDATE `hotornot-dev`.tblChallengeParticipants
+            	SET has_viewed = 0 
+            	WHERE challenge_id = ?
+            		AND user_id != ?
             ';
-            $params = array( $volleyId );
+            $params = array( $volleyId, $userId );
+            $this->prepareAndExecute($sql, $params);
+            
+            $sql = "
+            	UPDATE `hotornot-dev`.tblChallenges 
+            	SET has_viewed = IF( creator_id=?, 0, has_viewed ), 
+            		status_id = 4, 
+            		updated = NOW(), 
+            		started = NOW() 
+            	WHERE id = ?
+            ";
+            $params = array( $userId, $volleyId );
             $this->prepareAndExecute($sql, $params);
             
             $sql = '
@@ -495,9 +537,21 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         $this->prepareAndExecute($sql, $params);
     }
     
-    public function setPreviewed( $volleyId ){
-        $sql = 'UPDATE `hotornot-dev`.tblChallenges SET hasPreviewed = "Y" WHERE id = ?';
-        $params = array( $volleyId );
+    public function setPreviewed( $volleyId, $userId ){
+        $sql = '
+        	UPDATE `hotornot-dev`.tblChallenges
+        	SET has_viewed = 1
+        	WHERE id = ? AND creator_id = ?
+        ';
+        $params = array( $volleyId, $userId );
+        $this->prepareAndExecute($sql, $params);
+        
+        $sql = '
+        	UPDATE `hotornot-dev`.tblChallengeParticipants
+        	SET has_viewed = 1
+        	WHERE user_id = ? 
+        ';
+        $params = array( $userId );
         $this->prepareAndExecute($sql, $params);
     }
     
@@ -619,11 +673,8 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
     }
     
-    public function getIds( $userId, $private ){
-        $pSql = "AND tc.is_private = 'N'";
-        if( $private ){
-            $pSql = "AND tc.is_private = 'Y'";
-        }
+    public function getIds( $userId, $private = false ){
+        $private = (int) $private;
         
         $sql = "
             SELECT tc.id 
@@ -632,20 +683,15 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
             	ON tc.id = tcp.challenge_id
             WHERE tc.is_verify != 1
                 AND (tc.creator_id = ?  OR tcp.user_id = ? )
-                $pSql
+                AND tc.is_private = ?
+            GROUP BY tc.id
             ORDER BY tc.updated DESC
         ";
         
-        $params = array( $userId, $userId );
+        $params = array( $userId, $userId, $private );
         $stmt = $this->prepareAndExecute( $sql, $params );
-        $ids = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
         
-        if( $ids ){
-            foreach( $ids as &$id ){
-                $id = $id->id;
-            }
-        }
-        return $ids;
+        return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
     }
     
     /**
@@ -764,6 +810,7 @@ WHERE is_verify != 1
             WHERE
                 tc.is_verify != 1
                 AND tc.status_id IN (1,2,4)
+                AND tc.is_private = 0
                 AND tc.`creator_id` IN ( $fIdPlaceholders )
                 
             UNION
@@ -823,7 +870,7 @@ WHERE is_verify != 1
         return $ids;        
     }
     
-    public function getVolleysForUserId( $userId ){
+    public function getVolleysForUserId( $userId, $limit = 40 ){
 		// get latest 10 challenges for user
         $query = "
 			( 
@@ -837,7 +884,7 @@ WHERE is_verify != 1
 			FROM `hotornot-dev`.`tblChallengeParticipants`
 			WHERE `user_id` = ?
 			)
-			limit 40
+			limit $limit
 			";
 		$params = array( $userId, $userId );
         $stmt = $this->prepareAndExecute( $query, $params );
