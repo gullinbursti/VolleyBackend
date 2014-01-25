@@ -166,19 +166,19 @@ class BIM_Report{
         $date = $date->format('Y-m-d H:i:s');
         
         /*
-            (select count(distinct creator_id) as 'unique_users',  count(*) as count, 'Selfie creates' as type from `hotornot-dev`.tblChallenges where added > '2013-11-25' and is_verify != 1 )
+            (select count(distinct creator_id) as 'unique_users',  count(*) as count, (count/unique_users) as 'per_user', 'Selfie creates' as type from `hotornot-dev`.tblChallenges where added > '2013-11-25' and is_verify != 1 )
                 union 
-            (select count(distinct user_id) as 'unique_users', count(*) as count, 'Selfie joins' as type from `hotornot-dev`.tblChallengeParticipants where from_unixtime(joined) > '2013-11-25' )
+            (select count(distinct user_id) as 'unique_users', count(*) as count, (count/unique_users) as 'per_user','Selfie joins' as type from `hotornot-dev`.tblChallengeParticipants where from_unixtime(joined) > '2013-11-25' )
                 union 
-            (select count(distinct id) as 'unique_users' , count(*) as count, 'FR Completes' as type from `hotornot-dev`.tblUsers where added > '2013-11-25' and username not regexp '[0-9]{10}' )
+            (select count(distinct id) as 'unique_users' , count(*) as count, (count/unique_users) as 'per_user','FR Completes' as type from `hotornot-dev`.tblUsers where added > '2013-11-25' and username not regexp '[0-9]{10}' )
                 union 
-            (select count(distinct id) as 'unique_users' , count(*) as count, 'FR Begins' as type from `hotornot-dev`.tblUsers where added > '2013-11-25'  )
+            (select count(distinct id) as 'unique_users' , count(*) as count, (count/unique_users) as 'per_user','FR Begins' as type from `hotornot-dev`.tblUsers where added > '2013-11-25'  )
                 union 
-            (select count(distinct user_id) as 'unique_users',  count(*) as count, 'Verifies' as type from `hotornot-dev`.tblFlaggedUserApprovals where added > unix_timestamp('2013-11-25') )
+            (select count(distinct user_id) as 'unique_users',  count(*) as count, (count/unique_users) as 'per_user','Verifies' as type from `hotornot-dev`.tblFlaggedUserApprovals where added > unix_timestamp('2013-11-25') )
                 union
-            (select count(distinct user_id) as 'unique_users',  count(*) as count, 'Likes' as type from `hotornot-dev`.tblChallengeVotes where added > '2013-11-25' )
+            (select count(distinct user_id) as 'unique_users',  count(*) as count, (count/unique_users) as 'per_user','Likes' as type from `hotornot-dev`.tblChallengeVotes where added > '2013-11-25' )
                 union
-            (select count(distinct user_id) as 'unique_users',  count(*) as count, 'Deactivates' as type from `hotornot-dev`.user_archive where added > '2013-11-25' )
+            (select count(distinct user_id) as 'unique_users',  count(*) as count, (count/unique_users) as 'per_user','Deactivates' as type from `hotornot-dev`.user_archive where added > '2013-11-25' )
             order by type;
          */
         

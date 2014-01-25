@@ -19,7 +19,7 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
         
         $messages = $client->account->sms_messages->getIterator(0, 1000, array(
             'DateSent>' => '2013-11-26', // Wed, 27 Nov 2013 02:29:25 +0000
-            'DateSent<' => '2013-11-27 00:41:00',
+            //'DateSent<' => '2013-11-27 00:41:00',
             //'From' => '+17075551234', // **Optional** filter by 'From'...
             //'To' => '+18085559876', // ...or by 'To'
         ));
@@ -38,7 +38,7 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
             // $to = '+14152549391';
             echo "sending $from, $to, $msg\n";
             try{
-                $client->account->sms_messages->create( $from, $to, $msg );
+                //$client->account->sms_messages->create( $from, $to, $msg );
             } catch ( Exception $e ){
                 print_r( $e );
             }
@@ -85,6 +85,7 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
     public static function getHashedMobileNumbers( ){
         
         $es = new BIM_DAO_ElasticSearch( BIM_Config::elasticSearch()  );
+        // getting data fior ids 64514- 81259
         $query = json_decode(
             '
             {
@@ -101,7 +102,7 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
               "query": {
                 "range": {
                   "id": {
-                    "gte": 57319
+                    "gte": 64514
                   }
                 }
               }
@@ -154,10 +155,16 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
         $client = $self->getTwilioClient();
         $conf = BIM_Config::twilio();
         
-        $from = '9167108583';// $conf->api->number;
+        $from = '8582257273';// $conf->api->number;
         $msg = 
 '
+BECOME #SELFIEFAMOUS!!! Tap here now. 
+http://appstore.com/selfieclub
 ';
+        if( !$msg ){
+            error_log("no msg!");
+            exit;
+        }
         $numbers = file( $filename );
         foreach( $numbers as &$number ){
             $number = trim( $number );
