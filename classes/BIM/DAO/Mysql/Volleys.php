@@ -198,9 +198,10 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
             foreach( $data as $row ){
                 if( !isset( $challengerCounts[ $row->id ] ) ){
                     $challengerCounts[ $row->id ] = 0;
-                    //print "making counts for $row->id";
                 }
                 if( $challengerCounts[ $row->id ] >= 50 ){
+                    $challengerCounts[$row->id]++;
+                    $volleys[ $row->id ]->total_replies++;
                     continue;
                 }
                 if( empty( $volleys[ $row->id ] ) ){
@@ -223,6 +224,10 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                     unset( $row->challenger_img );
                     unset( $row->joined );
                     unset( $row->likes );
+                    $row->total_replies = 0;
+                    if( !empty( $row->challengers ) ){
+                        $row->total_replies++;
+                    }
                     $volleys[ $row->id ] = $row;
                 } else {
                     $volley = $volleys[ $row->id ];
@@ -235,7 +240,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                         'has_viewed' => $row->viewed
                     );
                     $challengerCounts[$row->id]++;
-                    //print "making counts for $row->id";
+                    $volley->total_replies++;
                 }
             }
         }
@@ -253,7 +258,6 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                 $volleys = array();
             }
         }
-        
         return $volleys;
     }
     
@@ -379,14 +383,27 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
     }
     
     public function join( $volleyId, $userId, $imgUrl, $hashTag = '' ){
+        $joined = time();
         $sql = '
-        	INSERT IGNORE INTO `hotornot-dev`.tblChallengeParticipants 
-        	(challenge_id, user_id, img, joined, likes, subject ) 
-        	VALUES 
-        	(?, ?, ?, ?, ?, ?)
+        	UPDATE `hotornot-dev`.tblChallengeParticipants
+        	set img = ?, joined = ?, subject = ?
+        	WHERE challenge_id = ?
+        		AND img is null
+        		AND user_id = ?
         ';
-        $params = array( $volleyId, $userId, $imgUrl, time(), 0, $hashTag );
+        $params = array( $imgUrl, $joined, $hashTag, $volleyId, $userId );
         $this->prepareAndExecute($sql, $params);
+        
+        if( !$this->rowCount ){
+            $sql = '
+            	INSERT IGNORE INTO `hotornot-dev`.tblChallengeParticipants 
+            	(challenge_id, user_id, img, joined, likes, subject ) 
+            	VALUES 
+            	(?, ?, ?, ?, ?, ?)
+            ';
+            $params = array( $volleyId, $userId, $imgUrl, $joined, 0, $hashTag );
+            $this->prepareAndExecute($sql, $params);
+        }
 
         if( $this->rowCount ){
             $sql = '
@@ -822,6 +839,7 @@ WHERE is_verify != 1
             WHERE
                 tc.is_verify != 1
                 AND tc.status_id IN (1,2,4)
+                AND tc.is_private = 0
                 AND tcp.`user_id` IN ( $fIdPlaceholders )
             GROUP BY tc.id, tc.added
             ORDER BY added DESC, id DESC LIMIT 25		

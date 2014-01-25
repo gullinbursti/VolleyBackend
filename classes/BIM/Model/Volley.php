@@ -19,11 +19,12 @@ class BIM_Model_Volley{
             $this->comments = 0; //$dao->commentCount( $volley->id );
             $this->viewed = array();
             $this->has_viewed = '';
+            $this->total_replies = $volley->total_replies;
             $this->started = $volley->started;
             $this->added = $volley->added;
             $this->updated = $volley->updated;
             $this->expires = $volley->expires;
-            $this->is_private = $volley->is_private;
+            $this->is_private = (int) $volley->is_private;
             $this->is_verify = (int) $volley->is_verify;
             
             $this->total_likers = 0;
@@ -38,11 +39,13 @@ class BIM_Model_Volley{
             
             $creator = (object) array(
                 'id' => $volley->creator_id,
-                'img' => $volley->creator_img,
+                'img' => $volley->creator_img ? $volley->creator_img : '',
                 'score' => $volley->creator_likes,
                 'subject' => $this->subject,
             );
-            $this->viewed[ $creator->id ] = $volley->has_viewed;
+            if($this->is_private){
+                $this->viewed[ $creator->id ] = $volley->has_viewed;
+            }
             
             $this->creator = $creator;
             $this->resolveScore($creator);
@@ -53,19 +56,22 @@ class BIM_Model_Volley{
             $challengers = array();
             
             $allUsers = array( $creator->id => 1 );
+            
             foreach( $volley->challengers as $challenger ){
                 $joined = new DateTime( "@$challenger->joined" );
                 $joined = $joined->format('Y-m-d H:i:s');
                 
                 $target = (object) array(
                     'id' => $challenger->challenger_id,
-                    'img' => $challenger->challenger_img,
+                	'img' => $challenger->challenger_img ? $challenger->challenger_img : '',
                     'score' => $challenger->likes,
                     'subject' => empty($challenger->subject) ? $this->subject : $challenger->subject,
                 	'joined' => $joined,
                     'joined_timestamp' => $challenger->joined,
                 );
-                $this->viewed[ $target->id ] = $challenger->has_viewed;
+                if($this->is_private){
+                    $this->viewed[ $target->id ] = $challenger->has_viewed;
+                }
                 $this->resolveScore($target);
                 $challengers[] = $target;
                 $allUsers[ $target->id ] = 1;
@@ -425,7 +431,7 @@ class BIM_Model_Volley{
             $dao->join( $this->id, $userId, $imgUrl, $hashTag );
             
             $this->purgeFromCache();
-            $user = BIM_Model_User::purgeById( $userId );
+            BIM_Model_User::purgeById( $userId );
         }
     }
     

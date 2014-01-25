@@ -38,6 +38,7 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
                 'id' => $volley->id
             );
         }
+        return array();
     }
     
     public function getPreviewForSubject(){
@@ -219,17 +220,32 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
         }
     }
     
+    public function createprivate(){
+        return $this->submitChallengeWithUsernames();
+    }
+    
     public function create(){
         return $this->submitChallengeWithUsernames();
     }
     
+    /**
+	imgURL = "https://hotornot-challenges.s3.amazonaws.com/54a0704e221c46c5b53b2ba3053f957f-27cfad206b4d4cf98a1aab...";
+    isPrivate = Y;
+    subject = "#catWhiskers";
+    targets = 2394;
+    userID = 55059;
+     * 
+     * Enter description here ...
+     */
     public function submitChallengeWithUsernames(){
         $uv = null;
         $input = (object) ($_POST ? $_POST : $_GET);
         if (isset($input->userID) && isset($input->subject) && isset($input->imgURL) ){
             $isPrivate = !empty( $input->isPrivate ) ? true : false ;
             if( !$isPrivate || ( $isPrivate  && !empty( $input->targets ) ) ){
-                $targets = !empty( $input->targets ) ? array_unique(explode(',', $input->targets)) : array() ;
+                $targets = ( $isPrivate  && !empty( $input->targets ) ) 
+                            ? array_unique(explode(',', $input->targets)) 
+                            : array() ;
                 $input->imgURL = $this->normalizeVolleyImgUrl($input->imgURL);
                 $userId = $this->resolveUserId( $input->userID );
                 $expires = $this->resolveExpires();
@@ -259,9 +275,6 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
         $challenge = array();
         if( !empty( $input->challengeID ) ){
             $challenge = BIM_Model_Volley::get( $input->challengeID );
-            if( !empty( $input->cancelFor ) ){
-                BIM_Utils::cancelTimedPushes( $input->cancelFor, $input->challengeID );
-            }
         }
         return $challenge;
     }

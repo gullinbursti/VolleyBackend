@@ -28,7 +28,6 @@ class BIM_App_Challenges extends BIM_App_Base{
      * 
      * return a list of awaiting verification objects
      * 
-     * @param unknown_type $volleyId
      * @param unknown_type $userId
     **/
     public function getVerifyList ($userId) {
