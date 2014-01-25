@@ -735,7 +735,7 @@ WHERE is_verify != 1
 		$fIdPlaceholders = trim( str_repeat('?,', $fIdct ), ',' );
 		
 		$query = "
-            SELECT tc.id as id, tc.updated as updated
+            SELECT tc.id as id, tc.added as added
             FROM `hotornot-dev`.`tblChallenges` as tc 
             WHERE
                 tc.is_verify != 1
@@ -744,7 +744,7 @@ WHERE is_verify != 1
                 
             UNION
             
-            SELECT tc.id as id, tc.updated as updated
+            SELECT tc.id as id, tc.added as added
             FROM `hotornot-dev`.`tblChallenges` as tc 
                 LEFT JOIN `hotornot-dev`.tblChallengeParticipants as tcp
                 ON tc.id = tcp.challenge_id
@@ -752,8 +752,8 @@ WHERE is_verify != 1
                 tc.is_verify != 1
                 AND tc.status_id IN (1,2,4)
                 AND tcp.`user_id` IN ( $fIdPlaceholders )
-            GROUP BY tc.id, tc.updated
-            ORDER BY updated DESC, id DESC LIMIT 25		
+            GROUP BY tc.id, tc.added
+            ORDER BY added DESC, id DESC LIMIT 25		
 		";
 		
 		$dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
