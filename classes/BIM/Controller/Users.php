@@ -200,7 +200,6 @@ class BIM_Controller_Users extends BIM_Controller_Base {
 		    );
 		    $users = new BIM_App_Users();
 			$friends = $users->matchFriends( $params );
-			
 		}
 		return $friends;
     }

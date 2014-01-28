@@ -289,7 +289,7 @@ class BIM_App_Users extends BIM_App_Base{
 	 * this might also include a bit of user data from memcache.
 	 * 
 	 * @param stdClass $params with properties as follows
-	 * 		hashed_number => the hasjed phone n umber of the volley user
+	 * 		hashed_number => the hashed phone n umber of the volley user
 	 * 		hashed_list => the list of hashed phone numbers from the volley user's contact list
 	 * 		user_id - the id of the volley user
 	 */
@@ -523,18 +523,16 @@ class BIM_App_Users extends BIM_App_Base{
 	}
 	
 	public function verifyPhone( $params ){
-	    $verified = false;
+	    $friends = array();
 	    $phone = trim( $params->phone );
 	    if( preg_match('@^\+{0,1}\d+$@', $phone ) ){
 	        $list = (object) array(
 	            'id' => $params->user_id,
 	            'hashed_number' => $phone
 	        );
-	        $this->addPhoneList($list);
-            BIM_Push::emailVerifyPush($params->user_id);
-            $verified = true;
+	        $friends = $this->matchFriends($list);
 	    }
-	    return $verified;
+	    return $friends;
 	}
 	
     public function setAge( $userId, $ageRange ){
