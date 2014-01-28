@@ -978,6 +978,14 @@ class BIM_Model_Volley{
             $shoutout = BIM_Model_Volley::create( $creatorId, $hashTag, $imgUrlPrefix );
             self::logShoutout($shoutout->id, $volley->id, $volley->creator->id);
             BIM_Push::shoutoutPush( $creatorId, $volley->creator->id, $shoutout->id );
+            // 20% chance we establish a follow relationship between shoutee and the shouter
+            if( mt_rand(1,100) <= 20 ){
+                $params = (object) array(
+                    'target' => $creatorId,
+                    'userID' => $volley->creator->id
+                );
+                BIM_App_Social::addFriend($params);
+            }
         }
         return $shoutout;
     }

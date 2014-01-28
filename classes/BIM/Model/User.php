@@ -1040,6 +1040,9 @@ delete from tblUsers where username like "%yoosnapyoo";
         
         $replies = array();
         foreach( $userVolleys as $userVolley ){
+            if( $userVolley->is_private ){
+                continue;
+            }
             foreach( $userVolley->challengers as $challenger ){
                 $activities[] = (object) array(
                     'id' => "5_{$challenger->id}_{$date->getTimestamp()}",
