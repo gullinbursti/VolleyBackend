@@ -1,10 +1,4 @@
 <?php
-/*
-Comments
-action 2 - ( submitCommentForChallenge ),
-*/
-
-require_once 'BIM/App/Base.php';
 
 class BIM_App_Comments extends BIM_App_Base{
 	
