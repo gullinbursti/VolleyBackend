@@ -239,11 +239,7 @@ class BIM_Growth{
     }
     
     public function getTwilioClient(){
-        if( ! $this->twilioApiClient ){
-            $conf = BIM_Config::twilio();
-            $this->twilioApiClient = new Services_Twilio( $conf->api->accountSid, $conf->api->authToken );
-        }
-        return $this->twilioApiClient;
+        return BIM_Utils::getTwilioClient();
     }
     
     /**

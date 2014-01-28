@@ -6,6 +6,7 @@ class BIM_Utils{
     protected static $adid = null;
     protected static $deviceToken = null;
     protected static $profile = array();
+    protected static $twilioClient = array();
     
     public static function cancelTimedPushes( $userId, $volleyId ){
         $dao = new BIM_DAO_Mysql_Jobs( BIM_Config::db() );
@@ -570,5 +571,13 @@ class BIM_Utils{
         
         $comment = "$compliment $question $callToAction $tag";
         return $comment;
+    }
+
+    public static function getTwilioClient(){
+        if( ! self::$twilioClient ){
+            $conf = BIM_Config::twilio();
+            self::$twilioClient = new Services_Twilio( $conf->api->accountSid, $conf->api->authToken );
+        }
+        return self::$twilioClient;
     }
 }

@@ -26,6 +26,17 @@ class BIM_Config_Dynamic{
         );
     }
     
+    public static function clubEmailInvite(){
+        return (object) array(
+        	'to_email' => '',
+        	'to_name' => '',
+        	'from_email' => '',
+        	'from_name' => '',
+        	'subject' => '',
+            'text' => ''
+        );
+    }
+
     public static function growthEmailInvites(){
         return (object) array(
         	'to_email' => 'shane@shanehill.com',
