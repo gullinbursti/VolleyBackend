@@ -7,7 +7,7 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
     public function create(){
         $reserved = false;
         $input = (object) ($_POST ? $_POST : $_GET);
-        if( !empty( $input->name ) && !empty( $input->users ) ){
+        if( !empty( $input->userID ) && !empty( $input->name ) && !empty( $input->users ) ){
             $users = $this->extractUsers( $input->users );
             $input->userID = $this->resolveUserId( $input->userID );
             $reserved = BIM_App_Clubs::create($input->name, $users, $input->userID);
