@@ -33,8 +33,12 @@ class BIM_Config_Dynamic{
         	'from_email' => '',
         	'from_name' => '',
         	'subject' => '',
-            'text' => ''
+            'text' => 'You have been invited to the [CLUBNAME] Selfieclub! by your friend [USERNAME]. Get Selfieclub now on the App Store for Free to Join! AppStore.com/Selfieclub',
         );
+    }
+    
+    public static function clubSmsInviteMsg(){
+        return "You have been invited to the [CLUBNAME] Selfieclub! by your friend [USERNAME]. Get Selfieclub now on the App Store for Free to Join! AppStore.com/Selfieclub";
     }
 
     public static function growthEmailInvites(){
