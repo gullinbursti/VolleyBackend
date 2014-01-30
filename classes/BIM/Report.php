@@ -376,6 +376,169 @@ Total number of unique daily actives
         return (int) $stmt->fetchColumn(0);
     }
 
+/**
+select count(*) from tblChallenges where is_verify != 1 and creator_id = ? and added = <added>
+
+select count(*) from tblChallengeParticipants where user_id = ? and joined = unix_timestamp(<added>)
+
+select count(*) from tblChallenges as c join tblShoutouts as s on c.id = s.challenge_id where s.added = added;
+
+select count(*) from tblFlaggedUserApprovals where user_id = ? and added = unix_timestamp(added)
+
+
+select count(*) from tblChallenges where is_verify != 1 and creator_id = ? and added <= DATE_ADD(added,INTERVAL 7 DAY)
+
+select count(*) from tblChallengeParticipants where user_id = ? and joined <= unix_timestamp( DATE_ADD(added,INTERVAL 7 DAY) )
+
+select count(*) from tblChallenges as c join tblShoutouts as s on c.id < s.challenge_id where s.added <= DATE_ADD(added,INTERVAL 7 DAY);
+
+select count(*) from tblFlaggedUserApprovals where user_id = ? and added < unix_timestamp( DATE_ADD(added,INTERVAL 7 DAY) )
+ */
+    public static function getCohortCounts( $id ){
+        $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+        
+        // get the users reg date
+        $sql = "select added from `hotornot-dev`.tblUsers where id = ?";
+        $params = array( $id );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $added = $stmt->fetchColumn(0);
+        
+        // get the total challenges on first day
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblChallenges 
+        	where is_verify != 1 
+        		and creator_id = ? 
+        		and added < DATE_ADD(?,INTERVAL 1 DAY)
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $challengeCtDay = $stmt->fetchColumn(0);
+        
+        // get the total challenges in first week
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblChallenges 
+        	where is_verify != 1 
+        		and creator_id = ? 
+        		and added < DATE_ADD(?,INTERVAL 7 DAY)";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $challengeCtWeek = $stmt->fetchColumn(0);
+        
+        // get the total joins in first day
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblChallengeParticipants 
+        	where user_id = ? 
+        		and joined < unix_timestamp(DATE_ADD(?,INTERVAL 1 DAY))
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $joinsCtDay = $stmt->fetchColumn(0);
+        
+        // get the total joins in first week
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblChallengeParticipants 
+        	where user_id = ? 
+        		and joined < unix_timestamp(DATE_ADD(?,INTERVAL 7 DAY))
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $joinsCtWeek = $stmt->fetchColumn(0);
+        
+                
+        // get the totalshouts in first day
+        $sql = "
+            select count(*)
+            from `hotornot-dev`.tblChallenges as c
+                join `hotornot-dev`.tblShoutouts as s
+                on c.id = s.challenge_id 
+            where c.creator_id = ? 
+                and c.added < DATE_ADD(?, INTERVAL 1 DAY)
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $shoutsCtDay = $stmt->fetchColumn(0);
+        
+        // get the totalshouts in first day
+        $sql = "
+        	select count(*)
+        	from `hotornot-dev`.tblChallenges as c
+        		join `hotornot-dev`.tblShoutouts as s
+    	    	on c.id = s.challenge_id 
+        	where c.creator_id = ? 
+        		and c.added < DATE_ADD(?, INTERVAL 7 DAY)
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $shoutsCtWeek = $stmt->fetchColumn(0);
+        
+        // get the total up flags in first day
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblFlaggedUserApprovals 
+        	where user_id = ? 
+        		and flag = -1
+        		and added < unix_timestamp(DATE_ADD(?,INTERVAL 1 DAY))
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $flagsUpDay = $stmt->fetchColumn(0);
+        
+        // get the total up flags in first week
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblFlaggedUserApprovals 
+        	where user_id = ? 
+        		and flag = -1
+        		and added < unix_timestamp(DATE_ADD(?,INTERVAL 7 DAY))
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $flagsUpWeek = $stmt->fetchColumn(0);
+        
+        // get the total down flags in first day
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblFlaggedUserApprovals 
+        	where user_id = ? 
+        		and flag = 1
+        		and added < unix_timestamp(DATE_ADD(?,INTERVAL 1 DAY))
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $flagsDownDay = $stmt->fetchColumn(0);
+        
+        // get the total down flags in first week
+        $sql = "
+            select count(*) 
+            from `hotornot-dev`.tblFlaggedUserApprovals 
+            where user_id = ? 
+                and flag = 1
+                and added < unix_timestamp(DATE_ADD(?,INTERVAL 7 DAY))
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $flagsDownWeek = $stmt->fetchColumn(0);
+        
+        print_r(
+            array(
+                'selfies_day_1' => $challengeCtDay,
+                'joins_day_1' => $joinsCtDay,
+                'shouts_day_1' => $shoutsCtDay,
+                'verifies_up_day_1' => $flagsUpDay,
+                'verifies_down_day_1' => $flagsDownDay,
+            
+                'selfies_week_1' => $challengeCtWeek,
+                'joins_week_1' => $joinsCtWeek,
+                'shouts_week_1' => $shoutsCtWeek,
+                'verifies_up_week_1' => $flagsUpWeek,
+                'verifies_down_week_1' => $flagsDownWeek,
+            )
+        );
+    }
 /*
 Network wide totals:
 
