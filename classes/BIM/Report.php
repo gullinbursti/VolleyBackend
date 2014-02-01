@@ -376,25 +376,67 @@ Total number of unique daily actives
         return (int) $stmt->fetchColumn(0);
     }
 
-/**
-select count(*) from tblChallenges where is_verify != 1 and creator_id = ? and added = <added>
+    public static function getCohortCounts(){
+        
+        $totals = (object) array(
+            'selfies_day_1' => 0,
+            'joins_day_1' => 0,
+            'shouts_day_1' => 0,
+            'verifies_up_day_1' => 0,
+            'verifies_down_day_1' => 0,
+        
+            'selfies_week_1' => 0,
+            'joins_week_1' => 0,
+            'shouts_week_1' => 0,
+            'verifies_up_week_1' => 0,
+            'verifies_down_week_1' => 0,
+        );
+        
+        $sql = "
+        	select u.id, count(*) 
+        	from `hotornot-dev`.tblUsers as u 
+        		join `hotornot-dev`.tblChallenges as c 
+        		on u.id = c.creator_id 
+        	where c.is_verify != 1 
+        	group by u.id 
+        	order by count(*) 
+        	desc limit 100
+        ";
+        $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $ids = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+        
+        foreach( $ids as $id ){
+            $counts = self::getCohortCountForId($id);
+            foreach( $counts as $prop => $total ){
+                $totals->$prop += $total;
+            }
+        }
+        
+        foreach( $totals as $prop => &$count ){
+            $count = ( $count / 100 );
+        }
+        
+        echo "
+Avg selfies per user during the first day : $totals->selfies_day_1
+Avg selfies per user during the first 7 days : $totals->selfies_week_1
 
-select count(*) from tblChallengeParticipants where user_id = ? and joined = unix_timestamp(<added>)
+Avg joins per user during the first day : $totals->joins_day_1
+Avg joins per user during the first 7 days : $totals->joins_week_1
 
-select count(*) from tblChallenges as c join tblShoutouts as s on c.id = s.challenge_id where s.added = added;
+Avg shoutouts per user during the first day : $totals->shouts_day_1
+Avg shoutouts per user during the first 7 days : $totals->shouts_week_1
 
-select count(*) from tblFlaggedUserApprovals where user_id = ? and added = unix_timestamp(added)
+Avg verifies up per user during the first day : $totals->verifies_up_day_1
+Avg verifies up per user during the first 7 days : $totals->verifies_up_week_1
 
-
-select count(*) from tblChallenges where is_verify != 1 and creator_id = ? and added <= DATE_ADD(added,INTERVAL 7 DAY)
-
-select count(*) from tblChallengeParticipants where user_id = ? and joined <= unix_timestamp( DATE_ADD(added,INTERVAL 7 DAY) )
-
-select count(*) from tblChallenges as c join tblShoutouts as s on c.id < s.challenge_id where s.added <= DATE_ADD(added,INTERVAL 7 DAY);
-
-select count(*) from tblFlaggedUserApprovals where user_id = ? and added < unix_timestamp( DATE_ADD(added,INTERVAL 7 DAY) )
- */
-    public static function getCohortCounts( $id ){
+Avg verifies down per user during the first day : $totals->verifies_down_day_1
+Avg verifies down per user during the first 7 days : $totals->verifies_down_week_1
+";
+        
+    }
+    
+    public static function getCohortCountForId( $id ){
         $dao = new BIM_DAO_Mysql( BIM_Config::db() );
         
         // get the users reg date
@@ -523,20 +565,18 @@ select count(*) from tblFlaggedUserApprovals where user_id = ? and added < unix_
         $stmt = $dao->prepareAndExecute( $sql, $params );
         $flagsDownWeek = $stmt->fetchColumn(0);
         
-        print_r(
-            array(
-                'selfies_day_1' => $challengeCtDay,
-                'joins_day_1' => $joinsCtDay,
-                'shouts_day_1' => $shoutsCtDay,
-                'verifies_up_day_1' => $flagsUpDay,
-                'verifies_down_day_1' => $flagsDownDay,
-            
-                'selfies_week_1' => $challengeCtWeek,
-                'joins_week_1' => $joinsCtWeek,
-                'shouts_week_1' => $shoutsCtWeek,
-                'verifies_up_week_1' => $flagsUpWeek,
-                'verifies_down_week_1' => $flagsDownWeek,
-            )
+        return (object) array(
+            'selfies_day_1' => $challengeCtDay,
+            'joins_day_1' => $joinsCtDay,
+            'shouts_day_1' => $shoutsCtDay,
+            'verifies_up_day_1' => $flagsUpDay,
+            'verifies_down_day_1' => $flagsDownDay,
+        
+            'selfies_week_1' => $challengeCtWeek,
+            'joins_week_1' => $joinsCtWeek,
+            'shouts_week_1' => $shoutsCtWeek,
+            'verifies_up_week_1' => $flagsUpWeek,
+            'verifies_down_week_1' => $flagsDownWeek,
         );
     }
 /*
