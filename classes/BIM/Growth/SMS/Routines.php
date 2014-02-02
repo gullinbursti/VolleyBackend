@@ -55,7 +55,8 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
         $urlSuffix = "contact_lists_bkp/phone/_search";
         $lists = json_decode( $es->call('POST', $urlSuffix, $query) );
         
-        $caliCodes = array( 209,213,310,323,408,415,424,442,510,530,559,562,619,626,650,657,661,707,714,747,760,805,818,831,858,909,916,925,949,951);
+        $caliCodes = array(209,213,310,323,408,415,424,442,510,530,559,562,619,626,650,657,661,707,714,747,760,805,818,831,858,909,916,925,949,951,905,204,514,506,709,226,519,613,705,819,306,204,289,226,250,289,306,403,416,418,450,506,514,519,587,604,613,647,705,709,778,780,807,819,867,902,905);
+        //$caliCodes = array( 209,213,310,323,408,415,424,442,510,530,559,562,619,626,650,657,661,707,714,747,760,805,818,831,858,909,916,925,949,951);
         $count = 0;
         
         foreach( $lists->hits->hits as $hit ){
@@ -155,12 +156,11 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
         $client = $self->getTwilioClient();
         $conf = BIM_Config::twilio();
         
-        $from = '8582257273';// $conf->api->number;
+        $from = '2394313268';// $conf->api->number;
         $msg = 
 '
-BECOME #SELFIEFAMOUS!!! Tap here now. 
-http://appstore.com/selfieclub
-';
+A friend has invited you to Selfieclub (#1 Selfie App) Install to find out who! AppStore.com/Selfieclub
+		';
         if( !$msg ){
             error_log("no msg!");
             exit;
