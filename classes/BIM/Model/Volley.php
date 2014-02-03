@@ -44,7 +44,8 @@ class BIM_Model_Volley{
                 'subject' => $this->subject,
             );
             if($this->is_private){
-                $this->viewed[ $creator->id ] = $volley->has_viewed;
+                $viewed = $volley->has_viewed ? 1 : 0;
+                $this->viewed[ $creator->id ] = $viewed;
             }
             
             $this->creator = $creator;
@@ -70,7 +71,8 @@ class BIM_Model_Volley{
                     'joined_timestamp' => $challenger->joined,
                 );
                 if($this->is_private){
-                    $this->viewed[ $target->id ] = $challenger->has_viewed;
+                    $viewed = $challenger->has_viewed ? 1 : 0;
+                    $this->viewed[ $target->id ] = $viewed;
                 }
                 $this->resolveScore($target);
                 $challengers[] = $target;
