@@ -1,7 +1,7 @@
 <?php
 class BIM_App_Clubs extends BIM_App_Base{
-    public static function create( $name, $users, $ownerId ) {
-        $created = BIM_Model_Club::create( $name, $users, $ownerId  );
+    public static function create( $name, $users, $ownerId, $description = '', $img = '' ) {
+        $created = BIM_Model_Club::create( $name, $users, $ownerId, $description, $img  );
         if( $created ){
             //BIM_Jobs_Clubs::queueNotifyInvitees($name, $users, $ownerId);
         }
