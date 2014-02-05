@@ -27,7 +27,7 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
                 if( !isset( $memberCounts[ $row->id ] ) ){
                     $memberCounts[ $row->id ] = 0;
                 }
-                if( $memberCounts[ $row->id ] >= 50 ){
+                if( $memberCounts[ $row->id ] >= 500 ){
                     $memberCounts[$row->id]++;
                     $clubs[ $row->id ]->total_members++;
                     continue;
@@ -71,7 +71,8 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
                 		'email' => $row->email,
                 		'pending' => $row->pending, 
                 		'blocked' => $row->blocked,
-                        'user_id' => $row->user_id
+                        'user_id' => $row->user_id,
+                        'invited' => $row->invited
                     );
                     $memberCounts[$row->id]++;
                     $club->total_members++;
@@ -136,5 +137,73 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
             $created = true;
         }
         return $created;
+    }
+    
+    /**
+     * takes an array of keys and values
+     * and updates the db for a club
+     */
+    public function update( $clubId, $update ){
+        $params = array();
+        $setSql = array();
+        foreach( $update as $col => $val ){
+            $setSql[] = " `$col` = ? ";
+            $params[] = $val;
+        }
+        $params[] = $clubId;
+        $sql = "
+        	update `hotornot-dev`.club
+        	set $setSql
+        	where id = ?
+        ";
+		$this->prepareAndExecute( $sql, $params );
+    }
+    
+    public function delete( $clubId ){
+        $sql = "
+        	delete from `hotornot-dev`.club
+        	where id = ?
+        ";
+        $params = array( $clubId );
+		$this->prepareAndExecute( $sql, $params );
+    }
+    /*
+  `club_id` int(11) NOT NULL,
+  `extern_name` varchar(255) DEFAULT NULL,
+  `mobile_number` varchar(25) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `pending` tinyint(4) DEFAULT '1',
+  `blocked` tinyint(4) NOT NULL DEFAULT '0',
+  `user_id` int(10) unsigned DEFAULT NULL,
+  `invited` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    */
+    public function join( $clubId, $userId ){
+        $sql = "
+        	insert ignore into `hotornot-dev`.club_member
+        	(club_id,user_id,blocked,pending) 
+        		values
+        	(?,?,0,0)
+        ";
+        $params = array( $clubId, $userId );
+		$this->prepareAndExecute( $sql, $params );
+    }
+    
+    public function quit( $clubId, $userId ){
+        $sql = "
+        	delete from `hotornot-dev`.club_member
+        	where club_id = ? and user_id = ?
+        ";
+        $params = array( $clubId, $userId );
+		$this->prepareAndExecute( $sql, $params );
+    }
+    
+    public function block( $clubId, $userId ){
+        $sql = "
+        	update `hotornot-dev`.club_member
+        	set blocked = 1
+        	where club_id = ? and user_id = ?
+        ";
+        $params = array( $clubId, $userId );
+		$this->prepareAndExecute( $sql, $params );
     }
 }

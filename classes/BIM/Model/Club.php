@@ -247,14 +247,46 @@ class BIM_Model_Club{
     }
     
     public function delete(){
-        $dao = new BIM_DAO_Mysql_clubs( BIM_Config::db() );
+        $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
         $dao->delete( $this->id );
         $this->purgeFromCache();
     }
     
-    public function update(){
-        $dao = new BIM_DAO_Mysql_clubs( BIM_Config::db() );
-        $dao->delete( $this->id );
+    /**
+     * takes an object with property names that the property names of a club and
+     * compares the values to this objects properties
+     * if the values are different then the db will be updated
+     * otherwise no action is taken
+     */
+    public function update( $data ){
+        foreach( $data as $prop => $value ){
+            $update = array();
+            if( $this->$prop != $value ){
+                $update->$prop = $value;
+            }
+        }
+        if( $update ){
+            $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
+            $dao->update( $this->id, $update );
+            $this->purgeFromCache();
+        }
+    }
+    
+    public function join( $userId ){
+        $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
+        $dao->join( $this->id, $userId );
+        $this->purgeFromCache();
+    }
+    
+    public function quit( $userId ){
+        $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
+        $dao->quit( $this->id, $userId );
+        $this->purgeFromCache();
+    }
+    
+    public function block( $userId ){
+        $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
+        $dao->block( $this->id, $userId );
         $this->purgeFromCache();
     }
 }
