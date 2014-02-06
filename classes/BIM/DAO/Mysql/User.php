@@ -428,7 +428,7 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         		last_login = CURRENT_TIMESTAMP,
         		notifications = ?,
         		device_token = ?
-        		WHERE id = ?
+        	WHERE id = ?
         ";
         $params[] = $notifications;
         $params[] = $deviceToken;
@@ -460,7 +460,7 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         		$ageSql
         		$passSql
         		last_login = CURRENT_TIMESTAMP
-        		WHERE id = ?
+        	WHERE id = ?
         ";
         $stmt = $this->prepareAndExecute( $query, $params );
     }

@@ -159,15 +159,15 @@ class BIM_DAO_Mysql extends BIM_DAO{
         if( BIM_Utils::isProfiling() ){
             $start = microtime(1);
         }
+        //if( preg_match('@total_challenges|last_login@',$sql) ){
+            //self::logQuery( $sql, $params );
+        //}
         $connParams = $this->getConnectionParams( $getWriter, $shardKey );
         $conn = $this->getConnection( $connParams );
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $params );
         if( !preg_match('/^(?:00|01|IM)/', $stmt->errorCode() ) ){
-            //$call = debug_backtrace();
-            //print_r( array( get_class( $this ), $stmt->errorCode(), $stmt->errorInfo(), $sql, $params ) );
-	    //exit;
-            // do some error handling
+            // TODO: need to add some error handling code
         }
         $this->lastInsertId = $conn->lastInsertId();
         $this->rowCount = $stmt->rowCount();
@@ -203,6 +203,12 @@ class BIM_DAO_Mysql extends BIM_DAO{
             
         }
         return $stmt;
+    }
+    
+    protected static function logQuery( $sql, $params ){
+        //$bt = debug_backtrace();
+        //$callTree = join( ' => ', array( $bt[2]['class'].':'.$bt[2]['function'], $bt[1]['class'].':'.$bt[1]['function'] ) );
+        //file_put_contents('/tmp/bim_query_log', print_r( array( $sql, $params, $callTree ), 1 ), FILE_APPEND );
     }
 
 }

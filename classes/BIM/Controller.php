@@ -45,15 +45,17 @@ class BIM_Controller{
                 $cache->set( $key, $method, 5 );
             }
         } else if( $method == 'getchallengeswithfriends' ){
+            $data = null;
+            if( $_POST ){
+                $data = &$_POST;
+            } else if( $_GET ){
+                $data = &$_GET;
+            }
             $lastMethod = $cache->get( $key );
-            if( $lastMethod == 'getsubscribees' ){
+            if( !empty( $data['userID'] ) && $lastMethod == 'getsubscribees' ){
                 $method = 'getchallengesforusername';
-                if( $_POST ){
-                    $data = &$_POST;
-                } else if( $_GET ){
-                    $data = &$_GET;
-                }
-                $data['username'] = $user->username;
+                $targetUser = BIM_Model_User::get( $data['userID'] );
+                $data['username'] = $targetUser->username;
                 $data['p'] = 1;
             }
             $cache->delete( $key );
