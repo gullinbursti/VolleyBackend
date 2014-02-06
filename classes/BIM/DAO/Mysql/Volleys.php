@@ -682,7 +682,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
             FROM `hotornot-dev`.tblChallenges as tc
             WHERE tc.is_verify != 1 
             	AND tc.creator_id = ?
-            ORDER BY tc.updated DESC
+            ORDER BY tc.added DESC
         ";
         
         $params = array( $userId );
@@ -890,20 +890,23 @@ WHERE is_verify != 1
     
     public function getVolleysForUserId( $userId, $limit = 40 ){
 		// get latest 10 challenges for user
-        $query = "
-			( 
-			SELECT id 
-			FROM `hotornot-dev`.`tblChallenges`
-			WHERE `creator_id` = ? AND is_verify != 1
-			)
-			UNION
-			( 
-			SELECT challenge_id 
-			FROM `hotornot-dev`.`tblChallengeParticipants`
-			WHERE `user_id` = ?
-			)
-			limit $limit
-			";
+		$query = "
+            (
+            SELECT p.challenge_id, p.joined as created
+            FROM `hotornot-dev`.`tblChallengeParticipants` AS p
+            JOIN `hotornot-dev`.tblChallenges AS c
+            ON p.challenge_id = c.id
+            WHERE p.user_id = ? and c.is_private = 0
+            )
+            UNION
+            ( 
+            SELECT id, unix_timestamp(added) as created
+            FROM `hotornot-dev`.`tblChallenges`
+            WHERE `creator_id` = ? AND is_verify != 1 AND is_private = 0
+            )
+            order by created desc
+            limit $limit
+		";
 		$params = array( $userId, $userId );
         $stmt = $this->prepareAndExecute( $query, $params );
         $ids = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );

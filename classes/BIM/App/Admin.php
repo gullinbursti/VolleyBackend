@@ -698,6 +698,7 @@ class BIM_App_Admin{
         	}
         	
             var successCallback = function( options, success, response ){ 
+            	alert('created shoutout');
                 console.log(options, success, response);
             };
             
@@ -716,7 +717,7 @@ class BIM_App_Admin{
                     url: '/admin/shoutout.php?volleyId=' + volleyId + '&addLikes=' + likes,
                     dataType: 'json',
                     type: 'GET',
-                    context: this,
+                    // context: this,
                     success: successCallback,
                     error: errorCallback
                   });
