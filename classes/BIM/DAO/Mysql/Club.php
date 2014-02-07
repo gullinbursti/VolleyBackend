@@ -179,10 +179,11 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
     */
     public function join( $clubId, $userId ){
         $sql = "
-        	insert ignore into `hotornot-dev`.club_member
+        	insert into `hotornot-dev`.club_member
         	(club_id,user_id,blocked,pending) 
-        		values
-        	(?,?,0,0)
+        	values (?,?,0,0)
+        	on duplicate key update
+        	pending = blocked;
         ";
         $params = array( $clubId, $userId );
 		$this->prepareAndExecute( $sql, $params );
@@ -201,6 +202,16 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         $sql = "
         	update `hotornot-dev`.club_member
         	set blocked = 1
+        	where club_id = ? and user_id = ?
+        ";
+        $params = array( $clubId, $userId );
+		$this->prepareAndExecute( $sql, $params );
+    }
+    
+    public function unblock( $clubId, $userId ){
+        $sql = "
+        	update `hotornot-dev`.club_member
+        	set blocked = 0
         	where club_id = ? and user_id = ?
         ";
         $params = array( $clubId, $userId );

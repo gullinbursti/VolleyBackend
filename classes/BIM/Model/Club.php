@@ -289,4 +289,10 @@ class BIM_Model_Club{
         $dao->block( $this->id, $userId );
         $this->purgeFromCache();
     }
+    
+    public function unblock( $userId ){
+        $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
+        $dao->block( $this->id, $userId );
+        $this->purgeFromCache();
+    }
 }
