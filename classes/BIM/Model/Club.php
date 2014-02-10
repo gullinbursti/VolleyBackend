@@ -262,7 +262,7 @@ class BIM_Model_Club{
         foreach( $data as $prop => $value ){
             $update = array();
             if( $this->$prop != $value ){
-                $update->$prop = $value;
+                $update[$prop] = $value;
             }
         }
         if( $update ){
@@ -273,9 +273,11 @@ class BIM_Model_Club{
     }
     
     public function join( $userId ){
+        $joined = false;
         $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
-        $dao->join( $this->id, $userId );
+        $joined = $dao->join( $this->id, $userId );
         $this->purgeFromCache();
+        return $joined;
     }
     
     public function quit( $userId ){
@@ -286,13 +288,42 @@ class BIM_Model_Club{
     
     public function block( $userId ){
         $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
-        $dao->block( $this->id, $userId );
-        $this->purgeFromCache();
+        $blocked = $dao->block( $this->id, $userId );
+        if( $blocked ){
+            $this->purgeFromCache();
+        }
+        return $blocked;
     }
     
     public function unblock( $userId ){
         $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
-        $dao->block( $this->id, $userId );
-        $this->purgeFromCache();
+        $unblocked = $dao->unblock( $this->id, $userId );
+        if( $unblocked ){
+            $this->purgeFromCache();
+        }
+        return $unblocked;
+    }
+    
+    public function getMemberIds(){
+        $ids = array();
+        foreach( $this->members as $member ){
+            $ids[] = $member->id;
+        }
+        return $ids;
+    }
+    
+    public function isMember( $userId ){
+        $isMember = false;
+        foreach( $this->members as $member ){
+            if( $member->id == $userId ){
+                $isMember = true;
+                break;
+            }
+        }
+        return $isMember;
+    }
+    
+    public function isOwner( $userId ){
+        return ($this->owner_id == $userId);
     }
 }

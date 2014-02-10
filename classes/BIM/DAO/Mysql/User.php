@@ -2,6 +2,42 @@
 
 class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
     
+    public function getClubInvites( $userId ){
+		$query = "
+            SELECT club_id
+            FROM `hotornot-dev`.club_member
+            WHERE user_id = ?
+            	AND pending = 1
+            	AND blocked = 0
+		";
+		$params = array( $userId );
+        $stmt = $this->prepareAndExecute( $query, $params );
+        $ids = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+        return $ids;
+    }
+    
+    public function getClubIds( $userId ){
+		$query = "
+            (
+                SELECT club_id
+                FROM `hotornot-dev`.club_member
+                WHERE user_id = ?
+                	AND pending = 0
+                	AND blocked = 0
+            )
+            UNION
+            ( 
+            	SELECT id 
+            	FROM club
+            	WHERE owner_id = ?
+            )
+		";
+		$params = array( $userId, $userId );
+        $stmt = $this->prepareAndExecute( $query, $params );
+        $ids = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+        return $ids;
+    }
+    
     public function getAllIds(){
         $sql = "select id from `hotornot-dev`.tblUsers";
 		$stmt = $this->prepareAndExecute($sql);

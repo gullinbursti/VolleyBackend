@@ -58,4 +58,40 @@ class BIM_App_Clubs extends BIM_App_Base{
             $e->sendEmail( $emailData );
         }
     }
+    
+    public static function join( $clubId, $userId ){
+        $club = BIM_Model_Club::get( $clubId );
+        $joined = false;
+        if( $club->isExtant() ){
+            $joined = $club->join( $userId );
+        }
+        return $joined;
+    }
+    
+    public static function quit( $clubId, $userId ){
+        $club = BIM_Model_Club::get( $clubId );
+        $joined = false;
+        if( $club->isExtant() ){
+            $joined = $club->join( $userId );
+        }
+        return $joined;
+    }
+    
+    public static function block( $clubId, $userId ){
+        $club = BIM_Model_Club::get( $clubId );
+        $blocked = false;
+        if( $club->isExtant() && $club->isOwner( $userId ) ){
+            $blocked = $club->block( $userId );
+        }
+        return $blocked;
+    }
+    
+    public static function unblock( $clubId, $userId ){
+        $club = BIM_Model_Club::get( $clubId );
+        $unblocked = false;
+        if( $club->isExtant() && $club->isOwner( $userId ) ){
+            $unblocked = $club->unblock( $userId );
+        }
+        return $unblocked;
+    }
 }

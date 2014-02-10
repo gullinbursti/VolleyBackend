@@ -66,7 +66,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         $this->prepareAndExecute( $sql, $params );
     }
     
-    public function add( $userId, $targetIds = array(), $hashTagId, $hashTag, $imgUrl, $isPrivate = false, $expires, $isVerify = false, $status = 2 ){
+    public function add( $userId, $targetIds = array(), $hashTagId, $hashTag, $imgUrl, $isPrivate = false, $expires, $isVerify = false, $status = 2, $clubId = 0 ){
         // cast isPrivate and isverify to an int
         // to be compatible with the db
         $isPrivate = (int) $isPrivate;
@@ -75,12 +75,15 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         // add the new challenge
         $sql = '
             INSERT INTO `hotornot-dev`.tblChallenges 
-                ( status_id, subject_id, subject, creator_id, creator_img, votes, updated, started, added, is_private, expires, is_verify )
+                ( 
+                status_id, subject_id, subject, creator_id, creator_img, votes,
+                updated, started, added, is_private, expires, is_verify, club_id 
+                )
             VALUES 
-                (?, ?, ?, ?, ?, "0", NOW(), NOW(), NOW(), ?, ?, ? )
+                (?, ?, ?, ?, ?, "0", NOW(), NOW(), NOW(), ?, ?, ?, ? )
         ';
         
-        $params = array($status, $hashTagId, $hashTag, $userId, $imgUrl, $isPrivate, $expires, $isVerify);
+        $params = array($status, $hashTagId, $hashTag, $userId, $imgUrl, $isPrivate, $expires, $isVerify, $clubId);
         $this->prepareAndExecute( $sql, $params );
         $volleyId = $this->lastInsertId;
         
@@ -816,10 +819,15 @@ WHERE is_verify != 1
         LIMIT 64 
      * 
      */
-    public function getVolleysWithFriends( $userId, $friendIds ){
-	    
+    public function getVolleysWithFriends( $userId, $friendIds, $clubIds = array() ){
+	    // add club id 0 so we get volleys that are not in a club
+	    $clubIds[] = 0;
+        
 	    $fIdct = count( $friendIds );
 		$fIdPlaceholders = trim( str_repeat('?,', $fIdct ), ',' );
+		
+	    $cIdct = count( $clubIds );
+		$cIdPlaceholders = trim( str_repeat('?,', $cIdct ), ',' );
 		
 		$query = "
             SELECT tc.id as id, tc.added as added
@@ -829,6 +837,7 @@ WHERE is_verify != 1
                 AND tc.status_id IN (1,2,4)
                 AND tc.is_private = 0
                 AND tc.`creator_id` IN ( $fIdPlaceholders )
+                AND tc.club_id IN ( $cIdPlaceholders )
                 
             UNION
             
@@ -841,15 +850,22 @@ WHERE is_verify != 1
                 AND tc.status_id IN (1,2,4)
                 AND tc.is_private = 0
                 AND tcp.`user_id` IN ( $fIdPlaceholders )
-            GROUP BY tc.id, tc.added
+                AND tc.club_id IN ( $cIdPlaceholders )
+                GROUP BY tc.id, tc.added
             ORDER BY added DESC, id DESC LIMIT 25		
 		";
 		
 		$dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
         
         $params = $friendIds;
-        foreach( $friendIds as $friendId ){
-            $params[] = $friendId;
+        foreach( $clubIds as $id ){
+            $params[] = $id;
+        }
+        foreach( $friendIds as $id ){
+            $params[] = $id;
+        }
+        foreach( $clubIds as $id ){
+            $params[] = $id;
         }
         $stmt = $dao->prepareAndExecute( $query, $params );
         return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );

@@ -26,6 +26,7 @@ class BIM_Model_Volley{
             $this->expires = $volley->expires;
             $this->is_private = (int) $volley->is_private;
             $this->is_verify = (int) $volley->is_verify;
+            $this->club_id = (int) $volley->club_id;
             
             $this->total_likers = 0;
             // setting up recent likes
@@ -297,11 +298,11 @@ class BIM_Model_Volley{
         return $dao->hasApproved( $this->id, $userId );
     }
     
-    public static function create( $userId, $hashTag, $imgUrl, $targetIds = array(), $isPrivate = false, $expires = -1, $isVerify = false, $status = 2 ) {
+    public static function create( $userId, $hashTag, $imgUrl, $targetIds = array(), $isPrivate = false, $expires = -1, $isVerify = false, $status = 2, $clubId = 0 ) {
         $volleyId = null;
         $hashTagId = self::getHashTagId($userId, $hashTag);
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-        $volleyId = $dao->add( $userId, $targetIds, $hashTagId, $hashTag, $imgUrl, $isPrivate, $expires, $isVerify, $status );
+        $volleyId = $dao->add( $userId, $targetIds, $hashTagId, $hashTag, $imgUrl, $isPrivate, $expires, $isVerify, $status, $clubId );
         BIM_Model_User::purgeById( array( $userId ) );
         return self::get( $volleyId );
     }
@@ -703,13 +704,22 @@ class BIM_Model_Volley{
         return $volley;
     }
     
+    // we exclude private volleys
+    // and we include volleys from 
+    // clubs the user has joined
     public static function getVolleysWithFriends( $userId ){
         $friends = BIM_App_Social::getFollowed( (object) array('userID' => $userId, 'size' => 100 ) );
         $friendIds = array_map(function($friend){return $friend->user->id;}, $friends);
+        
         // we add our own id here so we will include our challenges as well, not just our friends
         $friendIds[] = $userId;
+        
+        // now we get the club ids for this user
+        $user = BIM_Model_User::get( $userId );
+        $clubIds = $user->getClubs(true); // just get the club ids
+        
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-        $ids = $dao->getVolleysWithFriends($userId, $friendIds);
+        $ids = $dao->getVolleysWithFriends($userId, $friendIds, $clubIds );
         return self::getMulti($ids);
     }
     

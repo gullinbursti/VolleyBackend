@@ -320,7 +320,29 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         return true;
     }
     
+    public function getJoinedClubs(){
+        $clubs = array();
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty( $input->userID ) ){
+            $input->userID = $this->resolveUserId( $input->userID );
+            $clubs = BIM_App_Users::getJoinedClubs( $input->userID );
+        }
+        return $clubs;
+    }
+    
+    public function getClubInvites(){
+        $clubs = array();
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty( $input->userID ) ){
+            $input->userID = $this->resolveUserId( $input->userID );
+            $clubs = BIM_App_Users::getClubInvites( $input->userID );
+        }
+        return $clubs;
+    }
+    
     public function purge(){
+        // disabling for now
+        return true;
         $input = (object) ($_POST ? $_POST : $_GET);
         $user = BIM_Utils::getSessionUser();
         if( $user && $user->isExtant() && !$user->isSuspended() ){
@@ -330,6 +352,8 @@ class BIM_Controller_Users extends BIM_Controller_Base {
     }
     
     public function purgeContent(){
+        // disabling for now
+        return true;
         $input = (object) ($_POST ? $_POST : $_GET);
         $user = BIM_Utils::getSessionUser();
         if( $user && $user->isExtant() ){
@@ -340,7 +364,6 @@ class BIM_Controller_Users extends BIM_Controller_Base {
     
     public function randomKikUser(){
         return BIM_Model_User::getRandomKikUser();
-        //return 'aishaincali';
     }
     
     public function createKikUser(){
@@ -353,68 +376,16 @@ class BIM_Controller_Users extends BIM_Controller_Base {
 	    return false;
     }
     
-    // a better way to create() would be to
-    // have an "add" function that would attemopt to add the user 
-    // and if that failed due to a unique constraint, 
-    // then we would run th check to see what existed
-    // oh well, this is what we have.
     public function create(){
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty($input->username) && !empty( $input->password ) && !empty( $input->email )){
             $check = BIM_Model_User::usernameOrEmailExists($input);
             if( empty( $check->ok ) ){
                 return array('error' => $check);
-                /**
-                if( !empty( $check->username ) ){
-                    echo "username <b>$input->username</b> taken!<br>";
-                }
-                if( !empty( $check->username ) ){
-                    echo "email <b>$input->email</b> taken!<br>";
-                }
-                echo "Please go back and try again";
-                exit;
             } else {
                 $salt = sha1( md5( $input->username ) );
                 $password = md5( $input->password.$salt );
                 $user = BIM_Model_User::create($password, $input);
-                if(!empty( $input->redirect ) ){
-                    header('Location: '.$input->redirect);
-                    exit;
-                }
-                return $user;
-            }
-        }
-    }
-    
-    // a better way to create() would be to
-    // have an "add" function that would attemopt to add the user 
-    // and if that failed due to a unique constraint, 
-    // then we would run th check to see what existed
-    // oh well, this is what we have.
-    public function createOld(){
-        $input = (object) ($_POST ? $_POST : $_GET);
-        if( !empty($input->username) && !empty( $input->password ) && !empty( $input->email )){
-            $check = BIM_Model_User::usernameOrEmailExists($input);
-            if( empty( $check->ok ) ){
-                if( !empty( $check->username ) ){
-                    echo "username <b>$input->username</b> taken!<br>";
-                }
-                if( !empty( $check->email ) ){
-                    echo "email <b>$input->email</b> taken!<br>";
-                }
-                echo "Please go back and try again";
-                exit;
-                */
-            } else {
-                $salt = sha1( md5( $input->username ) );
-                $password = md5( $input->password.$salt );
-                $user = BIM_Model_User::create($password, $input);
-                /*
-                if(!empty( $input->redirect ) ){
-                    header('Location: '.$input->redirect);
-                    exit;
-                }
-                */
                 return $user;
             }
         }

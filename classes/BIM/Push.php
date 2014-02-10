@@ -302,10 +302,6 @@ class BIM_Push{
     public static function sendVolleyNotifications( $volleyId, $targetIds = array() ){
         $volley = BIM_Model_Volley::get( $volleyId );
         $creator = BIM_Model_User::get($volley->creator->id);
-        if( !$targetIds || !is_array($targetIds) ){
-            $followers = BIM_App_Social::getFollowers( $creator->id, true );
-            $targetIds = array_keys($followers);
-        }
         $targets = BIM_Model_User::getMulti($targetIds);
         foreach( $targets as $target ){
             if ( $target->isExtant() && $target->canPush() ){

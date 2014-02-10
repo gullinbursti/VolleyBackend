@@ -167,16 +167,22 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         $params = array( $clubId );
 		$this->prepareAndExecute( $sql, $params );
     }
-    /*
-  `club_id` int(11) NOT NULL,
-  `extern_name` varchar(255) DEFAULT NULL,
-  `mobile_number` varchar(25) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `pending` tinyint(4) DEFAULT '1',
-  `blocked` tinyint(4) NOT NULL DEFAULT '0',
-  `user_id` int(10) unsigned DEFAULT NULL,
-  `invited` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    */
+
+    /**
+     * 
+     * In the sql below we set the pending value to the value of the blocked column
+     * if the user is already in the club as an invitee or blockee
+     * 
+     * this means that if blocked = 0, then pending will be 0 
+     * and the user wull be joined to the club
+     * 
+     * similarly if blocked = 1, then pending will be 1
+     * and the user wull not be joined to the club
+     * 
+     * @param int $clubId
+     * @param int $userId
+     * 
+     */
     public function join( $clubId, $userId ){
         $sql = "
         	insert into `hotornot-dev`.club_member
@@ -187,6 +193,7 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         ";
         $params = array( $clubId, $userId );
 		$this->prepareAndExecute( $sql, $params );
+		return (bool) $this->rowCount;
     }
     
     public function quit( $clubId, $userId ){
@@ -206,6 +213,7 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         ";
         $params = array( $clubId, $userId );
 		$this->prepareAndExecute( $sql, $params );
+		return (bool) $this->rowCount;
     }
     
     public function unblock( $clubId, $userId ){
@@ -216,5 +224,6 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         ";
         $params = array( $clubId, $userId );
 		$this->prepareAndExecute( $sql, $params );
+		return (bool) $this->rowCount;
     }
 }

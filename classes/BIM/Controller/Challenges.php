@@ -192,9 +192,12 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
     }
     
     public function join(){
-        $uv = null;
+        $joinedVolley = null;
         $input = (object) ($_POST ? $_POST : $_GET);
         
+        // this conditional is checking to see if we are receiving an 
+        // upload directly from the client as is the case with
+        // the kik selfieclub messaging app
         if( !empty($input->imgData[0]) && empty($input->imgURL) ){
             $input->imgURL = BIM_Utils::processBase64Upload($input->imgData[0]);
         }
@@ -204,20 +207,21 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
             $userId = $this->resolveUserId( $input->userID );
             $challenges = new BIM_App_Challenges();
             // get the response hashtag
-            $hashTag = empty( $input->subject ) ? '' : $input->subject; 
+            $hashTag = empty( $input->subject ) ? '' : $input->subject;
             $volley = BIM_Model_Volley::get( $input->challengeID );
             if( $volley->isExtant() ){
                 $ptrn = "@$volley->subject\s*:@";
                 $hashTag = trim(preg_replace( $ptrn, '', $hashTag, 1 ));
-                $uv = $challenges->join( $userId, $input->challengeID, $input->imgURL, $hashTag );
+                $joinedVolley = $challenges->join( $userId, $input->challengeID, $input->imgURL, $hashTag );
+                if( $joinedVolley ){
+                    $joinedVolley = array(
+                        'id' => $joinedVolley->id,
+                        'img' => $input->imgURL
+                    );
+                }
             }
         }
-        if( $uv ){
-            return array(
-                'id' => $uv->id,
-                'img' => $input->imgURL
-            );
-        }
+        return $joinedVolley;
     }
     
     public function createprivate(){
@@ -245,12 +249,15 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
             if( !$isPrivate || ( $isPrivate  && !empty( $input->targets ) ) ){
                 $targets = ( $isPrivate  && !empty( $input->targets ) ) 
                             ? array_unique(explode(',', $input->targets)) 
-                            : array() ;
+                            : array();
+                $clubId = (!empty( $input->clubID ) && $input->clubID > 0) 
+                            ? $input->clubID
+                            : 0;
                 $input->imgURL = $this->normalizeVolleyImgUrl($input->imgURL);
                 $userId = $this->resolveUserId( $input->userID );
                 $expires = $this->resolveExpires();
                 $challenges = new BIM_App_Challenges();
-                $uv = $challenges->submitChallengeWithUsername( $userId, $input->subject, $input->imgURL, $isPrivate, $expires, $targets );
+                $uv = $challenges->submitChallengeWithUsername( $userId, $input->subject, $input->imgURL, $isPrivate, $expires, $targets, $clubId );
             }
         }
         return $uv;

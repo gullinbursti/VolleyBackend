@@ -774,6 +774,24 @@ delete from tblUsers where username like "%yoosnapyoo";
         return !empty($this->img_url);
     }
     
+    public function getClubs( $idsOnly = false ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        $clubIds = $dao->getClubIds( $this->id );
+        if( !$idsOnly ){
+            $clubIds = BIM_Model_Club::getMulti( $clubIds ); 
+        }
+        return $clubIds;
+    }
+    
+    public function getClubInvites( $idsOnly = false ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        $clubIds = $dao->getClubInvites( $this->id );
+        if( !$idsOnly ){
+            $clubIds = BIM_Model_Club::getMulti( $clubIds ); 
+        }
+        return $clubIds;
+    }
+    
     public static function getSuspendees( $limit = 50 ){
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
         $ids = $dao->getSuspendees( $limit );
