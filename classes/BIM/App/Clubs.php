@@ -6,15 +6,23 @@ class BIM_App_Clubs extends BIM_App_Base{
         $clubId = BIM_Model_Club::create( $name, $ownerId, $description, $img  );
         if( $clubId ){
             $club = BIM_Model_Club::get( $clubId );
-            //BIM_Jobs_Clubs::queueNotifyInvitees($name, $users, $ownerId);
         }
         return $club;
 	}
 	
-    public static function notifyInvitees( $name, $users, $ownerId ) {
+    public static function invite( $clubId, $ownerId, $users = array(), $nonUsers = array() ) {
+        $club = BIM_Model_Club::get( $clubId );
+        if( $club->isOwner($ownerId) ){
+            $invited = $club->invite( $users, $nonUsers );
+            // BIM_Jobs_Clubs::queueNotifyInvitees($clubId, $invited );
+        }
+        return $invited;
+	}
+	
+	public static function notifyInvitees( $clubId, $invited ) {
         $numbers = array();
         $emails = array();
-        foreach( $users as $user ){
+        foreach( $invited->nonUsers as $user ){
             if( !empty( $user[1] ) ){
                 $numbers[] = $user[1];
             }
@@ -24,8 +32,8 @@ class BIM_App_Clubs extends BIM_App_Base{
             }
         }
         
-        self::smsInvites($numbers, $name, $ownerId);
-        self::emailInvites($emails, $name, $ownerId);
+        self::smsInvites($numbers, $clubId );
+        self::emailInvites($emails, $clubId );
 	}
 	
     public static function smsInvites( $numbers, $clubName, $ownerId ){

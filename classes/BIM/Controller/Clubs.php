@@ -46,7 +46,6 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
         $club = false;
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty( $input->userID ) && !empty( $input->name ) ){
-            // $users = !empty( $input->users ) ? self::extractUsers( $input->users ) : array();
             $description = !empty( $input->description ) ? $input->description : '';
             $img = !empty( $input->imgURL ) ? $input->imgURL : '';
             $img = $this->normalizeVolleyImgUrl($img);
@@ -54,6 +53,18 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
             $club = BIM_App_Clubs::create($input->name, $input->userID, $description, $img);
         }
         return $club;
+    }
+    
+    public function invite(){
+        $invited = false;
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty( $input->userID ) && !empty( $input->clubID ) ){
+            $inviterId = $this->resolveUserId($input->userID);
+            $nonUsers = !empty( $input->nonUsers ) ? self::extractUsers( $input->nonUsers ) : array();
+            $users = !empty( $input->users ) ? explode(',', $input->users ) : array();
+            $invited = BIM_App_Clubs::invite( $input->clubID, $inviterId, $users, $nonUsers );
+        }
+        return $invited;
     }
     
     private static function extractUsers( $users ){

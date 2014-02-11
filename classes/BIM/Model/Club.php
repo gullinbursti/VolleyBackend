@@ -126,6 +126,16 @@ class BIM_Model_Club{
     	return array_unique($userIds);
     }
     
+    public function invite( $users = array(), $nonUsers = array() ){
+        $dao = new BIM_DAO_Mysql_Club( BIM_Config::db( ) );
+        $invited = $dao->invite( $this->id, $users, $nonUsers );
+        if( $invited ){
+            $this->purgeFromCache();
+            BIM_Model_User::purgeById($users);
+        }
+        return $invited;
+    }
+    
     public static function create( $name, $ownerId, $description = '', $img = '' ) {
         $dao = new BIM_DAO_Mysql_Club( BIM_Config::db( ) );
         $clubId = $dao->create( $name, $ownerId, $description, $img );
@@ -342,6 +352,6 @@ class BIM_Model_Club{
     }
     
     public function isOwner( $userId ){
-        return ($this->owner_id == $userId);
+        return ($this->owner->id == $userId);
     }
 }

@@ -42,7 +42,9 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
                         		'pending' => $row->pending, 
                         		'blocked' => $row->blocked,
                                 'user_id' => $row->user_id,
-                                'invited' => $row->invited
+                                'invited' => !empty($row->invited) ? $row->invited : '',
+                                'joined' => !empty($row->joined) ? $row->joined : '',
+                                'blocked_date' => !empty($row->blocked_date) ? $row->blocked_date : ''
                             ) 
                         );
                         $memberCounts[$row->id]++;
@@ -56,6 +58,8 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
                     unset( $row->blocked );
                     unset( $row->user_id );
                     unset( $row->invited );
+                    unset( $row->joined );
+                    unset( $row->blocked_date );
                     unset( $row->club_id );
                     $row->total_members = 0;
                     if( !empty( $row->members ) ){
@@ -72,8 +76,11 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
                 		'pending' => $row->pending, 
                 		'blocked' => $row->blocked,
                         'user_id' => $row->user_id,
-                        'invited' => $row->invited
-                    );
+                        'invited' => !empty($row->invited) ? $row->invited : '',
+                        'joined' => !empty($row->joined) ? $row->joined : '',
+                        'blocked_date' => !empty($row->blocked_date) ? $row->blocked_date : ''
+                        )
+                    ;
                     $memberCounts[$row->id]++;
                     $club->total_members++;
                 }
@@ -99,7 +106,6 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
     
     public function create( $name, $ownerId, $description = '', $img = '' ){
         $clubId = 0;
-        // add vote record
 		$sql = '
 			INSERT IGNORE INTO `hotornot-dev`.club 
 			( name, owner_id, description, img ) 
@@ -109,37 +115,65 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         $params = array( $name, $ownerId, $description, $img );
         $this->prepareAndExecute( $sql, $params );
         
-        if( $this->lastInsertId ){
-            $clubId = $this->lastInsertId;
-            /*
-            ### commenting this out until we decide how we are going to pass new users
-            $insertSql = array();
-            $params = array();
-            
-            foreach( $users as $user ){
-                $params[] = $this->lastInsertId;
-                foreach( $user as $value ){
-                    if( !$value ){
-                        $value = '';
-                    }
-                    $params[] = $value;
-                }
-                $insertSql[] = '(?,?,?,?)';
-            }
-            
-            if( $insertSql ){
-                $insertSql = join( ',', $insertSql );
-        		$sql = "
-        			INSERT IGNORE INTO `hotornot-dev`.club_member 
-        			( club_id, extern_name, mobile_number, email ) 
-        			VALUES
-        			$insertSql
-        		";
-        		$this->prepareAndExecute( $sql, $params );
-            }
-            */
-        }
+        if( $this->lastInsertId ) $clubId = $this->lastInsertId;
+        
         return $clubId;
+    }
+    
+    public function invite( $clubId, $users, $nonUsers ){
+        $invited = false;
+        // handle non users
+        $insertSql = array();
+        $params = array();
+        foreach( $nonUsers as $user ){
+            $params[] = $clubId;
+            foreach( $user as $value ){
+                if( !$value ){
+                    $value = null;
+                }
+                $params[] = $value;
+            }
+            $insertSql[] = '(?,?,?,?)';
+        }
+        
+        if( $insertSql ){
+            $insertSql = join( ',', $insertSql );
+    		$sql = "
+    			INSERT INTO `hotornot-dev`.club_member 
+    			( club_id, extern_name, mobile_number, email ) 
+    			VALUES
+    			$insertSql
+    			ON DUPLICATE KEY UPDATE
+    			pending = blocked, invited = IF(blocked=0 and invited=0, now(), invited)
+    		";
+    		$this->prepareAndExecute( $sql, $params );
+    		$invited = (bool) $this->rowCount;
+        }
+        
+        // handle registered app users
+        $params = array();
+        $insertSql = array();
+        foreach( $users as $userId ){
+            $params[] = $clubId;
+            $params[] = $userId;
+            $insertSql[] = '( ?, ?, now() )';
+        }
+        
+        if( $insertSql ){
+            $insertSql = join( ',', $insertSql );
+    		$sql = "
+    			INSERT INTO `hotornot-dev`.club_member 
+    			( club_id, user_id, invited ) 
+    			VALUES
+    			$insertSql
+    			ON DUPLICATE KEY UPDATE
+    			pending = blocked, invited = IF(blocked=0 and invited=0, now(), invited)
+    		";
+    		$this->prepareAndExecute( $sql, $params );
+        }
+        
+        $invited = $invited ? true : (bool) $this->rowCount;
+        return $invited;
     }
     
     /**
@@ -189,8 +223,8 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
     public function join( $clubId, $userId ){
         $sql = "
         	insert into `hotornot-dev`.club_member
-        	(club_id,user_id,blocked,pending) 
-        	values (?,?,0,0)
+        	(club_id,user_id,blocked,pending,invited,joined) 
+        	values (?,?,0,0,'0000-00-00 00:00:00',now())
         	on duplicate key update
         	pending = blocked;
         ";
@@ -211,9 +245,13 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
     
     public function block( $clubId, $userId ){
         $sql = "
-        	update `hotornot-dev`.club_member
-        	set blocked = 1
-        	where club_id = ? and user_id = ?
+        	insert into `hotornot-dev`.club_member
+        	(club_id,user_id,blocked,blocked_date,invited)
+        	values
+        	(?,?,1,now(),'0000-00-00 00:00:00')
+        	
+        	on duplicate key update
+        	blocked = 1, blocked_date = now()
         ";
         $params = array( $clubId, $userId );
 		$this->prepareAndExecute( $sql, $params );
