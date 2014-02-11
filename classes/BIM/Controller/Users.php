@@ -320,12 +320,12 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         return true;
     }
     
-    public function getJoinedClubs(){
+    public function getClubs(){
         $clubs = array();
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty( $input->userID ) ){
             $input->userID = $this->resolveUserId( $input->userID );
-            $clubs = BIM_App_Users::getJoinedClubs( $input->userID );
+            $clubs = BIM_App_Users::getClubs( $input->userID );
         }
         return $clubs;
     }

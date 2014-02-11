@@ -41,21 +41,19 @@
  * 
  */
 class BIM_Controller_Clubs extends BIM_Controller_Base {
-    /**
-     * name=<name>
-     * users=name:::number:::email|||
-     */
+    
     public function create(){
-        $created = false;
+        $club = false;
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty( $input->userID ) && !empty( $input->name ) ){
-            $users = !empty( $input->users ) ? self::extractUsers( $input->users ) : array();
+            // $users = !empty( $input->users ) ? self::extractUsers( $input->users ) : array();
             $description = !empty( $input->description ) ? $input->description : '';
-            $img = !empty( $input->img ) ? $input->img : '';
+            $img = !empty( $input->imgURL ) ? $input->imgURL : '';
+            $img = $this->normalizeVolleyImgUrl($img);
             $input->userID = $this->resolveUserId( $input->userID );
-            $created = BIM_App_Clubs::create($input->name, $users, $input->userID, $description, $img);
+            $club = BIM_App_Clubs::create($input->name, $input->userID, $description, $img);
         }
-        return $created;
+        return $club;
     }
     
     private static function extractUsers( $users ){
@@ -78,8 +76,14 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
     public function get(){
         $club = null;
         $input = (object) ($_POST ? $_POST : $_GET);
-        if( !empty( $input->clubID ) ){
-            $club = BIM_Model_Club::get($input->clubID);
+        if( !empty( $input->clubID ) && !empty( $input->userID ) ){
+            $club = BIM_Model_Club::get( $input->clubID );
+            $input->userID = $this->resolveUserId( $input->userID );
+            if( $club->isExtant() && !$club->isOwner($input->userID) ){
+                unset( $club->members );
+                unset( $club->pending );
+                unset( $club->blocked );
+            }
         }
         return $club;
     }
@@ -87,29 +91,43 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
     public function join(){
         $joined = false;
         $input = (object) ($_POST ? $_POST : $_GET);
-        if( !empty( $input->userID ) && !empty( $input->clubID ) ){
-            $joined = BIM_App_Clubs::join($input->clubID, $input->userID);
+        if( !empty( $input->userID ) && !empty( $input->ownerID ) && !empty( $input->clubID ) ){
+            $club = BIM_Model_Club::get( $input->clubID );
+            // now we make sure that the requesting user is
+            // the same as the user that is joining
+            // or the requesting user is the owner 
+            $requestingUserId = $this->resolveUserId( $input->ownerID );
+            if( $club->isExtant() && ( $club->isOwner( $requestingUserId ) || $requestingUserId == $input->userID ) ){
+                $joined = BIM_App_Clubs::join($input->clubID, $input->userID);
+            }
         }
         return $joined;
     }
     
     //remove user from a club
     public function quit(){
-        $joined = false;
+        $quit = false;
         $input = (object) ($_POST ? $_POST : $_GET);
-        if( !empty( $input->userID ) && !empty( $input->clubID ) ){
-            $joined = BIM_App_Clubs::quit($input->clubID, $input->userID);
+        if( !empty( $input->memberID ) && !empty( $input->clubID ) && !empty( $input->ownerID ) ){
+            $club = BIM_Model_Club::get( $input->clubID );
+            // now we make sure that the requesting user is
+            // the same as the user that is quitting
+            // or the requesting user is the owner 
+            $requestingUserId = $this->resolveUserId( $input->ownerID );
+            if( $club->isExtant() && ( $club->isOwner( $requestingUserId ) || $requestingUserId == $input->memberID ) ){
+                $quit = BIM_App_Clubs::quit($input->clubID, $input->memberID);
+            }
         }
-        return $joined;
+        return $quit;
     }
     
     //block a user from a club
     public function block(){
         $blocked = false;
         $input = (object) ($_POST ? $_POST : $_GET);
-        if( !empty( $input->userID ) && !empty( $input->clubID ) ){
-            $input->userID = $this->resolveUserId( $input->userID );
-            $blocked = BIM_App_Clubs::block($input->clubID, $input->userID);
+        if( !empty( $input->userID ) && !empty( $input->clubID ) && !empty( $input->ownerID ) ){
+            $input->ownerID = $this->resolveUserId( $input->ownerID );
+            $blocked = BIM_App_Clubs::block($input->clubID, $input->ownerID, $input->userID);
         }
         return $blocked;
     }
@@ -118,10 +136,24 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
     public function unblock(){
         $unblocked = false;
         $input = (object) ($_POST ? $_POST : $_GET);
-        if( !empty( $input->userID ) && !empty( $input->clubID ) ){
-            $input->userID = $this->resolveUserId( $input->userID );
-            $unblocked = BIM_App_Clubs::unblock($input->clubID, $input->userID);
+        if( !empty( $input->userID ) && !empty( $input->clubID ) && !empty( $input->ownerID ) ){
+            $input->ownerID = $this->resolveUserId( $input->ownerID );
+            $unblocked = BIM_App_Clubs::unblock($input->clubID, $input->ownerID, $input->userID);
         }
         return $unblocked;
     }
+    
+    // get featured clubs
+    public function featured(){
+        return BIM_App_Clubs::featured();
+    }
+    
+    public function processImage(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty( $input->imgURL ) ){
+            BIM_Jobs_Challenges::queueProcessImage( $input->imgURL);
+        }
+        return true;
+    }
+
 }

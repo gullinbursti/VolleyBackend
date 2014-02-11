@@ -561,8 +561,8 @@ class BIM_App_Users extends BIM_App_Base{
         return BIM_Model_User::get( $userId );
     }
     
-    public static function getJoinedClubs( $userId ){
-        $clubs = array();
+    public static function getClubs( $userId ){
+        $clubs = (object) array();
         $user = BIM_Model_User::get( $userId );
         if( $user->isExtant() ){
             $clubs = $user->getClubs();

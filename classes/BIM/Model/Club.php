@@ -126,9 +126,13 @@ class BIM_Model_Club{
     	return array_unique($userIds);
     }
     
-    public static function create( $name, $users, $ownerId, $description = '', $img = '' ) {
+    public static function create( $name, $ownerId, $description = '', $img = '' ) {
         $dao = new BIM_DAO_Mysql_Club( BIM_Config::db( ) );
-        return $dao->create( $name, $users, $ownerId, $description, $img );
+        $clubId = $dao->create( $name, $ownerId, $description, $img );
+        if( $clubId ){
+            BIM_Model_User::purgeById($ownerId);
+        }
+        return $clubId;
     }
     
     public static function makeCacheKeys( $ids ){
@@ -276,14 +280,24 @@ class BIM_Model_Club{
         $joined = false;
         $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
         $joined = $dao->join( $this->id, $userId );
-        $this->purgeFromCache();
+        if( $joined ){
+            $this->purgeFromCache();
+            // clear user from cache
+            BIM_Model_User::purgeById($userId);
+        }
         return $joined;
     }
     
     public function quit( $userId ){
+        $quit = false;
         $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
-        $dao->quit( $this->id, $userId );
-        $this->purgeFromCache();
+        $quit = $dao->quit( $this->id, $userId );
+        if( $quit ){
+            $this->purgeFromCache();
+            // clear user from cache
+            BIM_Model_User::purgeById($userId);
+        }
+        return $quit;
     }
     
     public function block( $userId ){
@@ -291,6 +305,8 @@ class BIM_Model_Club{
         $blocked = $dao->block( $this->id, $userId );
         if( $blocked ){
             $this->purgeFromCache();
+            // clear user from cache
+            BIM_Model_User::purgeById($userId);
         }
         return $blocked;
     }
@@ -300,6 +316,8 @@ class BIM_Model_Club{
         $unblocked = $dao->unblock( $this->id, $userId );
         if( $unblocked ){
             $this->purgeFromCache();
+            // clear user from cache
+            BIM_Model_User::purgeById($userId);
         }
         return $unblocked;
     }

@@ -1,11 +1,14 @@
 <?php
 class BIM_App_Clubs extends BIM_App_Base{
-    public static function create( $name, $users, $ownerId, $description = '', $img = '' ) {
-        $created = BIM_Model_Club::create( $name, $users, $ownerId, $description, $img  );
-        if( $created ){
+    
+    public static function create( $name, $ownerId, $description = '', $img = '' ) {
+        $club = null;
+        $clubId = BIM_Model_Club::create( $name, $ownerId, $description, $img  );
+        if( $clubId ){
+            $club = BIM_Model_Club::get( $clubId );
             //BIM_Jobs_Clubs::queueNotifyInvitees($name, $users, $ownerId);
         }
-        return $created;
+        return $club;
 	}
 	
     public static function notifyInvitees( $name, $users, $ownerId ) {
@@ -70,28 +73,37 @@ class BIM_App_Clubs extends BIM_App_Base{
     
     public static function quit( $clubId, $userId ){
         $club = BIM_Model_Club::get( $clubId );
-        $joined = false;
+        $quit = false;
         if( $club->isExtant() ){
-            $joined = $club->join( $userId );
+            $quit = $club->quit( $userId );
         }
-        return $joined;
+        return $quit;
     }
     
-    public static function block( $clubId, $userId ){
+    public static function block( $clubId, $ownerId, $userId ){
         $club = BIM_Model_Club::get( $clubId );
         $blocked = false;
-        if( $club->isExtant() && $club->isOwner( $userId ) ){
+        if( $club->isExtant() && $club->isOwner( $ownerId ) ){
             $blocked = $club->block( $userId );
         }
         return $blocked;
     }
     
-    public static function unblock( $clubId, $userId ){
+    public static function unblock( $clubId, $ownerId, $userId ){
         $club = BIM_Model_Club::get( $clubId );
         $unblocked = false;
-        if( $club->isExtant() && $club->isOwner( $userId ) ){
+        if( $club->isExtant() && $club->isOwner( $ownerId ) ){
             $unblocked = $club->unblock( $userId );
         }
         return $unblocked;
+    }
+    
+    public static function featured( ){
+        $featured = array();
+        $c = BIM_Config::app();
+        if( !empty( $c->featured_clubs ) ){
+            $featured = BIM_Model_Club::getMulti( $c->featured_clubs );
+        }
+        return $featured;
     }
 }

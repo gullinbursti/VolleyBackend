@@ -97,8 +97,8 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         return $clubs;
     }
     
-    public function create( $name, $users, $ownerId, $description = '', $img = '' ){
-        $created = false;
+    public function create( $name, $ownerId, $description = '', $img = '' ){
+        $clubId = 0;
         // add vote record
 		$sql = '
 			INSERT IGNORE INTO `hotornot-dev`.club 
@@ -110,6 +110,9 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         $this->prepareAndExecute( $sql, $params );
         
         if( $this->lastInsertId ){
+            $clubId = $this->lastInsertId;
+            /*
+            ### commenting this out until we decide how we are going to pass new users
             $insertSql = array();
             $params = array();
             
@@ -134,9 +137,9 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         		";
         		$this->prepareAndExecute( $sql, $params );
             }
-            $created = true;
+            */
         }
-        return $created;
+        return $clubId;
     }
     
     /**
@@ -203,6 +206,7 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         ";
         $params = array( $clubId, $userId );
 		$this->prepareAndExecute( $sql, $params );
+		return (bool) $this->rowCount;
     }
     
     public function block( $clubId, $userId ){

@@ -776,11 +776,23 @@ delete from tblUsers where username like "%yoosnapyoo";
     
     public function getClubs( $idsOnly = false ){
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
-        $clubIds = $dao->getClubIds( $this->id );
+        $clubData = $dao->getClubIds( $this->id );
         if( !$idsOnly ){
-            $clubIds = BIM_Model_Club::getMulti( $clubIds ); 
+            $clubs = (object) array(
+                'joined' => array(),
+                'owned' => (object) array()
+            );
+            $clubData = BIM_Model_Club::getMulti( $clubData );
+            foreach( $clubData as $club ){
+                if( $club->isOwner( $this->id ) ){
+                    $clubs->owned = $club;
+                } else {
+                    $clubs->joined[] = $club;
+                }
+            }
+            $clubData = $clubs;
         }
-        return $clubIds;
+        return $clubData;
     }
     
     public function getClubInvites( $idsOnly = false ){
