@@ -377,10 +377,9 @@ class BIM_Push{
         $club = BIM_Model_Club::get( $clubId );
         $user = BIM_Model_User::get( $userId );
         if( $user->canPush() ){
-            $user->device_token = '859613b4ea8a72a71a6fc8241c79ee4617ba748518fb75d28777e611839cc455';
             $owner = $club->owner;
             $msg = "You have been invited to the $club->name Selfieclub! by your friend $owner->username. Swipe to join their club!";
-            self::send($user->device_token, $msg, null, null, null, false);
+            self::send($user->device_token, $msg);
         }
     }
     

@@ -37,10 +37,7 @@ class BIM_App_Clubs extends BIM_App_Base{
         }
         
         foreach( $users as $userId ){
-            $user = BIM_Model_User::get( $userId );
-            if( $user->canPush() ){
-                BIM_Push::clubInvite( $user->id, $clubId );
-            }
+            BIM_Push::clubInvite( $userId, $clubId );
         }
         
         self::smsInvites( $numbers, $clubId );
@@ -55,11 +52,11 @@ class BIM_App_Clubs extends BIM_App_Base{
         $club = BIM_Model_Club::get( $clubId );
         
         foreach( $numbers as $number ){
-            $number = '14152549391';
             $client = BIM_Utils::getTwilioClient();
             $conf = BIM_Config::twilio();
-            $number = preg_replace('/\.\s\-\+/', '', $number);
-            $number = "+$number";
+            $number = preg_replace('@[^\d]@', '', $number);
+            $number = preg_replace('@^1@', '', $number);
+            $number = "+1$number";
             $msg = BIM_Config::clubSmsInviteMsg();
             $msg = str_replace('[CLUBNAME]',$club->name, $msg);
             $msg = str_replace('[USERNAME]',$club->owner->username, $msg);
@@ -74,7 +71,6 @@ class BIM_App_Clubs extends BIM_App_Base{
         $club = BIM_Model_Club::get( $clubId );
         
         foreach( $addys as $addy ){
-            $addy = 'shane@builtinmenlo.com';
             $emailData->to_email = $addy;
             $msg = $emailData->text;
             $msg = str_replace('[CLUBNAME]',$club->name, $msg);
