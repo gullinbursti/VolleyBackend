@@ -47,7 +47,7 @@ class BIM_Model_Club{
                     $this->blocked[] = $member;
                 } else if( $member->pending ){
                     $this->pending[] = $member;
-                } else if( $member->id ){
+                } else if( !empty($member->id) ){
                     $members[] = $member;
                 }
                 
@@ -108,17 +108,17 @@ class BIM_Model_Club{
     public function getUsers(){
         $userIds = array();
         foreach( $this->members as $member ){
-            if($member->id){
+            if( !empty( $member->id) ){
     	        $userIds[] = $member->id;
             }
 	    }
         foreach( $this->pending as $member ){
-            if($member->id){
+            if( !empty( $member->id) ){
     	        $userIds[] = $member->id;
             }
 	    }
         foreach( $this->blocked as $member ){
-            if($member->id){
+            if( !empty( $member->id) ){
     	        $userIds[] = $member->id;
             }
 	    }
@@ -128,6 +128,7 @@ class BIM_Model_Club{
     
     public function invite( $users = array(), $nonUsers = array() ){
         $dao = new BIM_DAO_Mysql_Club( BIM_Config::db( ) );
+        // now we figure out if any of the users have actually been invited
         $invited = $dao->invite( $this->id, $users, $nonUsers );
         if( $invited ){
             $this->purgeFromCache();

@@ -11,61 +11,75 @@ class BIM_App_Clubs extends BIM_App_Base{
 	}
 	
     public static function invite( $clubId, $ownerId, $users = array(), $nonUsers = array() ) {
+        $invited = false;
         $club = BIM_Model_Club::get( $clubId );
         if( $club->isOwner($ownerId) ){
             $invited = $club->invite( $users, $nonUsers );
-            // BIM_Jobs_Clubs::queueNotifyInvitees($clubId, $invited );
+            if( $invited ){
+                self::notifyInvitees($clubId, $users, $nonUsers);
+                //BIM_Jobs_Clubs::queueNotifyInvitees($clubId, $users, $nonUsers);
+            }
         }
         return $invited;
 	}
 	
-	public static function notifyInvitees( $clubId, $invited ) {
+	public static function notifyInvitees( $clubId, $users, $nonUsers ) {
         $numbers = array();
         $emails = array();
-        foreach( $invited->nonUsers as $user ){
+        foreach( $nonUsers as $user ){
             if( !empty( $user[1] ) ){
                 $numbers[] = $user[1];
-            }
+            } 
             
             if( !empty( $user[2] ) ){
                 $emails[] = $user[2];
             }
         }
         
-        self::smsInvites($numbers, $clubId );
-        self::emailInvites($emails, $clubId );
+        foreach( $users as $userId ){
+            $user = BIM_Model_User::get( $userId );
+            if( $user->canPush() ){
+                BIM_Push::clubInvite( $user->id, $clubId );
+            }
+        }
+        
+        self::smsInvites( $numbers, $clubId );
+        self::emailInvites( $emails, $clubId );
 	}
 	
-    public static function smsInvites( $numbers, $clubName, $ownerId ){
+    public static function smsInvites( $numbers, $clubId ){
         if( !is_array( $numbers ) ){
             $numbers = array( $numbers );
         }
         
-        $clubOwner = BIM_Model_User::get( $ownerId );
+        $club = BIM_Model_Club::get( $clubId );
         
         foreach( $numbers as $number ){
+            $number = '14152549391';
             $client = BIM_Utils::getTwilioClient();
             $conf = BIM_Config::twilio();
             $number = preg_replace('/\.\s\-\+/', '', $number);
             $number = "+$number";
-            $msg = BIM_Config_Dynamic::clubSmsInviteMsg();
-            $msg = str_replace('[CLUBNAME]',$clubName, $msg);
-            $msg = str_replace('[USERNAME]',$clubOwner->username, $msg);
+            $msg = BIM_Config::clubSmsInviteMsg();
+            $msg = str_replace('[CLUBNAME]',$club->name, $msg);
+            $msg = str_replace('[USERNAME]',$club->owner->username, $msg);
             $sms = $client->account->sms_messages->create( $conf->api->number, $number, $msg );
         }
     }
     
-    public static function emailInvites($addys, $clubName, $ownerId){
+    public static function emailInvites($addys, $clubId){
         $emailData = BIM_Config::clubEmailInvite();
         $e = new BIM_Email_Swift( BIM_Config::smtp() );
         
-        $clubOwner = BIM_Model_User::get( $ownerId );
+        $club = BIM_Model_Club::get( $clubId );
         
         foreach( $addys as $addy ){
+            $addy = 'shane@builtinmenlo.com';
             $emailData->to_email = $addy;
             $msg = $emailData->text;
-            $msg = str_replace('[CLUBNAME]',$clubName, $msg);
-            $msg = str_replace('[USERNAME]',$clubOwner->username, $msg);
+            $msg = str_replace('[CLUBNAME]',$club->name, $msg);
+            $msg = str_replace('[USERNAME]',$club->owner->username, $msg);
+            $emailData->text = $msg;  
             $e->sendEmail( $emailData );
         }
     }
