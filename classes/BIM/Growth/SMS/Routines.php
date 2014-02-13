@@ -103,7 +103,7 @@ class BIM_Growth_SMS_Routines extends BIM_Growth_SMS{
               "query": {
                 "range": {
                   "id": {
-                    "gte": 64514
+                    "gte": 0
                   }
                 }
               }

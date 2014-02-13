@@ -31,7 +31,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         ";
         $stmt = $this->prepareAndExecute( $sql, $userIds );
         $ids = $stmt->fetchAll(PDO::FETCH_COLUMN,0);
-        if(!$wantArray){
+        if(!$wantArray && !empty($ids[0]) ){
             $ids = $ids[0];
         }
         return $ids;

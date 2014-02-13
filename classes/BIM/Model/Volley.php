@@ -44,7 +44,7 @@ class BIM_Model_Volley{
                 'subject' => $this->subject,
             );
             if($this->is_private){
-                $viewed = $volley->has_viewed ? 1 : 0;
+                $viewed = !empty( $volley->has_viewed ) ? 1 : 0;
                 $this->viewed[ $creator->id ] = $viewed;
             }
             
