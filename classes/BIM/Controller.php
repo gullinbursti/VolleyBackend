@@ -17,9 +17,11 @@ class BIM_Controller{
                 $res = $this->getAccountSuspendedVolley();
                 if( !$res || $controllerClass == 'BIM_Controller_Users' ){
                     $r->user = BIM_Utils::getSessionUser();
+                    /*
                     if( $r->user ){
                         $method = self::resolveGetChallengesWithFriends($method);
                     }
+                    */
                     $res = $r->$method();
                     if( is_bool( $res ) ){
                         $res = array( 'result' => $res );
