@@ -299,11 +299,9 @@ class BIM_Push{
         }
     }
     
-    public static function sendVolleyNotifications( $volleyId ){
+    public static function sendVolleyNotifications( $volleyId, $targetIds = array() ){
         $volley = BIM_Model_Volley::get( $volleyId );
         $creator = BIM_Model_User::get($volley->creator->id);
-        $followers = BIM_App_Social::getFollowers( $creator->id, true );
-        $targetIds = array_keys($followers);
         $targets = BIM_Model_User::getMulti($targetIds);
         foreach( $targets as $target ){
             if ( $target->isExtant() && $target->canPush() ){
@@ -374,4 +372,15 @@ class BIM_Push{
             self::send($user->device_token, $msg);
         }
     }
+    
+    public static function clubInvite( $userId, $clubId ){
+        $club = BIM_Model_Club::get( $clubId );
+        $user = BIM_Model_User::get( $userId );
+        if( $user->canPush() ){
+            $owner = $club->owner;
+            $msg = "You have been invited to the $club->name Selfieclub! by your friend $owner->username. Swipe to join their club!";
+            self::send($user->device_token, $msg);
+        }
+    }
+    
 }

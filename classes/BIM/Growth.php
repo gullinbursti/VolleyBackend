@@ -130,7 +130,7 @@ class BIM_Growth{
 	    $maxRedirects = 50;
 	    while( $url && $maxRedirects-- > 0 ){
     	    $response = $this->_handleRequest($url, $options);
-    	    if( !empty( $response['status'] ) && preg_match( '@3\d\d@', $response['status'] ) ){
+    	    if( !empty( $response['status'] ) && preg_match( '@(300|301|302|303|307)@', $response['status'] ) ){
     	        $url = $response['headers']['Location'];
     	    } else {
     	        $url = false;
@@ -239,11 +239,7 @@ class BIM_Growth{
     }
     
     public function getTwilioClient(){
-        if( ! $this->twilioApiClient ){
-            $conf = BIM_Config::twilio();
-            $this->twilioApiClient = new Services_Twilio( $conf->api->accountSid, $conf->api->authToken );
-        }
-        return $this->twilioApiClient;
+        return BIM_Utils::getTwilioClient();
     }
     
     /**

@@ -168,11 +168,11 @@ class BIM_App_Admin{
                 BIM_Utils::putImage( $imgUrl, $name );
                 BIM_Utils::processImage($imgUrlPrefix);
                 
-                $hashTag = "#SHOUTOUT >> ".$volley->creator->username;
+                $hashTag = "#shoutout";
                 $teamVolleyId = BIM_Config::app()->team_volley_id;
                 $shoutout = BIM_Model_Volley::create( $teamVolleyId, $hashTag, $imgUrlPrefix );
-                self::logShoutout( $shoutout->id, $volley->id, $volley->creator->id );
-                BIM_Push::shoutoutPushToAll( $teamVolleyId, $volley->creator->id, $shoutout->id );
+                BIM_Model_Volley::logShoutout( $shoutout->id, $volley->id, $volley->creator->id );
+                BIM_Push::shoutoutPushToAll( $volley->creator->id, $shoutout->id );
                 if( !empty($input->addLikes) ){
                     $likers = BIM_Model_User::getRandomIds($input->addLikes,array(),"2013-09-01");
                     $likers = BIM_Model_User::getMulti($likers);
@@ -180,7 +180,6 @@ class BIM_App_Admin{
                         $shoutout->upvote( $shoutout->creator->id, $liker->id, $imgUrlPrefix );
                     }
                 }
-                self::logShoutout($shoutout, $volley->creator->id);
                 print_r( json_encode( $shoutout ) );
             }
         }
@@ -699,6 +698,7 @@ class BIM_App_Admin{
         	}
         	
             var successCallback = function( options, success, response ){ 
+            	alert('created shoutout');
                 console.log(options, success, response);
             };
             
@@ -717,7 +717,7 @@ class BIM_App_Admin{
                     url: '/admin/shoutout.php?volleyId=' + volleyId + '&addLikes=' + likes,
                     dataType: 'json',
                     type: 'GET',
-                    context: this,
+                    // context: this,
                     success: successCallback,
                     error: errorCallback
                   });

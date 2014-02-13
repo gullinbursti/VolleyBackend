@@ -18,14 +18,32 @@ class BIM_Config_Dynamic{
     
     public static function app(){
         return (object) array(
+        	'release_id' => 'foobarbaz',
             'team_volley_id' => 2394,
             'base_path' => '/hotornot/api-shane',
             'sticky_volleys' => array(), // a volley id that we want to tag to the top of the timeline
             'auto_subscribes' => array(), // user ids to which auto subscribe
             'super_users' => array(), // list of advertising ids from the Iphone
+            'celebrities' => array(2394),
+            'featured_clubs' => array();
         );
     }
     
+    public static function clubEmailInvite(){
+        return (object) array(
+        	'to_email' => '',
+        	'to_name' => '',
+        	'from_email' => '',
+        	'from_name' => '',
+        	'subject' => '',
+            'text' => 'You have been invited to the [CLUBNAME] Selfieclub! by your friend [USERNAME]. Get Selfieclub now on the App Store for Free to Join! AppStore.com/Selfieclub',
+        );
+    }
+    
+    public static function clubSmsInviteMsg(){
+        return "You have been invited to the [CLUBNAME] Selfieclub! by your friend [USERNAME]. Get Selfieclub now on the App Store for Free to Join! AppStore.com/Selfieclub";
+    }
+
     public static function growthEmailInvites(){
         return (object) array(
         	'to_email' => 'shane@shanehill.com',

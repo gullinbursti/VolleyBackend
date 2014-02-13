@@ -159,14 +159,15 @@ class BIM_DAO_Mysql extends BIM_DAO{
         if( BIM_Utils::isProfiling() ){
             $start = microtime(1);
         }
+        //if( preg_match('@total_challenges|last_login@',$sql) ){
+            //self::logQuery( $sql, $params );
+        //}
         $connParams = $this->getConnectionParams( $getWriter, $shardKey );
         $conn = $this->getConnection( $connParams );
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $params );
         if( !preg_match('/^(?:00|01|IM)/', $stmt->errorCode() ) ){
-            //$call = debug_backtrace();
-            //print_r( array( get_class( $this ), $stmt->errorCode(), $stmt->errorInfo(), $sql, $params ) );
-	    //exit;
+            error_log( get_class( $this ). ' ' . $stmt->errorCode(). ' ' .$stmt->errorInfo() . ' ' .$sql );
             // do some error handling
         }
         $this->lastInsertId = $conn->lastInsertId();
@@ -175,16 +176,25 @@ class BIM_DAO_Mysql extends BIM_DAO{
         if( BIM_Utils::isProfiling() ){
             $end = microtime(1);
             if( empty( self::$profile ) ){
-                self::$profile = array();
+                self::$profile = array(
+                    '__total__' => 0,
+                    '__time__' => 0
+                );
             }
             if( empty( self::$profile[ $sql ] ) ){
                 self::$profile[ $sql ] = array();
                 self::$profile[ $sql ]['total'] = 0;
                 self::$profile[ $sql ]['time'] = 0;
             }
+            
+            $time = ($end - $start);
+            
             self::$profile[ $sql ]['total']++;
-            self::$profile[ $sql ]['time'] += ($end - $start);
+            self::$profile[ $sql ]['time'] += $time;
 
+            self::$profile['__total__']++;
+            self::$profile['__time__'] += $time;
+            
             $bt = debug_backtrace();
             $callTree = join( ' => ', array( $bt[2]['class'].':'.$bt[2]['function'], $bt[1]['class'].':'.$bt[1]['function'] ) );
             if( !isset( self::$profile[ $sql ][$callTree] ) ){
@@ -194,6 +204,12 @@ class BIM_DAO_Mysql extends BIM_DAO{
             
         }
         return $stmt;
+    }
+    
+    protected static function logQuery( $sql, $params ){
+        //$bt = debug_backtrace();
+        //$callTree = join( ' => ', array( $bt[2]['class'].':'.$bt[2]['function'], $bt[1]['class'].':'.$bt[1]['function'] ) );
+        //file_put_contents('/tmp/bim_query_log', print_r( array( $sql, $params, $callTree ), 1 ), FILE_APPEND );
     }
 
 }

@@ -161,21 +161,41 @@ class BIM_Report{
     }
     
     public static function getStats( ){
-        $totalUsers = self::getTotalUsers($startDate, $endDate);
+        $time = time() - (86400 * 7);
+        $date = new DateTime( "@$time" );
+        $date = $date->format('Y-m-d H:i:s');
+        
+        /*
+            (select count(distinct creator_id) as 'unique_users',  count(*) as count, (count/unique_users) as 'per_user', 'Selfie creates' as type from `hotornot-dev`.tblChallenges where added > '2013-11-25' and is_verify != 1 )
+                union 
+            (select count(distinct user_id) as 'unique_users', count(*) as count, (count/unique_users) as 'per_user','Selfie joins' as type from `hotornot-dev`.tblChallengeParticipants where from_unixtime(joined) > '2013-11-25' )
+                union 
+            (select count(distinct id) as 'unique_users' , count(*) as count, (count/unique_users) as 'per_user','FR Completes' as type from `hotornot-dev`.tblUsers where added > '2013-11-25' and username not regexp '[0-9]{10}' )
+                union 
+            (select count(distinct id) as 'unique_users' , count(*) as count, (count/unique_users) as 'per_user','FR Begins' as type from `hotornot-dev`.tblUsers where added > '2013-11-25'  )
+                union 
+            (select count(distinct user_id) as 'unique_users',  count(*) as count, (count/unique_users) as 'per_user','Verifies' as type from `hotornot-dev`.tblFlaggedUserApprovals where added > unix_timestamp('2013-11-25') )
+                union
+            (select count(distinct user_id) as 'unique_users',  count(*) as count, (count/unique_users) as 'per_user','Likes' as type from `hotornot-dev`.tblChallengeVotes where added > '2013-11-25' )
+                union
+            (select count(distinct user_id) as 'unique_users',  count(*) as count, (count/unique_users) as 'per_user','Deactivates' as type from `hotornot-dev`.user_archive where added > '2013-11-25' )
+            order by type;
+         */
+        
         $sql = "
-            (select count(distinct creator_id) as 'unique_users', date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Selfie creates' as type from `hotornot-dev`.tblChallenges where added > '2013-11-25 17:00:00' and is_verify != 1 group by day)
+            (select count(distinct creator_id) as 'unique_users', date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Selfie creates' as type from `hotornot-dev`.tblChallenges where added > '$date' and is_verify != 1 group by day)
                 union 
-            (select count(distinct user_id) as 'unique_users', date_format(convert_tz(from_unixtime(joined),'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Selfie joins' as type from `hotornot-dev`.tblChallengeParticipants where from_unixtime(joined) > '2013-11-25 17:00:00' group by day)
+            (select count(distinct user_id) as 'unique_users', date_format(convert_tz(from_unixtime(joined),'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Selfie joins' as type from `hotornot-dev`.tblChallengeParticipants where from_unixtime(joined) > '$date' group by day)
                 union 
-            (select count(distinct id) as 'unique_users' , date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day, count(*) as count, 'FR Completes' as type from `hotornot-dev`.tblUsers where added > '2013-11-25 17:00:00' and username not regexp '[0-9]{10}' group by day)
+            (select count(distinct id) as 'unique_users' , date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day, count(*) as count, 'FR Completes' as type from `hotornot-dev`.tblUsers where added > '$date' and username not regexp '[0-9]{10}' group by day)
                 union 
-            (select count(distinct id) as 'unique_users' , date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day, count(*) as count, 'FR Begins' as type from `hotornot-dev`.tblUsers where added > '2013-11-25 17:00:00' group by day )
+            (select count(distinct id) as 'unique_users' , date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day, count(*) as count, 'FR Begins' as type from `hotornot-dev`.tblUsers where added > '$date' group by day )
                 union 
-            (select count(distinct user_id) as 'unique_users', date_format(convert_tz(from_unixtime(added),'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Verifies' as type from `hotornot-dev`.tblFlaggedUserApprovals where added > unix_timestamp('2013-11-25 17:00:00') group by day)
+            (select count(distinct user_id) as 'unique_users', date_format(convert_tz(from_unixtime(added),'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Verifies' as type from `hotornot-dev`.tblFlaggedUserApprovals where added > unix_timestamp('$date') group by day)
             	union
-			(select count(distinct user_id) as 'unique_users', date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Likes' as type from `hotornot-dev`.tblChallengeVotes where added > '2013-11-25 17:00:00' group by day)
+			(select count(distinct user_id) as 'unique_users', date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Likes' as type from `hotornot-dev`.tblChallengeVotes where added > '$date' group by day)
 				union
-			(select count(distinct user_id) as 'unique_users', date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Deactivates' as type from `hotornot-dev`.user_archive where added > '2013-11-25 17:00:00' group by day)
+			(select count(distinct user_id) as 'unique_users', date_format(convert_tz(added,'+00:00','-08:00'),'%Y-%m-%d, %W') as day , count(*) as count, 'Deactivates' as type from `hotornot-dev`.user_archive where added > '$date' group by day)
             order by day desc,type;
         ";
         $dao = new BIM_DAO_Mysql( BIM_Config::db() );
@@ -356,6 +376,209 @@ Total number of unique daily actives
         return (int) $stmt->fetchColumn(0);
     }
 
+    public static function getCohortCounts(){
+        
+        $totals = (object) array(
+            'selfies_day_1' => 0,
+            'joins_day_1' => 0,
+            'shouts_day_1' => 0,
+            'verifies_up_day_1' => 0,
+            'verifies_down_day_1' => 0,
+        
+            'selfies_week_1' => 0,
+            'joins_week_1' => 0,
+            'shouts_week_1' => 0,
+            'verifies_up_week_1' => 0,
+            'verifies_down_week_1' => 0,
+        );
+        
+        $sql = "
+        	select u.id, count(*) 
+        	from `hotornot-dev`.tblUsers as u 
+        		join `hotornot-dev`.tblChallenges as c 
+        		on u.id = c.creator_id 
+        	where c.is_verify != 1 
+        	group by u.id 
+        	order by count(*) 
+        	desc limit 100
+        ";
+        $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $ids = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+        
+        foreach( $ids as $id ){
+            $counts = self::getCohortCountForId($id);
+            foreach( $counts as $prop => $total ){
+                $totals->$prop += $total;
+            }
+        }
+        
+        foreach( $totals as $prop => &$count ){
+            $count = ( $count / 100 );
+        }
+        
+        echo "
+Avg selfies per user during the first day : $totals->selfies_day_1
+Avg selfies per user during the first 7 days : $totals->selfies_week_1
+
+Avg joins per user during the first day : $totals->joins_day_1
+Avg joins per user during the first 7 days : $totals->joins_week_1
+
+Avg shoutouts per user during the first day : $totals->shouts_day_1
+Avg shoutouts per user during the first 7 days : $totals->shouts_week_1
+
+Avg verifies up per user during the first day : $totals->verifies_up_day_1
+Avg verifies up per user during the first 7 days : $totals->verifies_up_week_1
+
+Avg verifies down per user during the first day : $totals->verifies_down_day_1
+Avg verifies down per user during the first 7 days : $totals->verifies_down_week_1
+";
+        
+    }
+    
+    public static function getCohortCountForId( $id ){
+        $dao = new BIM_DAO_Mysql( BIM_Config::db() );
+        
+        // get the users reg date
+        $sql = "select added from `hotornot-dev`.tblUsers where id = ?";
+        $params = array( $id );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $added = $stmt->fetchColumn(0);
+        
+        // get the total challenges on first day
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblChallenges 
+        	where is_verify != 1 
+        		and creator_id = ? 
+        		and added < DATE_ADD(?,INTERVAL 1 DAY)
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $challengeCtDay = $stmt->fetchColumn(0);
+        
+        // get the total challenges in first week
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblChallenges 
+        	where is_verify != 1 
+        		and creator_id = ? 
+        		and added < DATE_ADD(?,INTERVAL 7 DAY)";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $challengeCtWeek = $stmt->fetchColumn(0);
+        
+        // get the total joins in first day
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblChallengeParticipants 
+        	where user_id = ? 
+        		and joined < unix_timestamp(DATE_ADD(?,INTERVAL 1 DAY))
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $joinsCtDay = $stmt->fetchColumn(0);
+        
+        // get the total joins in first week
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblChallengeParticipants 
+        	where user_id = ? 
+        		and joined < unix_timestamp(DATE_ADD(?,INTERVAL 7 DAY))
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $joinsCtWeek = $stmt->fetchColumn(0);
+        
+                
+        // get the totalshouts in first day
+        $sql = "
+            select count(*)
+            from `hotornot-dev`.tblChallenges as c
+                join `hotornot-dev`.tblShoutouts as s
+                on c.id = s.challenge_id 
+            where c.creator_id = ? 
+                and c.added < DATE_ADD(?, INTERVAL 1 DAY)
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $shoutsCtDay = $stmt->fetchColumn(0);
+        
+        // get the totalshouts in first day
+        $sql = "
+        	select count(*)
+        	from `hotornot-dev`.tblChallenges as c
+        		join `hotornot-dev`.tblShoutouts as s
+    	    	on c.id = s.challenge_id 
+        	where c.creator_id = ? 
+        		and c.added < DATE_ADD(?, INTERVAL 7 DAY)
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $shoutsCtWeek = $stmt->fetchColumn(0);
+        
+        // get the total up flags in first day
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblFlaggedUserApprovals 
+        	where user_id = ? 
+        		and flag = -1
+        		and added < unix_timestamp(DATE_ADD(?,INTERVAL 1 DAY))
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $flagsUpDay = $stmt->fetchColumn(0);
+        
+        // get the total up flags in first week
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblFlaggedUserApprovals 
+        	where user_id = ? 
+        		and flag = -1
+        		and added < unix_timestamp(DATE_ADD(?,INTERVAL 7 DAY))
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $flagsUpWeek = $stmt->fetchColumn(0);
+        
+        // get the total down flags in first day
+        $sql = "
+        	select count(*) 
+        	from `hotornot-dev`.tblFlaggedUserApprovals 
+        	where user_id = ? 
+        		and flag = 1
+        		and added < unix_timestamp(DATE_ADD(?,INTERVAL 1 DAY))
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $flagsDownDay = $stmt->fetchColumn(0);
+        
+        // get the total down flags in first week
+        $sql = "
+            select count(*) 
+            from `hotornot-dev`.tblFlaggedUserApprovals 
+            where user_id = ? 
+                and flag = 1
+                and added < unix_timestamp(DATE_ADD(?,INTERVAL 7 DAY))
+        ";
+        $params = array( $id, $added );
+        $stmt = $dao->prepareAndExecute( $sql, $params );
+        $flagsDownWeek = $stmt->fetchColumn(0);
+        
+        return (object) array(
+            'selfies_day_1' => $challengeCtDay,
+            'joins_day_1' => $joinsCtDay,
+            'shouts_day_1' => $shoutsCtDay,
+            'verifies_up_day_1' => $flagsUpDay,
+            'verifies_down_day_1' => $flagsDownDay,
+        
+            'selfies_week_1' => $challengeCtWeek,
+            'joins_week_1' => $joinsCtWeek,
+            'shouts_week_1' => $shoutsCtWeek,
+            'verifies_up_week_1' => $flagsUpWeek,
+            'verifies_down_week_1' => $flagsDownWeek,
+        );
+    }
 /*
 Network wide totals:
 

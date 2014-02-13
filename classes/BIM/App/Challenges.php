@@ -28,7 +28,6 @@ class BIM_App_Challenges extends BIM_App_Base{
      * 
      * return a list of awaiting verification objects
      * 
-     * @param unknown_type $volleyId
      * @param unknown_type $userId
     **/
     public function getVerifyList ($userId) {
@@ -117,13 +116,22 @@ class BIM_App_Challenges extends BIM_App_Base{
      * @param $challenger_id The ID of the user to target (integer)
      * @return An associative object for a challenge (array)
     **/
-    public function submitChallengeWithChallenger($userId, $hashTag, $imgUrl, $isPrivate, $expires) {
+    public function submitChallengeWithChallenger($userId, $hashTag, $imgUrl, $isPrivate, $expires, $targets = array(), $clubId = 0 ) {
         $volley = null;
         $creator = BIM_Model_User::get( $userId );
         if ( $creator->isExtant() ) {
-            $volley = BIM_Model_Volley::create($creator->id, $hashTag, $imgUrl, array(), $isPrivate, $expires);
+            $isVerify = false;
+            $status = 2;
+            $volley = BIM_Model_Volley::create($creator->id, $hashTag, $imgUrl, $targets, $isPrivate, $expires, $clubId, $isVerify, $status, $clubId );
             if( $volley->isExtant() ){
-                BIM_Push::sendVolleyNotifications( $volley->id );
+                if( $clubId ){
+                    $club = BIM_Model_Club::get( $clubId );
+                    $targets = $club->getMemberIds();
+                } else if( !$targets || !is_array($targets) ){
+                    $followers = BIM_App_Social::getFollowers( $creator->id, true );
+                    $targets = array_keys($followers);
+                }
+                BIM_Push::sendVolleyNotifications( $volley->id, $targets );
             }
         }
         return $volley;
@@ -141,8 +149,8 @@ class BIM_App_Challenges extends BIM_App_Base{
      * @param $username array | string the username(s) of the user to target (string)
      * @return An associative object for a challenge (array)
     **/
-    public function submitChallengeWithUsername($userId, $hashTag, $imgUrl, $isPrivate, $expires ) {
-        return $this->submitChallengeWithChallenger($userId, $hashTag, $imgUrl, $isPrivate, $expires);
+    public function submitChallengeWithUsername($userId, $hashTag, $imgUrl, $isPrivate, $expires, $targets = array(), $clubId = 0 ) {
+        return $this->submitChallengeWithChallenger($userId, $hashTag, $imgUrl, $isPrivate, $expires, $targets, $clubId );
     }
     
     /** 
@@ -160,7 +168,11 @@ class BIM_App_Challenges extends BIM_App_Base{
      * @return The list of challenges (array)
     **/
     public function getChallenges($userId, $private = false ) {
-        return BIM_Model_Volley::getVolleys($userId, $private);
+        if( $private ){
+            return BIM_Model_Volley::getPrivateVolleys($userId);
+        } else {
+            return BIM_Model_Volley::getVolleys($userId, $private);
+        }
     }
     
     /** 
@@ -277,10 +289,26 @@ class BIM_App_Challenges extends BIM_App_Base{
     public function join($userId, $volleyId, $imgUrl, $hashTag = '' ) {
         $volley = BIM_Model_Volley::get( $volleyId );
         if( $volley->isExtant() ){
-            $volley->join( $userId, $imgUrl, $hashTag );
-            $volley = BIM_Model_Volley::get($volleyId, true);
-            $joiner = BIM_Model_User::get( $userId );
-            BIM_Push::doVolleyAcceptNotification( $volley->id, $joiner->id );
+            // we check to see if the conversation the user is joining here
+            // is part of a club, if it is then we check to see if the user is a member
+            // if they ARE a member then we contimue
+            // if they ARE NOT a member we abort the join
+            $canJoin = true;
+            if( !empty( $volley->club_id ) ){
+                $canJoin = false;
+                $club = BIM_Model_Club::get( $volley->club_id );
+                if( $club->isExtant() && $club->isMember( $input->userID ) ){
+                    $canJoin = true;
+                }
+            }
+            if( $canJoin ){
+                $volley->join( $userId, $imgUrl, $hashTag );
+                $volley = BIM_Model_Volley::get($volleyId, true);
+                $joiner = BIM_Model_User::get( $userId );
+                BIM_Push::doVolleyAcceptNotification( $volley->id, $joiner->id );
+            } else {
+                $volley = null;
+            }
         }
         return $volley;        
     }
@@ -362,9 +390,9 @@ class BIM_App_Challenges extends BIM_App_Base{
      * @param $challenge_id The ID of the challenge
      * @return An associative array with the challenge's ID
     **/
-    public function updatePreviewed ($volleyId) {
+    public function updatePreviewed ($volleyId, $userId ) {
         $volley = BIM_Model_Volley::get($volleyId);
-        $volley->setPreviewed();
+        $volley->setPreviewed( $userId );
         return $volley;
     }
     
@@ -572,7 +600,7 @@ If most or all of the images in a volley are missing, then do not make the call 
                     }
                     if( $volley->challengers ){
                         foreach( $volley->challengers as $challenger ){
-                            if( $challenger->joined_timestamp >= $time ){
+                            if( $challenger->joined_timestamp >= $time && $challenger->img != '' ){
                                 error_log( "checking challenger image $challenger->img" );
                                 $a->missingImage( $challenger->img );
                             }

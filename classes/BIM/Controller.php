@@ -17,6 +17,11 @@ class BIM_Controller{
                 $res = $this->getAccountSuspendedVolley();
                 if( !$res || $controllerClass == 'BIM_Controller_Users' ){
                     $r->user = BIM_Utils::getSessionUser();
+                    /*
+                    if( $r->user ){
+                        $method = self::resolveGetChallengesWithFriends($method);
+                    }
+                    */
                     $res = $r->$method();
                     if( is_bool( $res ) ){
                         $res = array( 'result' => $res );
@@ -26,6 +31,38 @@ class BIM_Controller{
         }
         BIM_Utils::endProfiling();
         $this->sendResponse( 200, $res );
+    }
+    
+    public static function resolveGetChallengesWithFriends( $method ){
+        $cache = new BIM_Cache( BIM_Config::cache() );
+        $user = BIM_Utils::getSessionUser();
+        $key = "last_call_$user->id";
+        $method = strtolower($method);
+        
+        if( $method == 'submitnewuser' ){
+            $cache->set( $key, $method, 5 );
+        } else if( $method == 'getsubscribees' ){
+            $lastMethod = $cache->get( $key );
+            if( $lastMethod != 'submitnewuser' ){
+                $cache->set( $key, $method, 5 );
+            }
+        } else if( $method == 'getchallengeswithfriends' ){
+            $data = null;
+            if( $_POST ){
+                $data = &$_POST;
+            } else if( $_GET ){
+                $data = &$_GET;
+            }
+            $lastMethod = $cache->get( $key );
+            if( !empty( $data['userID'] ) && $lastMethod == 'getsubscribees' ){
+                $method = 'getchallengesforusername';
+                $targetUser = BIM_Model_User::get( $data['userID'] );
+                $data['username'] = $targetUser->username;
+                $data['p'] = 1;
+            }
+            $cache->delete( $key );
+        }
+        return $method;
     }
     
     // returns an empty array or
@@ -111,6 +148,10 @@ class BIM_Controller{
 	    if( !empty( $sessionConf->use ) ){
             $OK = false;	        
             $request = BIM_Utils::getRequest();
+            
+            $createUser = (strtolower( $request->controllerClass ) == 'bim_controller_users') 
+                            && ( strtolower( $request->method ) == 'create' );
+                            
             $newUser = (strtolower( $request->controllerClass ) == 'bim_controller_users') 
                             && ( strtolower( $request->method ) == 'submitnewuser' );
 
@@ -120,7 +161,7 @@ class BIM_Controller{
             $twilio = (strtolower( $request->controllerClass ) == 'bim_controller_users') 
                             && ( strtolower( $request->method ) == 'twiliocallback' );
                             
-            if( $twilio || $getSelfies || $newUser || BIM_Utils::getSessionUser(true) ){
+            if( $createUser || $twilio || $getSelfies || $newUser || BIM_Utils::getSessionUser(true) ){
                 $OK = true;
             }
 	    }
