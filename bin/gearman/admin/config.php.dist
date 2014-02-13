@@ -1,15 +1,26 @@
 <?php
 
 return array(
-	"servers" => '127.0.0.1:4730', // this can also be an array of strings of format host:post
+	"servers" => '127.0.0.1:4730', // this can also be an array of strings of format host:port
 
 	"workers" => array(
 		array(
-			"count" => 1, // number of workers that will be executing the jobs listed under the "jobs key below"
-			"jobs" => array(
-				"createcampaign" => array(
-					'config' => array(
-						'class_prefix_constraint' => 'BIM_Jobs_' // only allow classes under the BIM_Jobs class hierarchy be executed by this (these) worker(s)
+			"count" => 1, // number of workers that will be executing the jobs listed under the "jobs" key below
+			"jobs" => array( // this key contains the names of the jobs the workers will be executing
+				"createcampaign" => array( // create campain is the name of the job to be executed.  
+										   // this is the name of the job as declared in the 
+										   // file found under the "worker_locations" key below
+					'config' => array( // the config array will be passed to every job that is executed
+									   // allowing for a per job config to be passed
+									   // any keys and values of any complexity can be declared here
+						'class_prefix_constraint' => 'BIM_Jobs_'
+									   // class_prefix_constraint contains the prefix for the class that
+									   // contains functions that this worker will be allowed to execute
+									   // if the worker is asked to execute a class that deos not contain 
+									   // this prefix then the job WILL NOT be executed
+									   // example:  BIM_Jobs_Challenges::foo() will be executed
+									   //           BIM_Foo::createcampaign() will not be executed
+									   // set to am empty string to allow execution of any class
 		            ), 
 		        ),
 		    ),
