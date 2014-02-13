@@ -1,0 +1,33 @@
+<?php
+
+/**
+POST /zerver/API/getFirstHeyHeys HTTP/1.1
+Host: kik.heyhey.us
+Content-Length: 11
+Origin: http://kik.heyhey.us
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36
+Content-Type: text/plain;charset=UTF-8
+Referer: http://kik.heyhey.us/
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: en-US,en;q=0.8
+ *
+ */
+class BIM_Growth_Kik extends BIM_Growth{
+    public static function getHeyHeys(){
+        $self = new self();
+        $url = "http://kik.heyhey.us/zerver/API/getFirstHeyHeys";
+        $args = array('{"args":[]}');
+        
+        $headers = array(
+            'Content-Type: text/plain;charset=UTF-8',
+            'Referer: http://kik.heyhey.us/',
+            'Host: kik.heyhey.us',
+            'Origin: http://kik.heyhey.us',
+            'Accept-Encoding: gzip,deflate,sdch',
+            'Accept-Language: en-US,en;q=0.8'
+        );
+        
+        $data = $self->post( $url, $args, true, $headers );
+        print_r( $data );
+    }
+}

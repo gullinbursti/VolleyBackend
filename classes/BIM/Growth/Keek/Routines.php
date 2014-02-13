@@ -1,6 +1,6 @@
 <?php
 
-class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
+class BIM_Growth_Keek_Routines extends BIM_Growth_Keek{
     
     protected $persona = null;
     protected $oauth = null;
@@ -145,7 +145,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
      * h12 - 7(72) workers - 36 likes - nh8,10,12,14
      * 
      *
-     * page that lists the selfies from webstagram hundreds at a time
+     * page that lists the selfies from Keek hundreds at a time
      * 
      * text
      * select an IG account
@@ -357,18 +357,12 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         $attempts = 0;
         while( !$randomUser && $attempts++ < 100 ){
             mt_srand(abs(crc32(uniqid())) + ( (int) getmypid() ) );
-            $time = time() - mt_rand(0, (86400 / 2) );
-            $urls = array(
-            	"http://web.stagram.com/tag/kik/?npk=$time",
-                "http://web.stagram.com/tag/snapchat/?npk=$time",
-            );
-            $selfieUrl = $urls[ array_rand( $urls ) ];
+            $time = time() - mt_rand(0, 86400 * 60);
+            $selfieUrl = "http://web.stagram.com/tag/selfie/?npk=$time";
             
-            //$selfieUrl = "http://web.stagram.com/tag/selfie/?npk=$time";
+            echo "getting $selfieUrl\n";
             
-            echo "getting random user from: $selfieUrl\n";
-            
-            $g = new BIM_Growth_Webstagram();
+            $g = new BIM_Growth_Keek();
             $response = $g->get( $selfieUrl );
             $users = self::getUsersFromText($response);
             foreach( $users as $user ){
@@ -390,18 +384,25 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
     // returns a unique 6 letter string
     public static function getUniqueTag(){
         $tags = array(
-            '#dsddoz', '#fdjbxt', '#xhfksz', '#jumfud', '#hxckxw', '#cffzhl', '#llnfve', '#owzfto', '#cjzfci', '#crinak', '#togrpp', '#ezsxcl', '#lkozfk', '#qjhuvy', '#bsgszk', '#haipig', '#krceek', '#ezfigj', '#xibxko', '#akfclg',
-            '#kikqon', '#xyzwtf', '#kdosnx', '#rsgger', '#zqxnea', '#nibmlf', '#dngfmd', '#tuapar', '#sotjsf', '#jbimtn', '#efjrna', '#dekalp', '#gyajdp', '#uhzonl', '#iqkbpt', '#bnpsbr', '#povkpw', '#ebafvr', '#tlbtbt', '#mywown',
-            '#dxskvd', '#tyxcfo', '#mddnkh', '#emlodr', '#xjhsmb', '#qdeclv', '#xcojtc', '#avaimf', '#cvpbzy', '#sdleyz', '#oxznty', '#nrzlqg', '#nxzcfy', '#rsbmky', '#naheku', '#ohztbj', '#fimcry', '#cclryr', '#mqqozn', '#wgjaon',
-            '#rryepx', '#tsgtst', '#nbotvu', '#vqrvpg', '#llwmet', '#xlspjz', '#rcklsu', '#wkijxm', '#ugoywa', '#edesof', '#fvhsrn', '#xngtvu', '#mswcog', '#kblisn', '#jbfeuv', '#pjogmw', '#vhpphu', '#wgwavr', '#liwyvu', '#nqwcqu',
-            '#sjewcj', '#mtprzh', '#vshssb', '#unvkjf', '#zdtana', '#ubmxgg', '#ynltbt', '#lqjzwn', '#djttsw', '#bdudgl', '#dyhiqy', '#mgizsq', '#vocxby', '#ccjbjp', '#peexig', '#ffymxc', '#vgvnjr', '#zkcncv', '#pgznrq', '#htlfso',
-            '#dsddoz', '#fdjbxt', '#xhfksz', '#jumfud', '#hxckxw', '#cffzhl', '#llnfve', '#owzfto', '#cjzfci', '#crinak', '#togrpp', '#ezsxcl', '#lkozfk', '#qjhuvy', '#bsgszk', '#haipig', '#krceek', '#ezfigj', '#xibxko', '#akfclg',
-            '#dxskvd', '#tyxcfo', '#mddnkh', '#emlodr', '#xjhsmb', '#qdeclv', '#xcojtc', '#avaimf', '#cvpbzy', '#sdleyz', '#oxznty', '#nrzlqg', '#nxzcfy', '#rsbmky', '#naheku', '#ohztbj', '#fimcry', '#cclryr', '#mqqozn', '#wgjaon',
-            '#dsddoz', '#fdjbxt', '#xhfksz', '#jumfud', '#hxckxw', '#cffzhl', '#llnfve', '#owzfto', '#cjzfci', '#crinak', '#togrpp', '#ezsxcl', '#lkozfk', '#qjhuvy', '#bsgszk', '#haipig', '#krceek', '#ezfigj', '#xibxko', '#akfclg',
-            '#dxskvd', '#tyxcfo', '#mddnkh', '#emlodr', '#xjhsmb', '#qdeclv', '#xcojtc', '#avaimf', '#cvpbzy', '#sdleyz', '#oxznty', '#nrzlqg', '#nxzcfy', '#rsbmky', '#naheku', '#ohztbj', '#fimcry', '#cclryr', '#mqqozn', '#wgjaon',
-            '#wckhrj', '#iukfqk', '#souffp', '#avwgue', '#vfcfng', '#kxfupc', '#sdkbxf', '#toysrc', '#jpmhdg', '#wzdogv', '#afruye', '#xnuxny', '#yqttud', '#uoojxt', '#vbntgy', '#hiqxeq', '#zwshbg', '#hawibn', '#boledl', '#niwduv',
-            '#duqqyq', '#phzonh', '#yekamg', '#wshxif', '#rkhgoj', '#vipmfz', '#kgonsj', '#vrdprt', '#baxyvo', '#syawqk', '#mojvwl', '#luwuxo', '#ukohpo', '#efwioo', '#xtabho', '#uikwfl', '#rgfqzv', '#ouzdeg', '#pznsku', '#husnal',
-            '#abxmmt', '#vmlelc', '#yuzxob', '#ftabzl', '#mlfhig', '#ndpoib', '#drpqlt', '#ywbism', '#sswfoj', '#xfaetn', '#qqunjd', '#jimhey', '#ghhyqe', '#nsnyde', '#cvsqyl', '#odxpnd', '#maeywv', '#wzrvil', '#fdyfje', '#tzkebd',
+            '#vvoyac', '#qlhmgm', '#dsyvqp', '#sudzba', '#blymew', '#jgkkgj', '#qwxset', '#chqprg', '#evjtof', '#siooaq', '#jxqfbn', '#eyrmfj', '#cydipe', '#djicwv', '#hmhbjj', '#rbiwbs', '#xdoyjn', '#kmxiln', '#wosbuv', '#orgfvz',            
+            '#dehmap', '#lnemjz', '#ycivwy', '#aljjpf', '#rdarko', '#bwvqdl', '#vxxeuw', '#xvpito', '#kxsiwj', '#nqoquo', '#iluawy', '#hfjpza', '#yutlmb', '#ksczet', '#nwvpsl', '#sffqdv', '#npbsqq', '#lwlemd', '#fcbaiz',
+            '#podhxs', '#yhzzvg', '#iprjba', '#xebanj', '#cnsjsj', '#hovsiu', '#eltnvq', '#sttjpi', '#ihospm', '#zfewbq', '#hbopfz', '#jvfcnt', '#nhezal', '#ryemma', '#jfpdgg', '#jnlqki', '#rrlrje', '#iidqoo', '#arximt', '#pedxcg',
+            '#vntrwm', '#nfquox', '#rvnnfo', '#xkspvf', '#pxdczg', '#hpzgfi', '#emwgau', '#ajbukt', '#oommga', '#remibq', '#bevvei', '#iryqhw', '#qdrcbz', '#niseqc', '#wcmpqo', '#nvdvuo', '#deudll', '#cdssri', '#lfvpnf', '#zxnybm',
+            '#vmvqis', '#ynwlba', '#sswpjw', '#xtkpdw', '#qnmkpc', '#wrdbgi', '#pbtvwr', '#fkvryv', '#psuskk', '#ojaaky', '#vfqkcp', '#bgtfgw', '#dackgb', '#rgxcdn', '#vwnqim', '#yienen', '#tgowef', '#izfqmx', '#wikaip', '#vhprln',
+            '#icaull', '#znntuc', '#vfmnmf', '#lvccck', '#lphxwu', '#oclqbj', '#xhnxan', '#vncvcq', '#jwstqb', '#kynngp', '#wtojww', '#nnceiz', '#rjfqvf', '#balyhf', '#taxuda', '#tmwamt', '#xsxfeq', '#bjugnt', '#loqzzp', '#amhkqr',
+            '#kqbswf', '#neayno', '#hjhqdd', '#gyoftt', '#vebfrn', '#hxfjzx', '#ahhten', '#tlderz', '#svzvon', '#srwyhr', '#bxguyg', '#jxojrn', '#llnxyy', '#ukjxxk', '#asiynx', '#mvdlte', '#ynerqc', '#eqrlcy', '#korzmr', '#aonses',
+            '#oqwhzj', '#lycpuk', '#uimftg', '#vfdowj', '#vcnwqh', '#dxqnfk', '#eqkckv', '#aacmtz', '#fsteuw', '#srnxxp', '#jmnbvp', '#jagtgh', '#cpxhzh', '#djeqbz', '#mukdqr', '#edlxwd', '#unjtsf', '#fceljo', '#lkqfnf', '#reyjto', 
+            '#gertyn', '#aypdvw', '#twjmjt', '#tfclys', '#gaprvb', '#lnrklh', '#drbrjc', '#yywwop', '#mnyzaj', '#nyicrp', '#zffyqt', '#kgaifg', '#jtuukr', '#zalpag', '#wmfizb', '#oqaojv', '#znrnfa', '#vjcmdj', '#kqpeld', '#vxjepg',
+            '#qorzdg', '#ribmxi', '#lnpzbc', '#osvosa', '#hvmkhl', '#yneoxz', '#txfjnv', '#gugcrp', '#xvtqmm', '#fjqepq', '#asiogi', '#wcwduf', '#yhpitw', '#feboka', '#leajpj', '#wjizyh', '#tgztvl', '#ygsurf', '#llhtcq', '#tmymxu',
+            '#qrzqac', '#dlqknf', '#tilquv', '#dummst', '#luarnl', '#rnkzsw', '#nozohv', '#hshrnu', '#rihccp', '#sryhki', '#gywetf', '#pkeriz', '#evapwz', '#telfih', '#anlybb', '#etorfo', '#acxkdv', '#skfbdi', '#lsvvls', '#npuhja',
+            '#tipvrg', '#lnhoje', '#ljgyqv', '#fcoqzf', '#bjiuvk', '#xudelo', '#vptuiu', '#eksbyr', '#aikzuf', '#sjjlxe', '#fhbpqw', '#zbpdzc', '#ffhflw', '#gwnfxx', '#adctou', '#ltemcf', '#cwjzve', '#iiqqzm', '#jiaqli', '#zvgwrc',
+            '#mqvnip', '#gexjlm', '#cyuroo', '#jxytvh', '#nnyeal', '#pzkfxs', '#lhqpll', '#cxseqd', '#wnqlzw', '#bnteqe', '#xmmbhx', '#eqlcoy', '#ojlzek', '#reywbk', '#kwwfho', '#ecfgvs', '#ruxotq', '#cwmijt', '#ghmbuv', '#choznu',
+            '#cvpifj', '#ffnahr', '#zyygen', '#umbhme', '#csvkyy', '#mdpaot', '#lkmkyv', '#kynfpa', '#cnzwzs', '#kolnbe', '#yaohqu', '#ojyfdy', '#whyscq', '#ynpips', '#skrsjv', '#xexgbq', '#fcczoz', '#gonnfn', '#lpxpol', '#tmkjji',
+            '#ehhqkc', '#opysmu', '#hedjwe', '#uoizgk', '#vbvrmc', '#hkcsjv', '#dexqaa', '#uhqbzo', '#pdspdm', '#uttbbo', '#gkoipq', '#dzfjhn', '#bzsotq', '#qtanjl', '#nozitq', '#qmuvnn', '#pnhtqb', '#xycvqo', '#ngimwg', '#bpbelv',
+            '#cfhkzt', '#mwbule', '#gzqpfp', '#eyccqz', '#irtbns', '#wxqlnq', '#dyztoh', '#ojllpk', '#gufaak', '#lpjlfc', '#ufhsbq', '#gylvvs', '#ijgiym', '#waorrp', '#fwecjj', '#alpwlp', '#qosnbg', '#milfuu', '#akuist', '#iwbwdf',
+        	'#wvemyx', '#updnwx', '#risjzn', '#cyogyr', '#dveofd', '#bacjpe', '#aapund', '#azlatz', '#wnqbdr', '#dsolym', '#vovhyz', '#iueovp', '#mpymdy', '#zwvxkb', '#qrtjrq', '#fgndux', '#vsnndd', '#uyeyqw', '#sgfbcx', '#nllugf',
+            '#zxndgf', '#ewlsoc', '#wtaqyu', '#utomea', '#fokrqp', '#rervna', '#qbrokv', '#jypupf', '#cqzkng', '#wkqvaj', '#ofkwpe', '#bhknwv', '#sdlrjm', '#ewrpka', '#tvtcob', '#gkjccr', '#tugdug', '#hhylke', '#grzofi', '#itbbsc',
+            '#xmdwny', '#moeduc', '#cxaccz', '#pzneyl', '#npuglp', '#cjggtc', '#ynfzas', '#btsvbu', '#klmhzw', '#tcrkxk', '#yshjoj', '#gmxuar', '#phzpob', '#jlkikf', '#mzlzbc', '#nmkrxl', '#vrrduu', '#oidtfx', '#mjjddz', '#dpuihz',
         );
         
         /*
@@ -695,11 +696,11 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         $response = $this->get( $url );
         if( !$this->isLoggedIn($response) ){
             $name = $this->persona->name;
-            echo "user $name not logged in to webstagram!  logging in!\n";
+            echo "user $name not logged in to Keek!  logging in!\n";
             $this->loginAndAuthorizeApp();
             $response = $this->get( $url );
             if( !$this->isLoggedIn($response) ){
-                $msg = "something is wrong with logging in $name to webstagram!  disabling the user!\n";
+                $msg = "something is wrong with logging in $name to Keek!  disabling the user!\n";
                 echo $msg;
                 $this->disablePersona( $msg );
                 $loggedIn = false;
@@ -746,7 +747,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             "fashion",
             "amazing",
             "tflers",
-            "webstagram",
+            "Keek",
             "iphoneonly",
             "selfie",
             "all_shots",
@@ -866,7 +867,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
     }
     
     public static function releaseUser( $userId ){
-        $dao = new BIM_DAO_Mysql_Growth_Webstagram( BIM_Config::db() );
+        $dao = new BIM_DAO_Mysql_Growth_Keek( BIM_Config::db() );
         $dao->releaseUser($userId);
     }
     
@@ -877,7 +878,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
             print_r( $data );
             $userId = empty( $data[1] ) ? $data[0] : $data[1];
             if( $userId ){
-                $dao = new BIM_DAO_Mysql_Growth_Webstagram( BIM_Config::db() );
+                $dao = new BIM_DAO_Mysql_Growth_Keek( BIM_Config::db() );
                 $timeSpan = 86400 * 7;
                 $currentTime = time();
                 // the getlastContact call will insert the 
@@ -913,7 +914,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         $response = json_decode( $response );
         print_r( $response );
         if( isset($response->status) && $response->status == 'OK' ){
-            $dao = new BIM_DAO_Mysql_Growth_Webstagram( BIM_Config::db() );
+            $dao = new BIM_DAO_Mysql_Growth_Keek( BIM_Config::db() );
             list( $imageId, $userId ) = explode('_', $id, 2 );
             $dao->updateLastContact( $userId, time() );
             $dao->logSuccess($id, $message, $this->persona->instagram->name );
@@ -966,7 +967,7 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
                 'followers' => $followers,
                 'following' => $following,
                 'likes' => $likes,
-                'network' => 'webstagram',
+                'network' => 'Keek',
             );
     
             print_r( $userStats );
@@ -1064,7 +1065,9 @@ class BIM_Growth_Webstagram_Routines extends BIM_Growth_Webstagram{
         $data = $dao->getData( null, 'instagram' );
         foreach($data as $persona ){
             self::checkPersona( $persona );
-            self::sleep(5,"checked $persona->username");
+            $sleep = 5;
+            echo "checked $persona->username sleeping for $sleep seconds\n";
+            sleep($sleep);
         }
     }
     
@@ -1143,9 +1146,8 @@ VALUES
         $r = new self( $persona );
         
         if( !$r->handleLogin() ){
-            echo "invalid account: ".$persona->instagram->username.",".$persona->instagram->password."\n";
-            echo "update growth.persona set enabled = 0 where network = 'instagram' and username = ".$persona->instagram->username."\n";
             $persona = null;
+            echo "invalid account: ".$persona->instagram->username.",".$persona->instagram->password."\n";
         } else {
             echo "valid account: ".$persona->instagram->username.",".$persona->instagram->password."\n";
         }
@@ -1165,7 +1167,7 @@ VALUES
     
     public static function harvestTags( $tags ){
         $baseUrl = 'http://web.stagram.com/search';
-        $g = new BIM_Growth_Webstagram();
+        $g = new BIM_Growth_Keek();
         $tagsFound = array();
         foreach( $tags as $tag ){
             $url = "$baseUrl/$tag/";
@@ -1201,10 +1203,10 @@ VALUES
             $selfieUrl = 'http://web.stagram.com//tag/selfie/';
         }
         
-        $g = new BIM_Growth_Webstagram();
+        $g = new BIM_Growth_Keek();
         $attempts = 0;
         while( $selfieUrl && $attempts < 3 ){
-            //@unlink('/tmp/cookies_BIM_Growth_Webstagram.txt');
+            //@unlink('/tmp/cookies_BIM_Growth_Keek.txt');
             echo "getting $selfieUrl\n";
             $response = $g->get( $selfieUrl );
             self::_findShoutOuts( $response );
@@ -1268,7 +1270,7 @@ VALUES
     
     public static function _findShoutOuts( $response ){
         $dao = new BIM_DAO_Mysql( BIM_Config::db() );
-        $g = new BIM_Growth_Webstagram();
+        $g = new BIM_Growth_Keek();
         echo "getting users\n";
         $users = self::getUsersFromText( $response );        
         
@@ -1316,7 +1318,7 @@ VALUES
     
     public static function findPromoters(){
         for( $n = 0; $n < 10; $n++ ){
-            @unlink('/tmp/cookies_BIM_Growth_Webstagram.txt');
+            @unlink('/tmp/cookies_BIM_Growth_Keek.txt');
             self::_findPromoters();
             $sleep = 5;
             echo "sleeping for $sleep seconds\n";
@@ -1326,7 +1328,7 @@ VALUES
     
     public static function _findPromoters(){
         $baseUrl = 'http://web.stagram.com/popular/?'.uniqid();
-        $g = new BIM_Growth_Webstagram();
+        $g = new BIM_Growth_Keek();
         $response = $g->get( $baseUrl );
         
         $ids = array();
@@ -1448,7 +1450,7 @@ VALUES
     }
     
     /**
-     * parse kik ids out of the db data we collectd from webstagram
+     * parse kik ids out of the db data we collectd from Keek
      */
     public static function parseKikIds(){
         $dao = new BIM_DAO_Mysql( BIM_Config::db() );
@@ -1466,7 +1468,7 @@ VALUES
     }
     
     /**
-     * parse kik ids out of the db data we collectd from webstagram
+     * parse kik ids out of the db data we collectd from Keek
      */
     public static function parseEmails(){
         $dao = new BIM_DAO_Mysql( BIM_Config::db() );
