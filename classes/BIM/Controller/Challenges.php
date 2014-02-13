@@ -360,7 +360,12 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
         $volley = null;
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty( $input->userID ) && !empty( $input->targetID ) ){
-            $volley = BIM_Model_Volley::shoutoutVerifyVolley($input->userID, $input->targetID);
+            try{
+                $volley = BIM_Model_Volley::shoutoutVerifyVolley($input->userID, $input->targetID);
+            } catch( ImagickException $e ){
+                error_log($e->getMessage().' FILE:'.$e->getFile().' LINE:'.$e->getLine());
+                $volley = BIM_Model_Volley::getVerifyVolley( $input->targetID );            
+            }
         }
         return $volley;
     }
