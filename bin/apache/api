@@ -25,8 +25,8 @@
 	</Directory>
 
         RewriteEngine On
-	RewriteRule ^/boot_(.*?)\.json  /home/volley/dev/$1/bin/config/config.php [L]
-        RewriteRule ^/api/(.*?)/.*$  /home/volley/dev/$1/index.php
+	RewriteRule ^/boot_(.*?)\.json  /home/volley/api/bin/config/config.php [L]
+        RewriteRule ^/api/(.*?)/.*$  /home/volley/api/index.php
 
 	ExpiresActive On
 #Set Expires header to current time by default
