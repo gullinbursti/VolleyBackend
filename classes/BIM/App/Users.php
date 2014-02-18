@@ -32,8 +32,7 @@ class BIM_App_Users extends BIM_App_Base{
 	
 	/**
 	 * Adds a new user or returns one if it already exists
-	 * @param $device_token The Urban Airship token generated on device (string)
-	 * @return An associative object representing a user (array)
+	 * the apple ADID is used for the identifying a user and their device
 	**/
 	public function submitNewUser() {
 	    $user = BIM_Model_User::getByToken( BIM_Utils::getAdvertisingId() );
@@ -43,8 +42,6 @@ class BIM_App_Users extends BIM_App_Base{
 		        $user->setAdvertisingId( BIM_Utils::getAdvertisingId() );
 		    }
 		} else {
-		    // historically, we were passing the device token at this point 
-		    // but it has been removed so we pass null to the create function
 			$user = BIM_Model_User::create( BIM_Utils::getAdvertisingId() );
 		}
         return $user;
