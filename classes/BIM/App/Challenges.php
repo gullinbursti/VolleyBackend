@@ -122,7 +122,7 @@ class BIM_App_Challenges extends BIM_App_Base{
         if ( $creator->isExtant() ) {
             $isVerify = false;
             $status = 2;
-            $volley = BIM_Model_Volley::create($creator->id, $hashTag, $imgUrl, $targets, $isPrivate, $expires, $clubId, $isVerify, $status, $clubId );
+            $volley = BIM_Model_Volley::create($creator->id, $hashTag, $imgUrl, $targets, $isPrivate, $expires, $isVerify, $status, $clubId );
             if( $volley->isExtant() ){
                 if( $clubId ){
                     $club = BIM_Model_Club::get( $clubId );
