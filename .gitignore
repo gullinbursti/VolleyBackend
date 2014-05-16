@@ -6,3 +6,21 @@ classes/BIM/Config/Dynamic.php
 bin/admin/.htaccess
 test/quotes.sql
 test/tumblr.o
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Editor temp files #
+#####################
+*~
+.swp
+.*.swp
+
