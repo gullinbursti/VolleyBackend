@@ -87,16 +87,39 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
     public function get(){
         $club = null;
         $input = (object) ($_POST ? $_POST : $_GET);
-        if( !empty( $input->clubID ) && !empty( $input->userID ) ){
-            $club = BIM_Model_Club::get( $input->clubID );
-            $input->userID = $this->resolveUserId( $input->userID );
-            if( $club->isExtant() && !$club->isOwner($input->userID) ){
-                unset( $club->members );
-                unset( $club->pending );
-                unset( $club->blocked );
+
+        if( empty( $input->clubID ) ) {
+            # TODO: Add propper logging!
+            error_log("BIM_Controller_Clubs->get(): clubID must be provided");
+            return null;
+        }
+            
+        if ( empty( $input->userID ) ){
+            # TODO: Add propper logging!
+            error_log("BIM_Controller_Clubs->get(): userID must be provided");
+            return null;
+        }
+
+        $club = BIM_Model_Club::get( $input->clubID );
+        $input->userID = $this->resolveUserId( $input->userID );
+        if( $club->isExtant() && !$club->isOwner($input->userID) ){
+            unset( $club->members );
+            unset( $club->pending );
+            unset( $club->blocked );
+        }
+
+        BIM_Controller_Clubs::stripProperty( 'email', $club->pending );
+        BIM_Controller_Clubs::stripProperty( 'email', $club->blocked );
+
+        return $club;
+    }
+
+    private static function stripProperty( $property, $objects ) {
+        foreach ( $objects as $object ) {
+            if (property_exists($object, $property)) {
+                unset($object->$property);
             }
         }
-        return $club;
     }
     
     public function join(){
