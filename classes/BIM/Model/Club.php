@@ -61,7 +61,15 @@ class BIM_Model_Club{
             if( $populateUserData ){
                 $this->populateMembers();
             }
+
+            $this->total_submissions = BIM_Model_Club::getTotalSubmissions( $clubId );
         }
+    }
+
+    protected static function getTotalSubmissions( $clubId ) {
+        $volleysDao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
+        $count = $volleysDao->getClubCount( $clubId );
+        return $count;
     }
     
     protected function populateMembers(){

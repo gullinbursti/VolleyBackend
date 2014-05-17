@@ -332,6 +332,18 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         return $stmt->fetchColumn( 0 );
     }
 
+    /**
+     * Helper function to get the number of volleys in a club.
+     * @param $clubId club ID to count for
+     * @return number of volleys in a club
+    **/
+    public function getClubCount( $clubId ) {
+        $sql = "SELECT COUNT(1) FROM `hotornot-dev`.tblChallenges WHERE club_id = ?";
+        $params = array( $clubId );
+        $stmt = $this->prepareAndExecute( $sql, $params );
+        return $stmt->fetchColumn( 0 );
+    }
+
     public function getRecentLikes($volleyId){
         $sql = "
         	select user_id, max(added) as added
