@@ -8,24 +8,24 @@
         join list (list of people who have joined)
         invite list (list of people pending to join from SMS/Email)
         block list (list of people who have been blocked by the club owner)
-        
-    Each user that joins a club will begin to receive Selfies that are sent 
-    directly into that club. Joining a club is a little like following a user, 
-    except targeting a club with an Selfie doesn't show up to all your followers 
-    just the members of that club. 
+
+    Each user that joins a club will begin to receive Selfies that are sent
+    directly into that club. Joining a club is a little like following a user,
+    except targeting a club with an Selfie doesn't show up to all your followers
+    just the members of that club.
     Followers == primary; Clubs == secondary (like sub-reddits)
-    
+
     Users can join as many clubs as they want but may only own a single club per profile.
-    
-    Submitting Selfies into a club will be similar to sending a direct message but 
-    instead of replying to X number of people you will be selecting the club during 
-    the last camera step. 
-    
-    Note that unlike direct messages the submitted selfie and emotion will be sent 
-    to all the people who are a part of that specific club. 
-    The selfie and emotion will appear as a new selfie on their main home timeline. 
+
+    Submitting Selfies into a club will be similar to sending a direct message but
+    instead of replying to X number of people you will be selecting the club during
+    the last camera step.
+
+    Note that unlike direct messages the submitted selfie and emotion will be sent
+    to all the people who are a part of that specific club.
+    The selfie and emotion will appear as a new selfie on their main home timeline.
     You will be able to reply to and or like club selfies that appear in your feed.
-    
+
     Calls/functionality we will need...
     creating a new club
     editing a new club's details (name, caption, avatar)
@@ -37,11 +37,11 @@
     viewing all of blocked members from my club
     removing members from my club
     viewing featured clubs (driven by config file + club ID)
-    Note we will be using TapStreams deeplinking URLs to direct invited users to the club's landing page where the user will be able to join. 
- * 
+    Note we will be using TapStreams deeplinking URLs to direct invited users to the club's landing page where the user will be able to join.
+ *
  */
 class BIM_Controller_Clubs extends BIM_Controller_Base {
-    
+
     public function create(){
         $club = false;
         $input = (object) ($_POST ? $_POST : $_GET);
@@ -54,7 +54,7 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
         }
         return $club;
     }
-    
+
     public function invite(){
         $invited = false;
         $input = (object) ($_POST ? $_POST : $_GET);
@@ -66,7 +66,7 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
         }
         return $invited;
     }
-    
+
     private static function extractUsers( $users ){
         $users = explode( '|||', $users );
         $toRemove = array();
@@ -83,7 +83,7 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
         }
         return $users;
     }
-    
+
     public function get(){
         $club = null;
         $input = (object) ($_POST ? $_POST : $_GET);
@@ -93,7 +93,7 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
             error_log("BIM_Controller_Clubs->get(): clubID must be provided");
             return null;
         }
-            
+
         if ( empty( $input->userID ) ){
             # TODO: Add propper logging!
             error_log("BIM_Controller_Clubs->get(): userID must be provided");
@@ -121,7 +121,7 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
             }
         }
     }
-    
+
     public function join(){
         $joined = false;
         $input = (object) ($_POST ? $_POST : $_GET);
@@ -129,7 +129,7 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
             $club = BIM_Model_Club::get( $input->clubID );
             // now we make sure that the requesting user is
             // the same as the user that is joining
-            // or the requesting user is the owner 
+            // or the requesting user is the owner
             $requestingUserId = $this->resolveUserId( $input->ownerID );
             if( $club->isExtant() && ( $club->isOwner( $requestingUserId ) || $requestingUserId == $input->userID ) ){
                 $joined = BIM_App_Clubs::join($input->clubID, $input->userID);
@@ -137,7 +137,7 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
         }
         return $joined;
     }
-    
+
     //remove user from a club
     public function quit(){
         $quit = false;
@@ -146,7 +146,7 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
             $club = BIM_Model_Club::get( $input->clubID );
             // now we make sure that the requesting user is
             // the same as the user that is quitting
-            // or the requesting user is the owner 
+            // or the requesting user is the owner
             $requestingUserId = $this->resolveUserId( $input->ownerID );
             if( $club->isExtant() && ( $club->isOwner( $requestingUserId ) || $requestingUserId == $input->memberID ) ){
                 $quit = BIM_App_Clubs::quit($input->clubID, $input->memberID);
@@ -154,7 +154,7 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
         }
         return $quit;
     }
-    
+
     //block a user from a club
     public function block(){
         $blocked = false;
@@ -165,7 +165,7 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
         }
         return $blocked;
     }
-    
+
     //unblock a user from a club
     public function unblock(){
         $unblocked = false;
@@ -176,12 +176,12 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
         }
         return $unblocked;
     }
-    
+
     // get featured clubs
     public function featured(){
         return BIM_App_Clubs::featured();
     }
-    
+
     public function processImage(){
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty( $input->imgURL ) ){
