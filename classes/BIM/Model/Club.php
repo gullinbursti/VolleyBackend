@@ -46,7 +46,7 @@ class BIM_Model_Club{
                 if( $member->blocked ){
                     $this->blocked[] = $member;
                 } else if( $member->pending ){
-                    $this->pending[] = $member;
+                    $this->pending[] = BIM_Model_Club::convertPendingMember( $member );
                 } else if( !empty($member->id) ){
                     $members[] = $member;
                 }
@@ -64,6 +64,14 @@ class BIM_Model_Club{
 
             $this->total_submissions = BIM_Model_Club::getTotalSubmissions( $clubId );
         }
+    }
+
+    protected static function convertPendingMember( $member ) {
+        $pendingMember = array();
+        $pendingMember['extern_name'] = $member->extern_name;
+        $pendingMember['phone'] = $member->mobile_number;
+        $pendingMember['invited'] = $member->invited; 
+        return $pendingMember;
     }
 
     protected static function getTotalSubmissions( $clubId ) {
