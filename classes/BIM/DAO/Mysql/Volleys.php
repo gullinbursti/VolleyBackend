@@ -264,6 +264,13 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         return $volleys;
     }
 
+    public function getVolleyIdsInClub( $clubId ) {
+        $sql = "SELECT id AS volley_id FROM `hotornot-dev`.tblChallenges WHERE club_id=?";
+        $params = array( $clubId );
+        $stmt = $this->prepareAndExecute( $sql, $params );
+        return $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+    }
+
     /**
      * Helper function to get the subject for a challenge
      * @param $subject_id The ID of the subject (integer)

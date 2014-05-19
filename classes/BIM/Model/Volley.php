@@ -618,6 +618,19 @@ class BIM_Model_Volley{
         return BIM_Utils::makeCacheKeys('volley', $ids);
     }
 
+    public static function getClubVolleys( $clubId ) {
+        $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
+        $ids = $dao->getVolleyIdsInClub( $clubId );
+
+        if (sizeof($ids) > 0) {
+            $volleys = self::getMulti( $ids );
+        } else {
+            $volleys = array();
+        }
+
+        return $volleys;
+    }
+
     /**
      *
      * do a multifetch to memcache
