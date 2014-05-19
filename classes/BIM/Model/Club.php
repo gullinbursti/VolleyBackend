@@ -123,11 +123,11 @@ class BIM_Model_Club{
         $userIds = self::_getUserIdsFromMembers( $members );
         $users = BIM_Model_User::getMulti($userIds, true);
 
-	    foreach ( $members as $member ){
+        foreach ( $members as $member ){
             $member->username = '';
             $member->avatar = '';
 
-	        if( !empty( $member->user_id ) ) {
+            if( !empty( $member->user_id ) ) {
                 $user = $users[ $member->user_id ];
 
                 if ( !empty($user->username) ) {
@@ -138,7 +138,7 @@ class BIM_Model_Club{
                 if ( !empty($avatarUrl) ) {
                     $member->avatar = $avatarUrl;
                 }
-	        }
+            }
         }
     }
 
@@ -147,11 +147,11 @@ class BIM_Model_Club{
 
         foreach( $members as $member ){
             if( !empty( $member->user_id) ){
-    	        $userIds[] = $member->user_id;
+                $userIds[] = $member->user_id;
             }
-	    }
+        }
 
-    	return array_unique($userIds);
+        return array_unique($userIds);
     }
 
     /**
@@ -162,21 +162,21 @@ class BIM_Model_Club{
         $userIds = array();
         foreach( $this->members as $member ){
             if( !empty( $member->id) ){
-    	        $userIds[] = $member->id;
+                $userIds[] = $member->id;
             }
-	    }
+        }
         foreach( $this->pending as $member ){
             if( !empty( $member->id) ){
-    	        $userIds[] = $member->id;
+                $userIds[] = $member->id;
             }
-	    }
+        }
         foreach( $this->blocked as $member ){
             if( !empty( $member->id) ){
-    	        $userIds[] = $member->id;
+                $userIds[] = $member->id;
             }
-	    }
-    	$userIds[] = $this->owner->id;
-    	return array_unique($userIds);
+        }
+        $userIds[] = $this->owner->id;
+        return array_unique($userIds);
     }
 
     public function invite( $users = array(), $nonUsers = array() ){
