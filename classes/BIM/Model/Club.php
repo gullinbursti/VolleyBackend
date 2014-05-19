@@ -55,6 +55,28 @@ class BIM_Model_Club{
         $this->members = $members;
 
         $this->total_submissions = BIM_Model_Club::getTotalSubmissions( $clubId );
+
+        $this->_populateSubmissions();
+    }
+
+    private function _populateSubmissions() {
+        $volleys = BIM_Model_Volley::getClubVolleys( $this->id );
+        $this->submissions = array();
+        foreach ( $volleys as $volley ) {
+            $this->submissions[] = self::_convertSubmission( $volley );
+        }
+    }
+
+    private static function _convertSubmission( $volley ) {
+        $submission = (object) array();
+        $submission->user_id = $volley->creator->id;
+        $submission->username = $volley->creator->username;
+        $submission->avatar = $volley->creator->avatar;
+        $submission->score = $volley->total_likers;
+        $submission->added = $volley->added;
+        $submission->img = $volley->creator->img;
+        $submission->subjects = array( $volley->creator->subject );
+        return $submission;
     }
 
     private static function _cleanUpMember( $member ) {
