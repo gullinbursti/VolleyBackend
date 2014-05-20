@@ -61,9 +61,13 @@ class BIM_Model_Club{
 
     private function _populateSubmissions() {
         $volleys = BIM_Model_Volley::getClubVolleys( $this->id );
+
+        $this->total_score = 0;
         $this->submissions = array();
         foreach ( $volleys as $volley ) {
-            $this->submissions[] = self::_convertSubmission( $volley );
+            $newSubmission = self::_convertSubmission( $volley );
+            $this->submissions[] = $newSubmission;
+            $this->total_score += $newSubmission->score;
         }
     }
 
@@ -72,10 +76,15 @@ class BIM_Model_Club{
         $submission->user_id = $volley->creator->id;
         $submission->username = $volley->creator->username;
         $submission->avatar = $volley->creator->avatar;
-        $submission->score = $volley->total_likers;
         $submission->added = $volley->added;
         $submission->img = $volley->creator->img;
         $submission->subjects = array( $volley->creator->subject );
+
+        $submission->score = $volley->creator->score;
+        foreach ( $volley->challengers as $challange ) {
+            $submission->score += $challange->score;
+        }
+
         return $submission;
     }
 
