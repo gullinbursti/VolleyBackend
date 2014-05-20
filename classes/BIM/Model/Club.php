@@ -36,6 +36,7 @@ class BIM_Model_Club{
 
         // TODO: Add actual type logic
         $this->type_id = "USER_GENERATED";
+        $this->updated = $this->added;
 
         $this->pending = array();
         $this->blocked = array();
@@ -67,7 +68,7 @@ class BIM_Model_Club{
         $this->total_submissions = 0;
         $this->submissions = array();
         foreach ( $volleys as $volley ) {
-            $newSubmission = self::_convertSubmission( $volley );
+            $newSubmission = $this->_convertSubmission( $volley );
             $this->submissions[] = $newSubmission;
             $this->total_score += $newSubmission->score;
             $this->total_submissions += 1 + $newSubmission->total_replies;
@@ -75,7 +76,7 @@ class BIM_Model_Club{
         }
     }
 
-    private static function _convertSubmission( $volley ) {
+    private function _convertSubmission( $volley ) {
         $submission = (object) array();
         $submission->user_id = $volley->creator->id;
         $submission->username = $volley->creator->username;
@@ -83,12 +84,14 @@ class BIM_Model_Club{
         $submission->added = $volley->added;
         $submission->img = $volley->creator->img;
         $submission->subjects = array( $volley->creator->subject );
+        $this->_updateUpdatedIfNewer( $volley->updated );
 
         $submission->total_replies = 0;
         $submission->score = $volley->creator->score;
         foreach ( $volley->challengers as $challange ) {
             ++$submission->total_replies;
             $submission->score += $challange->score;
+            $this->_updateUpdatedIfNewer( $challange->joined );
         }
 
         return $submission;
@@ -183,6 +186,15 @@ class BIM_Model_Club{
         }
 
         return array_unique($userIds);
+    }
+
+    private function _updateUpdatedIfNewer( $newTime ) {
+        $newTimeEpoc = strtotime( $newTime );
+        $updatedEpoc = strtotime( $this->updated );
+
+        if ( $newTimeEpoc > $updatedEpoc ) {
+            $this->updated = $newTime;
+        }
     }
 
     /**
