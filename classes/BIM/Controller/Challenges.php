@@ -224,12 +224,36 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
         return $joinedVolley;
     }
 
+    // TODO: Looks like this createprivate() is no longer in use.  Verify, then remove.
     public function createprivate(){
         return $this->submitChallengeWithUsernames();
     }
 
     public function create(){
-        return $this->submitChallengeWithUsernames();
+        $response = $this->submitChallengeWithUsernames();
+
+        // Clean out response
+        self::_stripProperties( $response, array("comments", "viewed", "has_viewed", "started", "expires", "is_private",
+                "total_likers", "recent_likes", "is_explore", "is_celeb") );
+        self::_stripProperties( $response->creator, array( "age" ) );
+        foreach ( $response->challengers as $challenger ) {
+            self::_stripProperties( $challenger, array( "age", "joined_timestamp" ) );
+        }
+
+        // Convert subject to array
+        $subject = $response->creator->subject;
+        unset( $response->creator->subject );
+        $response->creator->subject = array( $subject );
+
+        return $response;
+    }
+
+    private static function _stripProperties( $object, $properties ) {
+        foreach ( $properties as $property ) {
+            if ( property_exists($object, $property) ) {
+                unset( $object->$property );
+            }
+        }
     }
 
     /**
@@ -260,6 +284,7 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
                 $uv = $challenges->submitChallengeWithUsername( $userId, $input->subject, $input->imgURL, $isPrivate, $expires, $targets, $clubId );
             }
         }
+
         return $uv;
     }
 
