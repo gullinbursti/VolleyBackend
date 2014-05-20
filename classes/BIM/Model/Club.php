@@ -57,8 +57,6 @@ class BIM_Model_Club{
 
         $this->members = $members;
 
-        $this->total_submissions = BIM_Model_Club::getTotalSubmissions( $clubId );
-
         $this->_populateSubmissions();
     }
 
@@ -66,11 +64,14 @@ class BIM_Model_Club{
         $volleys = BIM_Model_Volley::getClubVolleys( $this->id );
 
         $this->total_score = 0;
+        $this->total_submissions = 0;
         $this->submissions = array();
         foreach ( $volleys as $volley ) {
             $newSubmission = self::_convertSubmission( $volley );
             $this->submissions[] = $newSubmission;
             $this->total_score += $newSubmission->score;
+            $this->total_submissions += 1 + $newSubmission->total_replies;
+            unset( $newSubmission->total_replies );
         }
     }
 
@@ -83,8 +84,10 @@ class BIM_Model_Club{
         $submission->img = $volley->creator->img;
         $submission->subjects = array( $volley->creator->subject );
 
+        $submission->total_replies = 0;
         $submission->score = $volley->creator->score;
         foreach ( $volley->challengers as $challange ) {
+            ++$submission->total_replies;
             $submission->score += $challange->score;
         }
 
@@ -145,12 +148,6 @@ class BIM_Model_Club{
         $pendingMember->phone = $member->mobile_number;
         $pendingMember->invited = $member->invited;
         return $pendingMember;
-    }
-
-    protected static function getTotalSubmissions( $clubId ) {
-        $volleysDao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-        $count = $volleysDao->getClubCount( $clubId );
-        return $count;
     }
 
     private function _fetchUserData( $members ){
