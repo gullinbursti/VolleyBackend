@@ -119,38 +119,65 @@ class BIM_Model_Club{
     }
 
     private static function _convertOwnerMember( $member ) {
-        $ownerMember = (object) array();
-        $ownerMember->id = $member->id;
-        $ownerMember->username = $member->username;
-        $ownerMember->avatar = $member->avatar;
+        $ownerMember = self::_convert(
+            $member,
+            array(
+                'id' => 'id',
+                'username' => 'username',
+                'avatar' => 'avatar')
+        );
+
         return $ownerMember;
     }
 
     private static function _convertJoinedMember( $member ) {
-        $joinedMember = (object) array();
-        $joinedMember->id = $member->id;
-        $joinedMember->username = $member->username;
-        $joinedMember->avatar = $member->avatar;
-        $joinedMember->invited = $member->invited;
-        $joinedMember->joined = $member->joined;
+        $joinedMember = self::_convert(
+            $member,
+            array(
+                'id' => 'id',
+                'username' => 'username',
+                'avatar' => 'avatar',
+                'invited' => 'invited',
+                'joined' => 'joined')
+        );
+
         return $joinedMember;
     }
 
     private static function _convertBlockedMember( $member ) {
-        $blockedMember = (object) array();
-        $blockedMember->id = $member->id;
-        $blockedMember->username = $member->username;
-        $blockedMember->avatar = $member->avatar;
-        $blockedMember->added = $member->blocked_date;
+        $blockedMember = self::_convert(
+            $member,
+            array(
+                'id' => 'id',
+                'username' => 'username',
+                'avatar' => 'avatar',
+                'added' => 'blocked_date')
+        );
+
         return $blockedMember;
     }
 
     private static function _convertPendingMember( $member ) {
-        $pendingMember = (object) array();
-        $pendingMember->extern_name = $member->extern_name;
-        $pendingMember->phone = $member->mobile_number;
-        $pendingMember->invited = $member->invited;
+        $pendingMember = self::_convert(
+            $member,
+            array(
+                'extern_name' => 'extern_name',
+                'phone' => 'mobile_number',
+                'invited' => 'invited')
+        );
+
         return $pendingMember;
+    }
+
+    private static function _convert( $oldObject, $map ) {
+        $newObject = (object) array();
+        foreach ( $map as $newProperty => $oldProperty ) {
+            $newObject->$newProperty = property_exists( $oldObject, $oldProperty )
+                ? $oldObject->$oldProperty
+                : '';
+        }
+
+        return $newObject;
     }
 
     private function _fetchUserData( $members ){
