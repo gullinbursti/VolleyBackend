@@ -22,7 +22,6 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
                 SELECT club_id
                 FROM `hotornot-dev`.club_member
                 WHERE user_id = ?
-                    AND pending = 0
                     AND blocked = 0
             )
             UNION

@@ -779,15 +779,19 @@ delete from tblUsers where username like "%yoosnapyoo";
         $clubData = $dao->getClubIds( $this->id );
         if( !$idsOnly ){
             $clubs = (object) array(
-                'joined' => array(),
-                'owned' => (object) array()
+                'owned' => array(),
+                'member' => array(),
+                'pending' => array(),
+                'other' => array()
             );
             $clubData = BIM_Model_Club::getMulti( $clubData );
             foreach( $clubData as $club ){
                 if( $club->isOwner( $this->id ) ){
-                    $clubs->owned = $club;
-                } else {
-                    $clubs->joined[] = $club;
+                    $clubs->owned[] = $club;
+                } else if ( $club->isMember( $this->id ) ) {
+                    $clubs->member[] = $club;
+                } else if ( $club->isPending( $this->id ) ) {
+                    $clubs->pending[] = $club;
                 }
             }
             $clubData = $clubs;
