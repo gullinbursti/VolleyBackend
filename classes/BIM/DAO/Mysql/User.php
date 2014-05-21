@@ -28,7 +28,7 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
             UNION
             (
                 SELECT id
-                FROM club
+                FROM `hotornot-dev`.club
                 WHERE owner_id = ?
             )
         ";
