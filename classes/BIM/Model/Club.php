@@ -47,7 +47,6 @@ class BIM_Model_Club{
             if( $member->blocked ){
                 $this->blocked[] = self::_convertBlockedMember( $member );
             } else if( $member->pending ){
-                #$this->pending[] = $member;
                 $this->pending[] = self::_convertPendingMember( $member );
             } else if ( $member->user_id == $ownerUserId ) {
                 $this->owner = self::_convertOwnerMember( $member );
@@ -151,6 +150,8 @@ class BIM_Model_Club{
                 'id' => 'id',
                 'username' => 'username',
                 'avatar' => 'avatar',
+                'extern_name' => 'extern_name',
+                'phone' => 'mobile_number',
                 'added' => 'blocked_date')
         );
 
@@ -161,6 +162,9 @@ class BIM_Model_Club{
         $pendingMember = self::_convert(
             $member,
             array(
+                'id' => 'id',
+                'username' => 'username',
+                'avatar' => 'avatar',
                 'extern_name' => 'extern_name',
                 'phone' => 'mobile_number',
                 'invited' => 'invited')
@@ -474,6 +478,17 @@ class BIM_Model_Club{
             }
         }
         return $isMember;
+    }
+
+    public function isPending( $userId ){
+        $isPending = false;
+        foreach( $this->pending as $pending ){
+            if( $pending->id == $userId ){
+                $isPending = true;
+                break;
+            }
+        }
+        return $isPending;
     }
 
     public function isOwner( $userId ){
