@@ -304,7 +304,8 @@ class BIM_Model_Club{
                     $objs[ $obj->id ] = $obj;
                 }
             }
-            self::populateClubMembers( $objs );
+            // TODO seriously fix caching:
+            //self::populateClubMembers( $objs );
             foreach( $objs as $obj ){
                 $key = self::makeCacheKeys($obj->id);
                 $cache->set( $key, $obj );
