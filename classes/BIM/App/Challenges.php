@@ -116,13 +116,15 @@ class BIM_App_Challenges extends BIM_App_Base{
      * @param $challenger_id The ID of the user to target (integer)
      * @return An associative object for a challenge (array)
     **/
-    public function submitChallengeWithChallenger($userId, $hashTag, $imgUrl, $isPrivate, $expires, $targets = array(), $clubId = 0 ) {
+    public function submitChallengeWithChallenger($userId, $hashTag, $imgUrl, $isPrivate, $expires, $targets = array(),
+            $clubId = 0, $hashTags = '' ) {
         $volley = null;
         $creator = BIM_Model_User::get( $userId );
         if ( $creator->isExtant() ) {
             $isVerify = false;
             $status = 2;
-            $volley = BIM_Model_Volley::create($creator->id, $hashTag, $imgUrl, $targets, $isPrivate, $expires, $isVerify, $status, $clubId );
+            $volley = BIM_Model_Volley::create($creator->id, $hashTag, $imgUrl, $targets, $isPrivate, $expires,
+                    $isVerify, $status, $clubId, $hashTags );
             if( $volley->isExtant() ){
                 if( $clubId ){
                     $club = BIM_Model_Club::get( $clubId );
@@ -149,8 +151,10 @@ class BIM_App_Challenges extends BIM_App_Base{
      * @param $username array | string the username(s) of the user to target (string)
      * @return An associative object for a challenge (array)
     **/
-    public function submitChallengeWithUsername($userId, $hashTag, $imgUrl, $isPrivate, $expires, $targets = array(), $clubId = 0 ) {
-        return $this->submitChallengeWithChallenger($userId, $hashTag, $imgUrl, $isPrivate, $expires, $targets, $clubId );
+    public function submitChallengeWithUsername($userId, $hashTag, $imgUrl, $isPrivate, $expires, $targets = array(),
+            $clubId = 0, $hashTags = '' ) {
+                return $this->submitChallengeWithChallenger($userId, $hashTag, $imgUrl, $isPrivate, $expires, $targets, $clubId,
+                        $hashTags );
     }
 
     /**

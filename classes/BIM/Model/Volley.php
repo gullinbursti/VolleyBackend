@@ -298,13 +298,42 @@ class BIM_Model_Volley{
         return $dao->hasApproved( $this->id, $userId );
     }
 
-    public static function create( $userId, $hashTag, $imgUrl, $targetIds = array(), $isPrivate = false, $expires = -1, $isVerify = false, $status = 2, $clubId = 0 ) {
+    public static function create( $userId, $hashTag, $imgUrl, $targetIds = array(), $isPrivate = false, $expires = -1,
+            $isVerify = false, $status = 2, $clubId = 0, $hashTags = '' ) {
         $volleyId = null;
-        $hashTagId = self::getHashTagId($userId, $hashTag);
+        $hashTagIds = self::_processHashTags( $userId, $hashTag, $hashTags );
+        $hashTagId = $hashTagIds[0];
+
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-        $volleyId = $dao->add( $userId, $targetIds, $hashTagId, $hashTag, $imgUrl, $isPrivate, $expires, $isVerify, $status, $clubId );
+        $volleyId = $dao->add( $userId, $targetIds, $hashTagId, $hashTag, $imgUrl, $isPrivate, $expires, $isVerify,
+                $status, $clubId );
         BIM_Model_User::purgeById( array( $userId ) );
         return self::get( $volleyId );
+    }
+
+    private static function _processHashTags( $userId, $hashTag, $hashTags ) {
+        $hashTagArray = array();
+        if ( !empty($hashTag) ) {
+            $hashTagArray[] = $hashTag;
+        }
+
+        if ( !empty($hashTags) ) {
+            $hashTagsJson = json_decode($hashTags);
+
+            if ( $hashTagsJson ) {
+                foreach ( $hashTagsJson as $tag ) {
+                    $hashTagArray[] = $tag;
+                }
+            }
+        } 
+
+        $hashTagIds = array();
+        foreach ( $hashTagArray as $hashTagTitle ) {
+            // TODO - Might want to change to a multi in one call to optomize speed.
+            $hashTagIds[] = self::getHashTagId( $userId, $hashTagTitle );
+        }
+
+        return $hashTagIds;
     }
 
 /**

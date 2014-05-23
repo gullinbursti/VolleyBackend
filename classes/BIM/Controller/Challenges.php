@@ -281,7 +281,13 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
                 $userId = $this->resolveUserId( $input->userID );
                 $expires = $this->resolveExpires();
                 $challenges = new BIM_App_Challenges();
-                $uv = $challenges->submitChallengeWithUsername( $userId, $input->subject, $input->imgURL, $isPrivate, $expires, $targets, $clubId );
+
+                // subject*s*, for backwards compatability
+                $subjects = property_exists($input, "subjects")
+                    ? $input->subjects : "";
+
+                $uv = $challenges->submitChallengeWithUsername( $userId, $input->subject, $input->imgURL, $isPrivate,
+                        $expires, $targets, $clubId, $subjects );
             }
         }
 
