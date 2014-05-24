@@ -1329,4 +1329,12 @@ limit 20
         $params = array( $challengeId, $subjectId );
         $this->prepareAndExecute( $sql, $params );
     }
+
+    public function getChallengeSubjectTitles( $challengeId ) {
+        $sql = "select title from `hotornot-dev`.tblChallengeSubjectMap AS map JOIN `hotornot-dev`.tblChallengeSubjects AS subs ON map.subject_id = subs.id WHERE challenge_id = ?";
+        $params = array( $challengeId );
+        $stmt = $this->prepareAndExecute( $sql, $params );
+        $ids = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+        return $ids;
+    }
 }

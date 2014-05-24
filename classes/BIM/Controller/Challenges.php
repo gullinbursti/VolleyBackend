@@ -240,11 +240,6 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
             self::_stripProperties( $challenger, array( "age", "joined_timestamp" ) );
         }
 
-        // Convert subject to array
-        $subject = $response->creator->subject;
-        unset( $response->creator->subject );
-        $response->creator->subject = array( $subject );
-
         return $response;
     }
 

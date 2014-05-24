@@ -149,14 +149,10 @@ class BIM_Model_Volley{
         }
     }
 
-    private function _setSubject( $me ){
-        if( empty($me->subject) ){
-            $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-            $this->subject = $dao->getSubject( $me->subject_id );
-            $dao->setSubject( $this->id );
-        } else {
-            $this->subject = $me->subject;
-        }
+    private function _setSubject( $me ) {
+        $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
+        $subjects = $dao->getChallengeSubjectTitles( $me->id );
+        $this->subject = $subjects;
     }
     /*
      * This function will gather all of the user ids
