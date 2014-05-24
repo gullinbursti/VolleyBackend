@@ -152,7 +152,10 @@ class BIM_Model_Volley{
     private function _setSubject( $me ) {
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
         $subjects = $dao->getChallengeSubjectTitles( $me->id );
-        $this->subject = $subjects;
+        if ( property_exists( $me, 'subject' ) && !empty($me->subject) ) {
+            $subjects[] = $me->subject;
+        }
+        $this->subject = array_unique( $subjects );
     }
     /*
      * This function will gather all of the user ids
