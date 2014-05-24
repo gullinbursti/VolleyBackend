@@ -1323,4 +1323,10 @@ limit 20
         $params = array( $volleyId, $targetVolleyId, $targetUserId );
         $this->prepareAndExecute( $sql, $params );
     }
+
+    public function mapChallengeToSubject( $challengeId, $subjectId ) {
+        $sql = "INSERT IGNORE INTO `hotornot-dev`.tblChallengeSubjectMap (challenge_id, subject_id) VALUE (?, ?)";
+        $params = array( $challengeId, $subjectId );
+        $this->prepareAndExecute( $sql, $params );
+    }
 }

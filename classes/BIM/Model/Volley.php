@@ -307,6 +307,12 @@ class BIM_Model_Volley{
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
         $volleyId = $dao->add( $userId, $targetIds, $hashTagId, $hashTag, $imgUrl, $isPrivate, $expires, $isVerify,
                 $status, $clubId );
+
+        foreach ( $hashTagIds as $currentTagId ) {
+            // TODO - Should be turned into a multi call to save on performance
+            $dao->mapChallengeToSubject($volleyId, $currentTagId);
+        }
+
         BIM_Model_User::purgeById( array( $userId ) );
         return self::get( $volleyId );
     }
