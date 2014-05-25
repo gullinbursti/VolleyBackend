@@ -63,11 +63,16 @@ class BIM_Model_Volley{
                 $joined = new DateTime( "@$challenger->joined" );
                 $joined = $joined->format('Y-m-d H:i:s');
 
+                $replySubjects = self::_getReplySubjects( $challenger->challenge_id, $challenger->subject );
+                $replySubjects = !empty($replySubjects)
+                    ? $replySubjects
+                    : $this->subjects;
+
                 $target = (object) array(
                     'id' => $challenger->challenger_id,
                     'img' => $challenger->challenger_img ? $challenger->challenger_img : '',
                     'score' => $challenger->likes,
-                    'subject' => empty($challenger->subject) ? $this->subject : $challenger->subject,
+                    'subject' => $replySubjects,
                     'joined' => $joined,
                     'joined_timestamp' => $challenger->joined,
                 );
@@ -157,6 +162,14 @@ class BIM_Model_Volley{
         }
         $this->subject = array_unique( $subjects );
     }
+
+    private static function _getReplySubjects( $replyId, $subject ) {
+        $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
+        $subjects = $dao->getChallengeParticipantSubjectTitle( $replyId );
+        $subjects[] = $subject;
+        return array_unique( $subjects );
+    }
+
     /*
      * This function will gather all of the user ids
      * and call BIM_Model_User::getMulti()
