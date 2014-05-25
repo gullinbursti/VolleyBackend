@@ -150,6 +150,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         $sql = "
             SELECT
                 tc.*,
+                tcp.id AS challenge_id,
                 tcp.user_id AS challenger_id,
                 tcp.img AS challenger_img,
                 tcp.joined as joined
@@ -179,6 +180,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         $sql = "
             SELECT
                 tc.*,
+                tcp.id AS challenge_id,
                 tcp.user_id AS challenger_id,
                 tcp.img AS challenger_img,
                 tcp.joined as joined,
@@ -211,6 +213,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                     if( !empty( $row->challenger_id )  ){
                         $row->challengers = array(
                             ( object ) array(
+                                'challenge_id' => $row->challenge_id,
                                 'challenger_id' => $row->challenger_id,
                                 'challenger_img' => $row->challenger_img,
                                 'joined' => $row->joined,
@@ -223,6 +226,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                     } else {
                         $row->challengers = array();
                     }
+                    unset( $row->challenge_id );
                     unset( $row->challenger_id );
                     unset( $row->challenger_img );
                     unset( $row->joined );
@@ -235,6 +239,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                 } else {
                     $volley = $volleys[ $row->id ];
                     $volley->challengers[] = ( object ) array(
+                        'challenge_id' => $row->challenge_id,
                         'challenger_id' => $row->challenger_id,
                         'challenger_img' => $row->challenger_img,
                         'joined' => $row->joined,
@@ -1335,4 +1340,13 @@ limit 20
         $ids = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
         return $ids;
     }
+
+    public function getChallengeParticipantSubjectTitle( $challengeParticipantId ) {
+        $sql = "select title from `hotornot-dev`.tblChallengeParticipantSubjectMap AS map JOIN `hotornot-dev`.tblChallengeSubjects AS subs ON map.subject_id = subs.id WHERE challenge_participant_id = ?";
+        $params = array( $challengeParticipantId );
+        $stmt = $this->prepareAndExecute( $sql, $params );
+        $ids = $stmt->fetchAll( PDO::FETCH_COLUMN, 0 );
+        return $ids;
+    }
+
 }
