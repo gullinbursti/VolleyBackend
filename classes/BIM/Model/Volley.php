@@ -459,13 +459,33 @@ class BIM_Model_Volley{
     }
 
     // $userId, $imgUrl
-    public function join( $userId, $imgUrl, $hashTag = '' ){
+    public function join( $userId, $imgUrl, $hashTag = '', $hashTags = '' ){
         if( $this->canJoin($userId) ){
             $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-            if( !$hashTag ){
-                $hashTag = $this->subject;
+
+            if( !empty($hashTag ) || !empty($hashTags) ) {
+                $hashTagIds = self::_processHashTags( $userId, $hashTag, $hashTags );
+            } else if ( property_exists($this, 'subject') && is_array($this->subject) ) {
+                $hashTagIds = array();
+                foreach ($this->subject as $subjectTitle) {
+                    $hashTagIds[] = $dao->getHashTagId($subjectTitle);
+                }
+            } else {
+                $hashTagIds = array();
             }
-            $dao->join( $this->id, $userId, $imgUrl, $hashTag );
+
+            if ( !empty($hashTagIds) ) {
+                $hashTag = $dao->getSubject( $hashTagIds[0] );
+            }
+
+            $newId = $dao->join( $this->id, $userId, $imgUrl, $hashTag );
+
+            if ( $newId != 0 ) {
+                foreach ( $hashTagIds as $currentId ) {
+                    // TODO - Should be turned into a multi call to save on performance
+                    $dao->mapChallengeParticipantToSubject($newId, $currentId);
+                }
+            }
 
             $this->purgeFromCache();
             BIM_Model_User::purgeById( $userId );

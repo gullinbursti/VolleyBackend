@@ -206,13 +206,17 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
             $input->imgURL = $this->normalizeVolleyImgUrl($input->imgURL);
             $userId = $this->resolveUserId( $input->userID );
             $challenges = new BIM_App_Challenges();
+
             // get the response hashtag
             $hashTag = empty( $input->subject ) ? '' : $input->subject;
+            $hashTags = empty( $input->subjects ) ? '' : $input->subjects;
             $volley = BIM_Model_Volley::get( $input->challengeID );
+
             if( $volley->isExtant() ){
                 $ptrn = "@$volley->subject\s*:@";
                 $hashTag = trim(preg_replace( $ptrn, '', $hashTag, 1 ));
-                $joinedVolley = $challenges->join( $userId, $input->challengeID, $input->imgURL, $hashTag );
+                $joinedVolley = $challenges->join( $userId, $input->challengeID, $input->imgURL, $hashTag, $hashTags );
+
                 if( $joinedVolley ){
                     $joinedVolley = array(
                         'id' => $joinedVolley->id,

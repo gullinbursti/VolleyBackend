@@ -394,26 +394,16 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
 
     public function join( $volleyId, $userId, $imgUrl, $hashTag = '' ){
         $joined = time();
-        $sql = '
-            UPDATE `hotornot-dev`.tblChallengeParticipants
-            set img = ?, joined = ?, subject = ?
-            WHERE challenge_id = ?
-                AND img is null
-                AND user_id = ?
-        ';
-        $params = array( $imgUrl, $joined, $hashTag, $volleyId, $userId );
-        $this->prepareAndExecute($sql, $params);
 
-        if( !$this->rowCount ){
-            $sql = '
-                INSERT IGNORE INTO `hotornot-dev`.tblChallengeParticipants
-                (challenge_id, user_id, img, joined, likes, subject )
-                VALUES
-                (?, ?, ?, ?, ?, ?)
-            ';
-            $params = array( $volleyId, $userId, $imgUrl, $joined, 0, $hashTag );
-            $this->prepareAndExecute($sql, $params);
-        }
+        $sql = '
+            INSERT IGNORE INTO `hotornot-dev`.tblChallengeParticipants
+            (challenge_id, user_id, img, joined, likes, subject )
+            VALUES
+            (?, ?, ?, ?, ?, ?)
+        ';
+        $params = array( $volleyId, $userId, $imgUrl, $joined, 0, $hashTag );
+        $this->prepareAndExecute($sql, $params);
+        $id = $this->lastInsertId;
 
         if( $this->rowCount ){
             $sql = '
@@ -444,6 +434,8 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
             $params = array( $userId );
             $this->prepareAndExecute($sql, $params);
         }
+
+        return $id;
     }
 
     public function accept( $volleyId, $userId, $imgUrl ){
@@ -1327,6 +1319,12 @@ limit 20
     public function mapChallengeToSubject( $challengeId, $subjectId ) {
         $sql = "INSERT IGNORE INTO `hotornot-dev`.tblChallengeSubjectMap (challenge_id, subject_id) VALUE (?, ?)";
         $params = array( $challengeId, $subjectId );
+        $this->prepareAndExecute( $sql, $params );
+    }
+
+    public function mapChallengeParticipantToSubject( $challengeParticipantId, $subjectId ) {
+        $sql = "INSERT IGNORE INTO `hotornot-dev`.tblChallengeParticipantSubjectMap (challenge_participant_id, subject_id) VALUE (?, ?)";
+        $params = array( $challengeParticipantId, $subjectId );
         $this->prepareAndExecute( $sql, $params );
     }
 

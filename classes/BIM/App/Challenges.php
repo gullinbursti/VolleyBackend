@@ -290,7 +290,7 @@ class BIM_App_Challenges extends BIM_App_Base{
      * @param $img_url The URL to the challenger's image (string)
      * @return The ID of the challenge (integer)
     **/
-    public function join($userId, $volleyId, $imgUrl, $hashTag = '' ) {
+    public function join($userId, $volleyId, $imgUrl, $hashTag = '', $hashTags = '' ) {
         $volley = BIM_Model_Volley::get( $volleyId );
         if( $volley->isExtant() ){
             // we check to see if the conversation the user is joining here
@@ -306,7 +306,7 @@ class BIM_App_Challenges extends BIM_App_Base{
                 }
             }
             if( $canJoin ){
-                $volley->join( $userId, $imgUrl, $hashTag );
+                $volley->join( $userId, $imgUrl, $hashTag, $hashTags );
                 $volley = BIM_Model_Volley::get($volleyId, true);
                 $joiner = BIM_Model_User::get( $userId );
                 BIM_Push::doVolleyAcceptNotification( $volley->id, $joiner->id );
