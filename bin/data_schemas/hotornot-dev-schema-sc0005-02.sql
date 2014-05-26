@@ -17,4 +17,6 @@ INSERT INTO `tblClubTypeEnum` (`id`, `club_type`, `description`) VALUE (6, "THIR
 
 ALTER TABLE `club` ADD COLUMN `club_type_id` SMALLINT(1) NOT NULL DEFAULT 1 AFTER `name`;
 ALTER TABLE `club` ADD CONSTRAINT `club_type_id_fk_1` FOREIGN KEY (`club_type_id`) REFERENCES `tblClubTypeEnum` (`id`);
+ALTER TABLE `club` DROP KEY `owner_id_2`, ADD KEY `owner_id_2` (`owner_id`);
+ALTER TABLE `club` ADD UNIQUE KEY `name_key_1` (`name`);
 
