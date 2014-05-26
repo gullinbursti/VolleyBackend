@@ -122,15 +122,15 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         return $clubs;
     }
 
-    public function create( $name, $ownerId, $description = '', $img = '' ){
+    public function create( $name, $ownerId, $description = '', $img = '', $clubType = 'USER_GENERATED' ) {
         $clubId = 0;
         $sql = '
             INSERT IGNORE INTO `hotornot-dev`.club
-            ( name, owner_id, description, img )
+            ( name, owner_id, description, img, club_type_id )
             VALUES
-            (?,?,?,?)
+            (?,?,?,?, (SELECT id FROM `hotornot-dev`.tblClubTypeEnum WHERE club_type = ?))
         ';
-        $params = array( $name, $ownerId, $description, $img );
+        $params = array( $name, $ownerId, $description, $img, $clubType );
         $this->prepareAndExecute( $sql, $params );
 
         if( $this->lastInsertId ) $clubId = $this->lastInsertId;

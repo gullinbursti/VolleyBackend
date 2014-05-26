@@ -262,9 +262,9 @@ class BIM_Model_Club{
         return $invited;
     }
 
-    public static function create( $name, $ownerId, $description = '', $img = '' ) {
+    public static function create( $name, $ownerId, $description = '', $img = '', $clubType = 'USER_GENERATED' ) {
         $dao = new BIM_DAO_Mysql_Club( BIM_Config::db( ) );
-        $clubId = $dao->create( $name, $ownerId, $description, $img );
+        $clubId = $dao->create( $name, $ownerId, $description, $img, $clubType );
         if( $clubId ){
             BIM_Model_User::purgeById($ownerId);
         }
