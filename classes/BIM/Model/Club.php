@@ -34,8 +34,6 @@ class BIM_Model_Club{
             self::_fetchUserData( $this->members );
         }
 
-        // TODO: Add actual type logic
-        $this->type_id = "USER_GENERATED";
         $this->updated = $this->added;
 
         $this->pending = array();
