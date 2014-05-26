@@ -11,11 +11,29 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
 
         $placeHolders = trim(join('',array_fill(0, count( $ids ), '?,') ),',');
         $sql = "
-            select * from
-            `hotornot-dev`.club as c
-                left join `hotornot-dev`.club_member as m
-                on c.id = m.club_id
-            where id in ($placeHolders)
+            SELECT
+                c.id AS id,
+                c.name AS name,
+                c.added AS added,
+                c.owner_id AS owner_id,
+                c.description AS description,
+                c.img AS img,
+                m.club_id AS club_id,
+                m.extern_name AS extern_name,
+                m.mobile_number AS mobile_number,
+                m.email AS email,
+                m.pending AS pending,
+                m.blocked AS blocked,
+                m.user_id AS user_id,
+                m.invited AS invited,
+                m.joined AS joined,
+                m.blocked_date AS blocked_date,
+                e.club_type AS club_type
+            FROM 
+                `hotornot-dev`.club AS c 
+                    LEFT join `hotornot-dev`.club_member AS m ON c.id = m.club_id
+                    JOIN `hotornot-dev`.tblClubTypeEnum AS e ON c.club_type_id = e.id
+            WHERE c.id IN ($placeHolders)
         ";
         $stmt = $this->prepareAndExecute( $sql, $ids );
         $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
