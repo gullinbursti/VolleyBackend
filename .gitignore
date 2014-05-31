@@ -27,4 +27,5 @@ Thumbs.db
 # PHP Composer #
 ################
 /vendor/
+/composer.phar
 
