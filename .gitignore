@@ -24,3 +24,7 @@ Thumbs.db
 .swp
 .*.swp
 
+# PHP Composer #
+################
+/vendor/
+

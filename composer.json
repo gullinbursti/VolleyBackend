@@ -1,0 +1,24 @@
+{
+    "name": "built-in-menlo/volley-backend",
+    "require-dev": {
+        "phpunit/phpunit": "4.1.*",
+        "phpmd/phpmd": "1.5.*"
+    },
+    "authors": [
+        {
+            "name": "Matt Holcombe",
+            "email": "matt@builtinmenlo.com"
+        },
+        {
+            "name": "Pedro H",
+            "email": "pedro@builtinmenlo.com"
+        },
+        {
+            "name": "Jason Festa",
+            "email": "jason@builtinmenlo.com"
+        }
+    ],
+    "require": {
+
+    }
+}
