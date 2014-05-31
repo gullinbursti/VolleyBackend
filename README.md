@@ -9,7 +9,7 @@ just perform the following commands:
     $ git clone git@github.com:BuiltInMenlo/VolleyBackend.git
     $ cd ~/src/VolleyBackend
     $ ./bin/composer-installer.php
-    $ ./composer.phar update --working-dir code
+    $ ./composer.phar update
 
 
 ## Important notes on Composer
@@ -22,7 +22,7 @@ When making changes to this project, keep the following in mind:
   commit the dependencies in my vendor directory?][composer vendor commit]
 - __Do__ commit `composer.lock` (along with `composer.json`) into version control.  Please read: [composer.lock - The
   Lock File][composer composer.lock].
-- Run `./composer.phar update --working-dir code` every so often to make sure your local clone is up to date.
+- Run `./composer.phar update` every so often to make sure your local clone is up to date.
 
 Even though the [Composer installation instruction][composer install doc] calls for using `curl` to install
 `composer.phar`, __do not__ do it.  Reason being:
