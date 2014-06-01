@@ -2,7 +2,8 @@
 
 class BIM_DAO_Mysql_UserPhone extends BIM_DAO_Mysql{
 
-    public function create( $userId, $phoneNumberEnc, $verifyCode, $verifyCountDown ) {
+    public function create( $userId, $phoneNumberEnc, $verifyCode,
+            $verifyCountDown ) {
 
         $query = "
             INSERT INTO `hotornot-dev`.tblUserPhones
@@ -33,7 +34,10 @@ class BIM_DAO_Mysql_UserPhone extends BIM_DAO_Mysql{
         $query = "SELECT * FROM `hotornot-dev`.tblUserPhones WHERE id = ?";
         $params = array( $id );
         $stmt = $this->prepareAndExecute( $query, $params );
-        $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+        $raw_data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+        $data = isset($raw_data[0])
+                ? $raw_data[0]
+                : null;
         return $data;
     }
 
@@ -41,6 +45,13 @@ class BIM_DAO_Mysql_UserPhone extends BIM_DAO_Mysql{
     public function deleteByPhoneNumberEnc( $phoneNumberEnc ) {
         $query = "DELETE FROM `hotornot-dev`.tblUserPhones WHERE phone_number_enc = ?";
         $params = array( $phoneNumberEnc );
+        $this->prepareAndExecute( $query, $params );
+        return $this->rowCount;
+    }
+
+    public function deleteById( $id ) {
+        $query = "DELETE FROM `hotornot-dev`.tblUserPhones WHERE id = ?";
+        $params = array( $id );
         $this->prepareAndExecute( $query, $params );
         return $this->rowCount;
     }

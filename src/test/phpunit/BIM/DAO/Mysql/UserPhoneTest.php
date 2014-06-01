@@ -1,11 +1,14 @@
 <?php
 
+require_once 'Hamcrest.php';
+
 class BIM_DAO_Mysql_UserPhoneTest extends PHPUnit_Framework_TestCase
 {
     private static $_testUserId1 = null;
     private static $_testUserId2 = null;
 
     private $_userPhoneDao = null;
+    private $_existentUserPhoneId = null;
 
     protected static function user1() {
         return (object) array(
@@ -56,7 +59,6 @@ class BIM_DAO_Mysql_UserPhoneTest extends PHPUnit_Framework_TestCase
         self::deleteTestUsers( $userDao );
     }
 
-
     /**
      * @before
      */
@@ -82,12 +84,63 @@ class BIM_DAO_Mysql_UserPhoneTest extends PHPUnit_Framework_TestCase
         $phone = self::nonexistentUserPhone();
 
         // Act
+        $nowish = date( 'Y-m-d H:i:' );
         $id = $dao->create( $phone->userId, $phone->phoneNumberEnc,
                 $phone->verifyCode, $phone->verifyCountDown);
         $newEntry = $dao->readById( $id );
 
         // Assert
-        $this->assertEquals(-1, -1);
+        assertThat( $newEntry->id, is(equalTo($id)) );
+        assertThat( $newEntry->user_id, is(equalTo($phone->userId)) );
+        assertThat( $newEntry->phone_number_enc, is(equalTo($phone->phoneNumberEnc)) );
+        assertThat( $newEntry->verify_code, is(equalTo($phone->verifyCode)) );
+        assertThat( $newEntry->verify_count_down, is(equalTo($phone->verifyCountDown)) );
+        assertThat( $newEntry->verified_date, is(nullValue()) );
+        assertThat( $newEntry->verify_last_attempt, is(nullValue()) );
+        assertThat( $newEntry->verify_count_total, is(equalTo(0)) );
+        assertThat( $newEntry->verified, is(equalTo(0)) );
+        assertThat( $newEntry->created, is(equalTo($newEntry->updated)) );
+        assertThat( $newEntry->created, startsWith($nowish) );
+    }
+
+    /**
+     * @test
+     */
+    public function readById_existent_object()
+    {
+        // Arrange
+        $dao = $this->getUserPhoneDao();
+        $phone = self::existentUserPhone();
+        $id = $this->_existentUserPhoneId;
+
+        // Act
+        $entry = $dao->readById( $id );
+
+        // Assert
+        assertThat( $entry, is(not(nullValue())) );
+        assertThat( $entry->id, is(equalTo($id)) );
+        assertThat( $entry->user_id, is(equalTo($phone->userId)) );
+        assertThat( $entry->phone_number_enc, is(equalTo($phone->phoneNumberEnc)) );
+        assertThat( $entry->verify_code, is(equalTo($phone->verifyCode)) );
+        assertThat( $entry->verify_count_down, is(equalTo($phone->verifyCountDown)) );
+    }
+
+    /**
+     * @test
+     */
+    public function readById_nonExistent_null()
+    {
+        // Arrange
+        $dao = $this->getUserPhoneDao();
+        $phone = self::existentUserPhone();
+        $id = $this->_existentUserPhoneId;
+        $dao->deleteById( $id );
+
+        // Act
+        $entry = $dao->readById( $id );
+
+        // Assert
+        assertThat( $entry, is(nullValue()) );
     }
 
 
@@ -125,7 +178,7 @@ class BIM_DAO_Mysql_UserPhoneTest extends PHPUnit_Framework_TestCase
 
     protected function createTestUserPhone() {
         $phone = self::existentUserPhone();
-        $this->getUserPhoneDao()->create(
+        $this->_existentUserPhoneId = $this->getUserPhoneDao()->create(
             $phone->userId,
             $phone->phoneNumberEnc,
             $phone->verifyCode,
