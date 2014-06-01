@@ -132,7 +132,6 @@ class BIM_DAO_Mysql_UserPhoneTest extends PHPUnit_Framework_TestCase
     {
         // Arrange
         $dao = $this->getUserPhoneDao();
-        $phone = self::existentUserPhone();
         $id = $this->_existentUserPhoneId;
         $dao->deleteById( $id );
 
@@ -143,6 +142,70 @@ class BIM_DAO_Mysql_UserPhoneTest extends PHPUnit_Framework_TestCase
         assertThat( $entry, is(nullValue()) );
     }
 
+    /**
+     * @test
+     */
+    public function deleteById_existent_oneCount()
+    {
+        // Arrange
+        $dao = $this->getUserPhoneDao();
+        $id = $this->_existentUserPhoneId;
+
+        // Act
+        $count = $dao->deleteById( $id );
+
+        // Assert
+        assertThat( $count, is(equalTo(1)) );
+    }
+
+    /**
+     * @test
+     */
+    public function deleteById_nonExistent_zeroCount()
+    {
+        // Arrange
+        $dao = $this->getUserPhoneDao();
+        $id = $this->_existentUserPhoneId;
+        $dao->deleteById( $id );
+
+        // Act
+        $count = $dao->deleteById( $id );
+
+        // Assert
+        assertThat( $count, is(equalTo(0)) );
+    }
+
+    /**
+     * @test
+     */
+    public function deleteByPhoneNumberEnc_existent_oneCount()
+    {
+        // Arrange
+        $dao = $this->getUserPhoneDao();
+        $phoneEnc = self::existentUserPhone()->phoneNumberEnc;
+
+        // Act
+        $count = $dao->deleteByPhoneNumberEnc( $phoneEnc );
+
+        // Assert
+        assertThat( $count, is(equalTo(1)) );
+    }
+
+    /**
+     * @test
+     */
+    public function deleteByPhoneNumberEnc_nonExistent_zeroCount()
+    {
+        // Arrange
+        $dao = $this->getUserPhoneDao();
+        $phoneEnc = self::nonExistentUserPhone()->phoneNumberEnc;
+
+        // Act
+        $count = $dao->deleteByPhoneNumberEnc( $phoneEnc );
+
+        // Assert
+        assertThat( $count, is(equalTo(0)) );
+    }
 
     protected static function getUserDao() {
         return new BIM_DAO_Mysql_User( BIM_Config::db() );
