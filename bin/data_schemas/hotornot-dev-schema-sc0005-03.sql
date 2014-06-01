@@ -1,7 +1,7 @@
 
-/* DROP TABLE IF EXISTS `tblUserPhone`; */
+/* DROP TABLE IF EXISTS `tblUserPhones`; */
 
-CREATE TABLE `tblUserPhone` (
+CREATE TABLE `tblUserPhones` (
   `id` int(12) UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` int(10) UNSIGNED NOT NULL,
   `phone_number_enc` VARCHAR(64) NOT NULL,
