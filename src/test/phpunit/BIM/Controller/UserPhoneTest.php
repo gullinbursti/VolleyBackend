@@ -119,6 +119,51 @@ class BIM_Controller_UserPhoneTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @test
+     */
+    public function getUserPhoneApp_nothing_lazyLoads() {
+        // Arrange
+        $controller = new BIM_Controller_UserPhone();
+
+        // Act
+        $app = $controller->getUserPhoneApp();
+
+        // Assert
+        assertThat( $app, is(not(nullValue())) );
+        assertThat( $app, is(anInstanceOf('BIM_App_UserPhone')) );
+    }
+
+    /**
+     * @test
+     */
+    public function getUserPhoneApp_setAll_identical() {
+        // Arrange
+        $controller = new BIM_Controller_UserPhone();
+        $appStub = $this->getMock( 'BIM_App_UserPhone' );
+
+        // Act
+        $controller->setUserPhoneApp( $appStub );
+        $app = $controller->getUserPhoneApp();
+
+        // Assert
+        assertThat( $app, is(identicalTo($appStub)) );
+    }
+
+    /**
+     * @test
+     * @expectedException UnexpectedValueException
+     */
+    public function setUserPhoneApp_setTwice_exception() {
+        // Arrange
+        $controller = new BIM_Controller_UserPhone();
+        $appStub = $this->getMock( 'BIM_App_UserPhone' );
+
+        // Act & Assert
+        $controller->setUserPhoneApp( $appStub );
+        $controller->setUserPhoneApp( $appStub );
+    }
+
     protected function getNewUserPhoneController() {
         $controller = new BIM_Controller_UserPhone();
         $appStub = $this->getMock( 'BIM_App_UserPhone' );
