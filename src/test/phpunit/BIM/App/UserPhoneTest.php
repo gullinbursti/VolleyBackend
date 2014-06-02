@@ -151,56 +151,62 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
 
 
 
-//    /**
-//     * @test
-//     */
-//    public function getUserPhoneApp_nothing_lazyLoads() {
-//        // Arrange
-//        $controller = new BIM_App_UserPhone();
-//
-//        // Act
-//        $app = $controller->getUserPhoneApp();
-//
-//        // Assert
-//        assertThat( $app, is(not(nullValue())) );
-//        assertThat( $app, is(anInstanceOf('BIM_App_UserPhone')) );
-//    }
-//
-//    /**
-//     * @test
-//     */
-//    public function getUserPhoneApp_setAll_identical() {
-//        // Arrange
-//        $controller = new BIM_App_UserPhone();
-//        $appStub = $this->getMock( 'BIM_App_UserPhone' );
-//
-//        // Act
-//        $controller->setUserPhoneApp( $appStub );
-//        $app = $controller->getUserPhoneApp();
-//
-//        // Assert
-//        assertThat( $app, is(identicalTo($appStub)) );
-//    }
-//
-//    /**
-//     * @test
-//     * @expectedException UnexpectedValueException
-//     */
-//    public function setUserPhoneApp_setTwice_exception() {
-//        // Arrange
-//        $controller = new BIM_App_UserPhone();
-//        $appStub = $this->getMock( 'BIM_App_UserPhone' );
-//
-//        // Act & Assert
-//        $controller->setUserPhoneApp( $appStub );
-//        $controller->setUserPhoneApp( $appStub );
-//    }
+    /**
+     * @test
+     */
+    public function getUserPhoneDao_nothing_lazyLoads() {
+        // Arrange
+        $app = new BIM_App_UserPhone();
+
+        // Act
+        $dao = $app->getUserPhoneDao();
+
+        // Assert
+        assertThat( $dao, is(not(nullValue())) );
+        assertThat( $dao, is(anInstanceOf('BIM_DAO_Mysql_UserPhone')) );
+    }
+
+    /**
+     * @test
+     */
+    public function getUserPhoneDao_setAll_identical() {
+        // Arrange
+        $app = new BIM_App_UserPhone();
+        $daoStub = $this->getMockBuilder( 'BIM_DAO_Mysql_UserPhone' )
+                ->disableOriginalConstructor()
+                ->getMock();
+
+        // Act
+        $app->setUserPhoneDao( $daoStub );
+        $dao = $app->getUserPhoneDao();
+
+        // Assert
+        assertThat( $dao, is(identicalTo($daoStub)) );
+    }
+
+    /**
+     * @test
+     * @expectedException UnexpectedValueException
+     */
+    public function setUserPhoneDao_setTwice_exception() {
+        // Arrange
+        $app = new BIM_App_UserPhone();
+        $daoStub = $this->getMockBuilder( 'BIM_DAO_Mysql_UserPhone' )
+                ->disableOriginalConstructor()
+                ->getMock();
+
+        // Act & Assert
+        $app->setUserPhoneDao( $daoStub );
+        $app->setUserPhoneDao( $daoStub );
+    }
 
     protected function getNewUserPhoneApp() {
-        $controller = new BIM_App_UserPhone();
-        //$appStub = $this->getMock( 'BIM_App_UserPhone' );
-        //$controller->setUserPhoneApp( $appStub );
-        return $controller;
+        $app = new BIM_App_UserPhone();
+        $daoStub = $this->getMockBuilder( 'BIM_DAO_Mysql_UserPhone' )
+                ->disableOriginalConstructor()
+                ->getMock();
+        $app->setUserPhoneDao( $daoStub );
+        return $app;
     }
 }
 
