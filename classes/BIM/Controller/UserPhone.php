@@ -6,36 +6,34 @@ class BIM_Controller_UserPhone extends BIM_Controller_Base {
 
     public function updatePhone() {
         $input = (object) ($_POST ? $_POST : $_GET);
-        $usedId = isset($input->userID) ? $input->userID : null;
+        $userId = isset($input->userID) ? $input->userID : null;
         $phone = isset($input->phone) ? $input->phone : null;
 
         // Validation
-        if ( empty($usedId) || empty($phone) ) {
+        if ( empty($userId) || empty($phone) ) {
             return null;
         }
 
         // Process
         $app = $this->getUserPhoneApp();
-
-        error_log ("HERE WE GO");
-        $app->updatePhone( $usedId, $phone );
+        $app->updatePhone( $userId, $phone );
 
         return true;
     }
 
     public function validatePhone() {
         $input = (object) ($_POST ? $_POST : $_GET);
-        $usedId = isset($input->userID) ? $input->userID : null;
+        $userId = isset($input->userID) ? $input->userID : null;
         $pin = isset($input->pin) ? $input->pin : null;
 
         // Validation
-        if ( empty($usedId) || empty($pin) ) {
+        if ( empty($userId) || empty($pin) ) {
             return null;
         }
 
         // Process
         $app = $this->getUserPhoneApp();
-        $app->validatePhone( $usedId, $pin );
+        $app->validatePhone( $userId, $pin );
 
         return true;
     }
