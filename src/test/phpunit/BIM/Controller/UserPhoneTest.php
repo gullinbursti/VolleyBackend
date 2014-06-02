@@ -4,8 +4,6 @@ require_once 'Hamcrest.php';
 
 class BIM_Controller_UserPhoneTest extends PHPUnit_Framework_TestCase
 {
-    private $_userPhoneController = null;
-
     /**
      * @before
      */
