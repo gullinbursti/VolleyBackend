@@ -17,7 +17,6 @@ class BIM_Controller_UserPhoneTest extends PHPUnit_Framework_TestCase
      * @after
      */
     protected function tearDown() {
-        $_userPhoneController = null;
     }
 
     /**
@@ -28,7 +27,7 @@ class BIM_Controller_UserPhoneTest extends PHPUnit_Framework_TestCase
         $userId = 921384723;
         $phone = '15555555555';
         $GLOBALS['_POST'] = array( 'userID' => $userId, 'phone' => $phone );
-        $controller = $this->getUserPhoneController();
+        $controller = $this->getNewUserPhoneController();
         $observer = $controller->getUserPhoneApp();
         $observer->expects($this->once())
                 ->method('updatePhone')
@@ -46,7 +45,7 @@ class BIM_Controller_UserPhoneTest extends PHPUnit_Framework_TestCase
         $userId = 921384723;
         $pin = 'abcd';
         $GLOBALS['_POST'] = array( 'userID' => $userId, 'pin' => $pin );
-        $controller = $this->getUserPhoneController();
+        $controller = $this->getNewUserPhoneController();
         $observer = $controller->getUserPhoneApp();
         $observer->expects($this->once())
                 ->method('validatePhone')
@@ -63,7 +62,7 @@ class BIM_Controller_UserPhoneTest extends PHPUnit_Framework_TestCase
     public function updatePhone_invalid_null( $post ) {
         // Arrange
         $GLOBALS['_POST'] = $post;
-        $controller = $this->getUserPhoneController();
+        $controller = $this->getNewUserPhoneController();
 
         // Act
         $response = $controller->updatePhone();
@@ -95,7 +94,7 @@ class BIM_Controller_UserPhoneTest extends PHPUnit_Framework_TestCase
     public function validatePhone_invalid_null( $post ) {
         // Arrange
         $GLOBALS['_POST'] = $post;
-        $controller = $this->getUserPhoneController();
+        $controller = $this->getNewUserPhoneController();
 
         // Act
         $response = $controller->validatePhone();
@@ -120,14 +119,11 @@ class BIM_Controller_UserPhoneTest extends PHPUnit_Framework_TestCase
         );
     }
 
-    protected function getUserPhoneController() {
-        if ( is_null($this->_userPhoneController) ) {
-            $controller = new BIM_Controller_UserPhone();
-            $appStub = $this->getMock( 'BIM_App_UserPhone' );
-            $controller->setUserPhoneApp( $appStub );
-            $this->_userPhoneController = $controller;
-        }
-        return $this->_userPhoneController;
+    protected function getNewUserPhoneController() {
+        $controller = new BIM_Controller_UserPhone();
+        $appStub = $this->getMock( 'BIM_App_UserPhone' );
+        $controller->setUserPhoneApp( $appStub );
+        return $controller;
     }
 
     protected function clearHttpRequest() {
