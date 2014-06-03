@@ -6,6 +6,7 @@ class BIM_App_UserPhone extends BIM_App_Base {
 
     CONST VERIFY_CODE_LENGTH = 4;
     CONST VERIFY_CODE_CHARS = '0123456789';
+    CONST VERIFY_COUNT_DOWN = 5;
 
     private $_userPhoneDao = null;
 
@@ -29,7 +30,7 @@ class BIM_App_UserPhone extends BIM_App_Base {
         //----
         $phoneNumberEnc = BIM_Utils::blowfishEncrypt( $phone );
         $verifyCode = $this->generateVerifyCode();
-        $verifyCountDown = 5;
+        $verifyCountDown = self::VERIFY_COUNT_DOWN;
 
         // TODO - Call Nexmo
 
