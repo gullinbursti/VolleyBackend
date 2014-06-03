@@ -128,6 +128,27 @@ class BIM_DAO_Mysql_UserPhoneTest extends PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function readExistingByUserId_existent_object()
+    {
+        // Arrange
+        $dao = $this->getUserPhoneDao();
+        $phone = self::existentUserPhone();
+        $userId = $phone->userId;
+        $id = $this->_existentUserPhoneId;
+
+        // Act
+        $entry = $dao->readExistingByUserId( $userId );
+
+        // Assert
+        assertThat( $entry, is(not(nullValue())) );
+        assertThat( $entry->id, is(equalTo($id)) );
+        assertThat( $entry->user_id, is(equalTo($phone->userId)) );
+        assertThat( $entry->phone_number_enc, is(equalTo($phone->phoneNumberEnc)) );
+    }
+
+    /**
+     * @test
+     */
     public function readById_nonExistent_null()
     {
         // Arrange

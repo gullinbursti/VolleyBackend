@@ -35,7 +35,7 @@ class BIM_App_UserPhone extends BIM_App_Base {
         // TODO - Call Nexmo
 
         $dao = $this->getUserPhoneDao();
-        $userPhone = $dao->readByUserId( $userId );
+        $userPhone = $dao->readExistingByUserId( $userId );
         if ( is_null($userPhone) ) {
             // TODO - error check
             $dao->create( $userId, $phoneNumberEnc, $verifyCode,

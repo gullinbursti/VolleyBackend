@@ -135,7 +135,7 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         $appMock = $this->getNewUserPhoneApp();
         $daoMock = $appMock->getUserPhoneDao();
         $daoMock->expects( $this->once() )
-            ->method( 'readByUserId' )
+            ->method( 'readExistingByUserId' )
             ->with( $this->equalTo($userId) )
             ->will( $this->returnValue(null) );
         $daoMock->expects( $this->once() )
@@ -168,7 +168,7 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         $appMock = $this->getNewUserPhoneApp();
         $daoMock = $appMock->getUserPhoneDao();
         $daoMock->expects( $this->once() )
-            ->method( 'readByUserId' )
+            ->method( 'readExistingByUserId' )
             ->with( $this->equalTo($userId) )
             ->will( $this->returnValue($daoReadResponse) );
         $daoMock->expects( $this->once() )

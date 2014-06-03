@@ -41,16 +41,19 @@ class BIM_DAO_Mysql_UserPhone extends BIM_DAO_Mysql{
         return $data;
     }
 
-    public function readByUserId( $userId ) {
-        throw new BadFunctionCallException( "readByUserId() not implemented." );
-//        $query = "SELECT * FROM `hotornot-dev`.tblUserPhones WHERE id = ?";
-//        $params = array( $id );
-//        $stmt = $this->prepareAndExecute( $query, $params );
-//        $raw_data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
-//        $data = isset($raw_data[0])
-//                ? $raw_data[0]
-//                : null;
-//        return $data;
+    public function readExistingByUserId( $userId ) {
+        $query = "
+            SELECT
+                id, user_id, phone_number_enc
+            FROM `hotornot-dev`.tblUserPhones WHERE user_id = ?
+            ";
+        $params = array( $userId );
+        $stmt = $this->prepareAndExecute( $query, $params );
+        $raw_data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+        $data = isset($raw_data[0])
+                ? $raw_data[0]
+                : null;
+        return $data;
     }
 
     public function updateNewPhone( $phoneId, $userId, $phoneNumberEnc, $verifyCode,
