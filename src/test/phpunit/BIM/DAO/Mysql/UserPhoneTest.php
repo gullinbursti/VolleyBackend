@@ -116,16 +116,39 @@ class BIM_DAO_Mysql_UserPhoneTest extends PHPUnit_Framework_TestCase
         // TODO - Add code to inc counters, and thinsg
 
         // Act
-        $dao->updateNewPhone( $id, $newPhone->userId, $newPhone->phoneNumberEnc,
-                $newPhone->verifyCode, $newPhone->verifyCountDown);
+        $count = $dao->updateNewPhone( $id, $newPhone->userId,
+                $newPhone->phoneNumberEnc, $newPhone->verifyCode,
+                $newPhone->verifyCountDown);
         $newEntry = $dao->readById( $id );
 
         // Assert
+        assertThat( $count, is(equalTo(1)) );
         assertThat( $newEntry->id, is(equalTo($id)) );
         assertThat( $newEntry->user_id, is(equalTo($newPhone->userId)) );
         assertThat( $newEntry->phone_number_enc, is(equalTo($newPhone->phoneNumberEnc)) );
         assertThat( $newEntry->verify_code, is(equalTo($newPhone->verifyCode)) );
         assertThat( $newEntry->verify_count_down, is(equalTo($newPhone->verifyCountDown)) );
+    }
+
+    /**
+     * @test
+     */
+    public function updateNewPhone_nonexistent_zeroCount()
+    {
+        // Arrange
+        //   Using nonexistentUserPhone to modify existentUserPhone.
+        $dao = $this->getUserPhoneDao();
+        $newPhone = self::nonexistentUserPhone();
+        $id = $this->_existentUserPhoneId;
+        $dao->deleteById( $id );
+
+        // Act
+        $count = $dao->updateNewPhone( $id, $newPhone->userId,
+                $newPhone->phoneNumberEnc, $newPhone->verifyCode,
+                $newPhone->verifyCountDown);
+
+        // Assert
+        assertThat( $count, is(equalTo(0)) );
     }
 
     /**

@@ -89,7 +89,4 @@ class BIM_DAO_Mysql_UserPhone extends BIM_DAO_Mysql{
         $this->prepareAndExecute( $query, $params );
         return $this->rowCount;
     }
-
-
-
 }
