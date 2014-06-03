@@ -22,7 +22,7 @@ class BIM_App_UserPhone extends BIM_App_Base {
             return false;
         }
 
-        // TODO: Add check to see if number is registered by another user
+        // TODO - Add check to see if number is registered by another user
 
         //----
         // Process
@@ -30,16 +30,22 @@ class BIM_App_UserPhone extends BIM_App_Base {
         $phoneNumberEnc = BIM_Utils::blowfishEncrypt( $phone );
         $verifyCode = $this->generateVerifyCode();
         $verifyCountDown = 5;
+
+        // TODO - Call Nexmo
+
         $dao = $this->getUserPhoneDao();
         $userPhone = $dao->readByUserId( $userId );
         if ( is_null($userPhone) ) {
+            // TODO - error check
             $dao->create( $userId, $phoneNumberEnc, $verifyCode,
                     $verifyCountDown );
         } else {
             $phoneId = $userPhone->id;
+            // TODO - error check
             $dao->updateNewPhone( $phoneId, $userId, $phoneNumberEnc, $verifyCode,
                     $verifyCountDown );
         }
+
 
         return true;
     }
