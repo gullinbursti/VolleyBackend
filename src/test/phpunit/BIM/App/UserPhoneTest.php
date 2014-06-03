@@ -4,6 +4,9 @@ require_once 'Hamcrest.php';
 
 class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
 {
+    //-------------------------------------------------------------------------
+    // Unit test fixtures
+    //-------------------------------------------------------------------------
     /**
      * @before
      */
@@ -52,6 +55,9 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
 //        $controller->validatePhone();
 //    }
 
+    //-------------------------------------------------------------------------
+    // createOrUpdatePhone()
+    //-------------------------------------------------------------------------
     /**
      * @test
      * @dataProvider createOrUpdatePhoneInvalidData
@@ -191,6 +197,9 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
     }
 
 
+    //-------------------------------------------------------------------------
+    // validatePhone()
+    //-------------------------------------------------------------------------
     /**
      * @test
      */
@@ -315,10 +324,9 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         $app->setNexmoTwoFactorAuth( $nexmoStub );
     }
 
-
-
-
-
+    //-------------------------------------------------------------------------
+    // generateVerifyCode()
+    //-------------------------------------------------------------------------
     /**
      * @test
      */
@@ -369,6 +377,9 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         assertThat( $appMock->generateVerifyCode(), is(typeOf('string')) );
     }
 
+    //-------------------------------------------------------------------------
+    // Unit test helpers
+    //-------------------------------------------------------------------------
     protected function getNewUserPhoneApp() {
         $appMock = $this->getMock( 'BIM_App_UserPhone', array('userExists') );
 
