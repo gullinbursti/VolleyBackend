@@ -138,7 +138,7 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         // Arrange
         $userId = 108655;
         $phone = '15025550172';
-        $appMock = $this->getNewUserPhoneApp( $userId );
+        $appMock = $this->getNewUserPhoneApp( true );
         $daoMock = $appMock->getUserPhoneDao();
         $daoMock->expects( $this->once() )
             ->method( 'readExistingByUserId' )
@@ -171,7 +171,7 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         $phone = '16515550125';
         $phoneId = 96710;
         $daoReadResponse = (object) array( 'id' => $phoneId );
-        $appMock = $this->getNewUserPhoneApp( $userId );
+        $appMock = $this->getNewUserPhoneApp( true );
         $daoMock = $appMock->getUserPhoneDao();
         $daoMock->expects( $this->once() )
             ->method( 'readExistingByUserId' )
@@ -413,14 +413,18 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
             $appMock = $this->getMock( 'BIM_App_UserPhone', $whatToStub );
 
             if ( is_null( $userExists ) ) {
+                // userExists() calls DB, so always block!!!
                 $appMock->expects($this->any())
                     ->method('userExists')
                     ->will($this->throwException(new BadFunctionCallException(
                             "userExists() blocked for unit testing.")));
-            } else {
+            } else if ( is_bool($userExists) ) {
                 $appMock->expects($this->any())
                     ->method('userExists')
                     ->will($this->returnValue($userExists));
+            } else {
+                throw new InvalidArgumentException(
+                    "'userExists' must be null, or boolean." );
             }
 
             if ( !is_null($fakeGenerateVerifyCode) ) {
