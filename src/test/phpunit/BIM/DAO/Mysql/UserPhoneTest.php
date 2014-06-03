@@ -106,6 +106,31 @@ class BIM_DAO_Mysql_UserPhoneTest extends PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function updateNewPhone_valid_updated()
+    {
+        // Arrange
+        //   Using nonexistentUserPhone to modify existentUserPhone.
+        $dao = $this->getUserPhoneDao();
+        $newPhone = self::nonexistentUserPhone();
+        $id = $this->_existentUserPhoneId;
+        // TODO - Add code to inc counters, and thinsg
+
+        // Act
+        $dao->updateNewPhone( $id, $newPhone->userId, $newPhone->phoneNumberEnc,
+                $newPhone->verifyCode, $newPhone->verifyCountDown);
+        $newEntry = $dao->readById( $id );
+
+        // Assert
+        assertThat( $newEntry->id, is(equalTo($id)) );
+        assertThat( $newEntry->user_id, is(equalTo($newPhone->userId)) );
+        assertThat( $newEntry->phone_number_enc, is(equalTo($newPhone->phoneNumberEnc)) );
+        assertThat( $newEntry->verify_code, is(equalTo($newPhone->verifyCode)) );
+        assertThat( $newEntry->verify_count_down, is(equalTo($newPhone->verifyCountDown)) );
+    }
+
+    /**
+     * @test
+     */
     public function readById_existent_object()
     {
         // Arrange
