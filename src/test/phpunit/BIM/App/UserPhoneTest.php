@@ -187,11 +187,6 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
     }
 
 
-
-
-
-
-
     /**
      * @test
      */
@@ -259,6 +254,39 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         // Act & Assert
         $app->setUserPhoneDao( $daoStub );
         $app->setUserPhoneDao( $daoStub );
+    }
+
+    /**
+     * @test
+     */
+    public function generateVerifyCode_none_correctLength() {
+        // Arrange
+        $appMock = $this->getNewUserPhoneApp();
+        $length = BIM_App_UserPhone::VERIFY_CODE_LENGTH;
+
+        // Act & assert - get a bit of a large sample
+        assertThat( strlen($appMock->generateVerifyCode()), is(equalTo($length)) );
+        assertThat( strlen($appMock->generateVerifyCode()), is(equalTo($length)) );
+        assertThat( strlen($appMock->generateVerifyCode()), is(equalTo($length)) );
+        assertThat( strlen($appMock->generateVerifyCode()), is(equalTo($length)) );
+        assertThat( strlen($appMock->generateVerifyCode()), is(equalTo($length)) );
+    }
+
+    /**
+     * @test
+     */
+    public function generateVerifyCode_none_correctChars() {
+        // Arrange
+        $appMock = $this->getNewUserPhoneApp();
+        $chars = BIM_App_UserPhone::VERIFY_CODE_CHARS;
+        $regx = "/^[$chars]+$/";
+
+        // Act & assert - get a bit of a large sample
+        assertThat( $appMock->generateVerifyCode(), matchesPattern($regx) );
+        assertThat( $appMock->generateVerifyCode(), matchesPattern($regx) );
+        assertThat( $appMock->generateVerifyCode(), matchesPattern($regx) );
+        assertThat( $appMock->generateVerifyCode(), matchesPattern($regx) );
+        assertThat( $appMock->generateVerifyCode(), matchesPattern($regx) );
     }
 
     protected function getNewUserPhoneApp() {

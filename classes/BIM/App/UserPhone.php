@@ -4,6 +4,9 @@ require_once 'BIM/App/Base.php';
 
 class BIM_App_UserPhone extends BIM_App_Base {
 
+    CONST VERIFY_CODE_LENGTH = 4;
+    CONST VERIFY_CODE_CHARS = '0123456789';
+
     private $_userPhoneDao = null;
 
     public function createOrUpdatePhone( $userId, $phone ) {
@@ -25,9 +28,8 @@ class BIM_App_UserPhone extends BIM_App_Base {
         // Process
         //----
         $phoneNumberEnc = BIM_Utils::blowfishEncrypt( $phone );
-        $verifyCode = "TESTING";
+        $verifyCode = $this->generateVerifyCode();
         $verifyCountDown = 5;
-
         $dao = $this->getUserPhoneDao();
         $userPhone = $dao->readByUserId( $userId );
         if ( is_null($userPhone) ) {
@@ -42,8 +44,6 @@ class BIM_App_UserPhone extends BIM_App_Base {
         return true;
     }
 
-
-
     public function validatePhone( $userId, $pin ) {
         // Validation
         if ( empty($userId) || empty($pin) ) {
@@ -55,10 +55,23 @@ class BIM_App_UserPhone extends BIM_App_Base {
             return false;
         }
 
-
         return true;
     }
 
+    /**
+     * Thank you:
+     *   - http://stackoverflow.com/questions/4356289/php-random-string-generator
+     */
+    public function generateVerifyCode() {
+        $length = self::VERIFY_CODE_LENGTH;
+        $characters = self::VERIFY_CODE_CHARS;
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, strlen($characters) - 1)];
+        }
+
+        return $randomString;
+    }
 
     /**
      * Static call to BIM_Model_User::get isolated to allow stubbing in
