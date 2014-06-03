@@ -29,10 +29,16 @@ class BIM_App_UserPhone extends BIM_App_Base {
         //----
         // Process
         //----
+        // Setup
         $phoneNumberEnc = BIM_Utils::blowfishEncrypt( $phone );
         $verifyCode = $this->generateVerifyCode();
         $verifyCountDown = self::VERIFY_COUNT_DOWN;
 
+        // Call Nexmo
+        $nexmoAuth = $this->getNexmoTwoFactorAuth();
+        $nexmoAuth->sendPin($phone, $verifyCode );
+
+        // Save data
         $dao = $this->getUserPhoneDao();
         $userPhone = $dao->readExistingByUserId( $userId );
         if ( is_null($userPhone) ) {
@@ -45,9 +51,6 @@ class BIM_App_UserPhone extends BIM_App_Base {
             $dao->updateNewPhone( $phoneId, $userId, $phoneNumberEnc, $verifyCode,
                     $verifyCountDown );
         }
-
-        $nexmoAuth = $this->getNexmoTwoFactorAuth();
-        $nexmoAuth->sendPin($phone, $verifyCode );
 
         return true;
     }
