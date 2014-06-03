@@ -196,6 +196,26 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         assertThat( $result, is(equalTo(true)) );
     }
 
+    /**
+     * @test
+     */
+    public function createOrUpdatePhone_allValid_callsNexmo()
+    {
+        // Arrange
+        $userId = 411005;
+        $phone = '18505550114';
+        $pin = 'KU9LBS1LVA';
+
+        $app = $this->getNewUserPhoneApp( true, $pin );
+        $nexmoStub = $app->getNexmoTwoFactorAuth();
+        $nexmoStub->expects($this->once())
+                ->method('sendPin')
+                ->with( $this->equalTo($phone), $this->equalTo($pin) )
+                ->will($this->returnValue(true));
+
+        // Act & assert
+        $app->createOrUpdatePhone( $userId, $phone );
+    }
 
     //-------------------------------------------------------------------------
     // validatePhone()
@@ -380,20 +400,47 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
     //-------------------------------------------------------------------------
     // Unit test helpers
     //-------------------------------------------------------------------------
-    protected function getNewUserPhoneApp() {
-        $appMock = $this->getMock( 'BIM_App_UserPhone', array('userExists') );
+    protected function getNewUserPhoneApp( $userExists = null,
+            $fakeGenerateVerifyCode = null ) {
+        $whatToStub = array();
+        if ( !is_null($userExists) ) {
+            $whatToStub[] = 'userExists';
+        }
 
-        // All users exist!
-        $appMock->expects($this->any())
-                ->method('userExists')
-                ->will($this->returnValue(true));
+        if ( !is_null($fakeGenerateVerifyCode) ) {
+            $whatToStub[] = 'generateVerifyCode';
+        }
+
+
+        if ( !empty($whatToStub) ) {
+            $appMock = $this->getMock( 'BIM_App_UserPhone', $whatToStub );
+
+            if ( !is_null( $userExists ) ) {
+                $appMock->expects($this->any())
+                    ->method('userExists')
+                    ->will($this->returnValue($userExists));
+            }
+
+            if ( !is_null($fakeGenerateVerifyCode) ) {
+                $appMock->expects($this->any())
+                    ->method('generateVerifyCode')
+                    ->will($this->returnValue($fakeGenerateVerifyCode));
+            }
+        } else {
+            $appMock = new BIM_App_UserPhone();
+        }
+
 
         // Fake the DB connection
         $daoStub = $this->getMockBuilder( 'BIM_DAO_Mysql_UserPhone' )
                 ->disableOriginalConstructor()
                 ->getMock();
-
         $appMock->setUserPhoneDao( $daoStub );
+
+        // Fake Nexmo connection
+        $nexmoStub = $this->getMock( 'BIM_Integration_Nexmo_TwoFactorAuth' );
+        $appMock->setNexmoTwoFactorAuth( $nexmoStub );
+
         return $appMock;
     }
 }

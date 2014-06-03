@@ -33,8 +33,6 @@ class BIM_App_UserPhone extends BIM_App_Base {
         $verifyCode = $this->generateVerifyCode();
         $verifyCountDown = self::VERIFY_COUNT_DOWN;
 
-        // TODO - Call Nexmo
-
         $dao = $this->getUserPhoneDao();
         $userPhone = $dao->readExistingByUserId( $userId );
         if ( is_null($userPhone) ) {
@@ -48,6 +46,8 @@ class BIM_App_UserPhone extends BIM_App_Base {
                     $verifyCountDown );
         }
 
+        $nexmoAuth = $this->getNexmoTwoFactorAuth();
+        $nexmoAuth->sendPin($phone, $verifyCode );
 
         return true;
     }
