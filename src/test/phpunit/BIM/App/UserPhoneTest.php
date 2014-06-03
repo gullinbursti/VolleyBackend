@@ -211,6 +211,9 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         assertThat( $result, is(equalTo(false)) );
     }
 
+    //-------------------------------------------------------------------------
+    // getUserPhoneDao() & setUserPhoneDao
+    //-------------------------------------------------------------------------
     /**
      * @test
      */
@@ -259,6 +262,62 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         $app->setUserPhoneDao( $daoStub );
         $app->setUserPhoneDao( $daoStub );
     }
+
+    //-------------------------------------------------------------------------
+    // getNexmoTwoFactorAuth() & setNexmoTwoFactorAuth
+    //-------------------------------------------------------------------------
+    /**
+     * @test
+     */
+    public function getNexmoTwoFactorAuth_nothing_lazyLoads() {
+        // Arrange
+        $app = new BIM_App_UserPhone();
+
+        // Act
+        $nexmo = $app->getNexmoTwoFactorAuth();
+
+        // Assert
+        assertThat( $nexmo, is(not(nullValue())) );
+        assertThat( $nexmo, is(anInstanceOf('BIM_Integration_Nexmo_TwoFactorAuth')) );
+    }
+
+    /**
+     * @test
+     */
+    public function getNexmoTwoFactorAuth_setAll_identical() {
+        // Arrange
+        $app = new BIM_App_UserPhone();
+        $nexmoStub = $this->getMockBuilder( 'BIM_Integration_Nexmo_TwoFactorAuth' )
+                ->disableOriginalConstructor()
+                ->getMock();
+
+        // Act
+        $app->setNexmoTwoFactorAuth( $nexmoStub );
+        $nexmo = $app->getNexmoTwoFactorAuth();
+
+        // Assert
+        assertThat( $nexmo, is(identicalTo($nexmoStub)) );
+    }
+
+    /**
+     * @test
+     * @expectedException UnexpectedValueException
+     */
+    public function setNexmoTwoFactorAuth_setTwice_exception() {
+        // Arrange
+        $app = new BIM_App_UserPhone();
+        $nexmoStub = $this->getMockBuilder( 'BIM_Integration_Nexmo_TwoFactorAuth' )
+                ->disableOriginalConstructor()
+                ->getMock();
+
+        // Act & Assert
+        $app->setNexmoTwoFactorAuth( $nexmoStub );
+        $app->setNexmoTwoFactorAuth( $nexmoStub );
+    }
+
+
+
+
 
     /**
      * @test

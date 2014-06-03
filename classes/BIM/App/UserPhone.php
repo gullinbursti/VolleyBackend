@@ -9,6 +9,7 @@ class BIM_App_UserPhone extends BIM_App_Base {
     CONST VERIFY_COUNT_DOWN = 5;
 
     private $_userPhoneDao = null;
+    private $_nexmoTwoFactorAuth = null;
 
     public function createOrUpdatePhone( $userId, $phone ) {
         //----
@@ -105,6 +106,24 @@ class BIM_App_UserPhone extends BIM_App_Base {
         }
 
         return $this->_userPhoneDao;
+    }
+
+    public function setNexmoTwoFactorAuth( $nexmoTwoFactorAuth ) {
+        if ( is_null($this->_nexmoTwoFactorAuth) ) {
+            $this->_nexmoTwoFactorAuth = $nexmoTwoFactorAuth;
+        } else {
+            throw new UnexpectedValueException(
+                    "'nexmoTwoFactorAuth' can only be set once." );
+        }
+    }
+
+    public function getNexmoTwoFactorAuth() {
+        if ( is_null($this->_nexmoTwoFactorAuth) ) {
+            $nexmo = new BIM_Integration_Nexmo_TwoFactorAuth( BIM_Config::nexmo() );
+            $this->setNexmoTwoFactorAuth( $nexmo );
+        }
+
+        return $this->_nexmoTwoFactorAuth;
     }
 }
 
