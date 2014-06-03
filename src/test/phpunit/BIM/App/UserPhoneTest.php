@@ -293,6 +293,23 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         assertThat( $appMock->generateVerifyCode(), matchesPattern($regx) );
     }
 
+    /**
+     * @test
+     */
+    public function generateVerifyCode_none_isString() {
+        // Arrange
+        $appMock = $this->getNewUserPhoneApp();
+        $chars = BIM_App_UserPhone::VERIFY_CODE_CHARS;
+        $regx = "/^[$chars]+$/";
+
+        // Act & assert - get a bit of a large sample
+        assertThat( $appMock->generateVerifyCode(), is(typeOf('string')) );
+        assertThat( $appMock->generateVerifyCode(), is(typeOf('string')) );
+        assertThat( $appMock->generateVerifyCode(), is(typeOf('string')) );
+        assertThat( $appMock->generateVerifyCode(), is(typeOf('string')) );
+        assertThat( $appMock->generateVerifyCode(), is(typeOf('string')) );
+    }
+
     protected function getNewUserPhoneApp() {
         $appMock = $this->getMock( 'BIM_App_UserPhone', array('userExists') );
 
