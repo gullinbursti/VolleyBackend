@@ -53,6 +53,12 @@ class BIM_DAO_Mysql_UserPhone extends BIM_DAO_Mysql{
 //        return $data;
     }
 
+    public function updateNewPhone( $phoneId, $userId, $phoneNumberEnc, $verifyCode,
+            $verifyCountDown) {
+        throw new BadFunctionCallException( "updateNewPhone() not implemented." );
+    }
+
+
 
     public function deleteByPhoneNumberEnc( $phoneNumberEnc ) {
         $query = "DELETE FROM `hotornot-dev`.tblUserPhones WHERE phone_number_enc = ?";

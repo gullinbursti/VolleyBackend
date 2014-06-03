@@ -152,6 +152,40 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         assertThat( $result, is(equalTo(true)) );
     }
 
+    /**
+     * @test
+     */
+    public function createOrUpdatePhone_existingUserNewPhone_true() {
+        // Arrange
+        $userId = 3481;
+        $phone = '16515550125';
+        $phoneId = 96710;
+        $daoReadResponse = (object) array( 'id' => $phoneId );
+        $appMock = $this->getNewUserPhoneApp();
+        $daoMock = $appMock->getUserPhoneDao();
+        $daoMock->expects( $this->once() )
+            ->method( 'readByUserId' )
+            ->with( $this->equalTo($userId) )
+            ->will( $this->returnValue($daoReadResponse) );
+        $daoMock->expects( $this->once() )
+            ->method( 'updateNewPhone' )
+            ->with( $this->equalTo($phoneId),
+                    $this->equalTo($userId),
+                    $this->logicalAnd($this->logicalNot($this->equalTo($phone)),
+                        $this->matchesRegularExpression("/^\w+==$/")),
+                    // TODO: More constraints
+                    $this->anything(),
+                    // TODO: More constraints
+                    $this->anything() )
+            ->will($this->returnValue(true));
+
+        // Act & assert (expects)
+        $result = $appMock->createOrUpdatePhone( $userId, $phone );
+
+        // Assert
+        assertThat( $result, is(equalTo(true)) );
+    }
+
 
 
 

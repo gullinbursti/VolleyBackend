@@ -19,6 +19,8 @@ class BIM_App_UserPhone extends BIM_App_Base {
             return false;
         }
 
+        // TODO: Add check to see if number is registered by another user
+
         //----
         // Process
         //----
@@ -26,20 +28,21 @@ class BIM_App_UserPhone extends BIM_App_Base {
         $verifyCode = "TESTING";
         $verifyCountDown = 5;
 
-        // TODO: Add check to see if number is registered by another user
-
         $dao = $this->getUserPhoneDao();
         $userPhone = $dao->readByUserId( $userId );
         if ( is_null($userPhone) ) {
             $dao->create( $userId, $phoneNumberEnc, $verifyCode,
                     $verifyCountDown );
         } else {
-            // TODO
+            $phoneId = $userPhone->id;
+            $dao->updateNewPhone( $phoneId, $userId, $phoneNumberEnc, $verifyCode,
+                    $verifyCountDown );
         }
-
 
         return true;
     }
+
+
 
     public function validatePhone( $userId, $pin ) {
         // Validation
