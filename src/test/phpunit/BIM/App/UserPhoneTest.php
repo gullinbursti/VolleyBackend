@@ -138,7 +138,7 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         // Arrange
         $userId = 108655;
         $phone = '15025550172';
-        $appMock = $this->getNewUserPhoneApp();
+        $appMock = $this->getNewUserPhoneApp( $userId );
         $daoMock = $appMock->getUserPhoneDao();
         $daoMock->expects( $this->once() )
             ->method( 'readExistingByUserId' )
@@ -171,7 +171,7 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         $phone = '16515550125';
         $phoneId = 96710;
         $daoReadResponse = (object) array( 'id' => $phoneId );
-        $appMock = $this->getNewUserPhoneApp();
+        $appMock = $this->getNewUserPhoneApp( $userId );
         $daoMock = $appMock->getUserPhoneDao();
         $daoMock->expects( $this->once() )
             ->method( 'readExistingByUserId' )
@@ -402,10 +402,7 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
     //-------------------------------------------------------------------------
     protected function getNewUserPhoneApp( $userExists = null,
             $fakeGenerateVerifyCode = null ) {
-        $whatToStub = array();
-        if ( !is_null($userExists) ) {
-            $whatToStub[] = 'userExists';
-        }
+        $whatToStub = array( 'userExists' );
 
         if ( !is_null($fakeGenerateVerifyCode) ) {
             $whatToStub[] = 'generateVerifyCode';
@@ -415,7 +412,12 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         if ( !empty($whatToStub) ) {
             $appMock = $this->getMock( 'BIM_App_UserPhone', $whatToStub );
 
-            if ( !is_null( $userExists ) ) {
+            if ( is_null( $userExists ) ) {
+                $appMock->expects($this->any())
+                    ->method('userExists')
+                    ->will($this->throwException(new BadFunctionCallException(
+                            "userExists() blocked for unit testing.")));
+            } else {
                 $appMock->expects($this->any())
                     ->method('userExists')
                     ->will($this->returnValue($userExists));
