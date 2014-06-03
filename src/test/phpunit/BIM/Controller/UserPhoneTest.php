@@ -28,7 +28,7 @@ class BIM_Controller_UserPhoneTest extends PHPUnit_Framework_TestCase
         $controller = $this->getNewUserPhoneController();
         $observer = $controller->getUserPhoneApp();
         $observer->expects($this->once())
-                ->method('updatePhone')
+                ->method('createOrUpdatePhone')
                 ->with($this->equalTo($userId), $this->equalTo($phone));
 
         // Act & assert

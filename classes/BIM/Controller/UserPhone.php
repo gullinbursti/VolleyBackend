@@ -16,7 +16,7 @@ class BIM_Controller_UserPhone extends BIM_Controller_Base {
 
         // Process
         $app = $this->getUserPhoneApp();
-        $app->updatePhone( $userId, $phone );
+        $app->createOrUpdatePhone( $userId, $phone );
 
         return true;
     }

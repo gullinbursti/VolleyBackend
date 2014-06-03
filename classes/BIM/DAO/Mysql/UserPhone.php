@@ -41,6 +41,18 @@ class BIM_DAO_Mysql_UserPhone extends BIM_DAO_Mysql{
         return $data;
     }
 
+    public function readByUserId( $userId ) {
+        throw new BadFunctionCallException( "readByUserId() not implemented." );
+//        $query = "SELECT * FROM `hotornot-dev`.tblUserPhones WHERE id = ?";
+//        $params = array( $id );
+//        $stmt = $this->prepareAndExecute( $query, $params );
+//        $raw_data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+//        $data = isset($raw_data[0])
+//                ? $raw_data[0]
+//                : null;
+//        return $data;
+    }
+
 
     public function deleteByPhoneNumberEnc( $phoneNumberEnc ) {
         $query = "DELETE FROM `hotornot-dev`.tblUserPhones WHERE phone_number_enc = ?";

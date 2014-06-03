@@ -19,7 +19,7 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
 //    /**
 //     * @test
 //     */
-//    public function updatePhone_valid_callsUserPhoneApp() {
+//    public function createOrUpdatePhone_valid_callsUserPhoneApp() {
 //        // Arrange
 //        $userId = 921384723;
 //        $phone = '15555555555';
@@ -27,11 +27,11 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
 //        $controller = $this->getNewUserPhoneApp();
 //        $observer = $controller->getUserPhoneApp();
 //        $observer->expects($this->once())
-//                ->method('updatePhone')
+//                ->method('createOrUpdatePhone')
 //                ->with($this->equalTo($userId), $this->equalTo($phone));
 //
 //        // Act & assert
-//        $controller->updatePhone();
+//        $controller->createOrUpdatePhone();
 //    }
 //
 //    /**
@@ -54,18 +54,18 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @dataProvider updatePhoneInvalidData
+     * @dataProvider createOrUpdatePhoneInvalidData
      * @expectedException InvalidArgumentException
      */
-    public function updatePhone_invalid_null( $userId, $phone ) {
+    public function createOrUpdatePhone_invalid_null( $userId, $phone ) {
         // Arrange
         $app = $this->getNewUserPhoneApp();
 
         // Act & assert
-        $response = $app->updatePhone( $userId, $phone );
+        $response = $app->createOrUpdatePhone( $userId, $phone );
     }
 
-    public function updatePhoneInvalidData() {
+    public function createOrUpdatePhoneInvalidData() {
         return array(
             //-----$userId---+$phone
             array( null,      null ),
@@ -107,7 +107,7 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function updatePhone_nonexistantUser_false() {
+    public function createOrUpdatePhone_nonexistantUser_false() {
         // Arrange
         $userId = 83962387;
         $phone = '12025550105';
@@ -118,11 +118,45 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
                 ->will($this->returnValue(false));
 
         // Act
-        $result = $appMock->updatePhone( $userId, $phone );
+        $result = $appMock->createOrUpdatePhone( $userId, $phone );
 
         // Assert
         assertThat( $result, is(equalTo(false)) );
     }
+
+
+    /**
+     * @test
+     */
+    public function createOrUpdatePhone_newUserNewPhone_true() {
+        // Arrange
+        $userId = 108655;
+        $phone = '15025550172';
+        $appMock = $this->getNewUserPhoneApp();
+        $daoMock = $appMock->getUserPhoneDao();
+        $daoMock->expects( $this->once() )
+            ->method( 'create' )
+            ->with( $this->equalTo($userId),
+                    $this->logicalAnd($this->logicalNot($this->equalTo($phone)),
+                        $this->matchesRegularExpression("/^\w+==$/")),
+                    // TODO: More constraints
+                    $this->anything(),
+                    // TODO: More constraints
+                    $this->anything() )
+            ->will($this->returnValue(111));
+
+        // Act & assert (expects)
+        $result = $appMock->createOrUpdatePhone( $userId, $phone );
+
+        // Assert
+        assertThat( $result, is(equalTo(true)) );
+    }
+
+
+
+
+
+
 
     /**
      * @test
@@ -143,13 +177,6 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         // Assert
         assertThat( $result, is(equalTo(false)) );
     }
-
-
-
-
-
-
-
 
     /**
      * @test
@@ -201,12 +228,20 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
     }
 
     protected function getNewUserPhoneApp() {
-        $app = new BIM_App_UserPhone();
+        $appMock = $this->getMock( 'BIM_App_UserPhone', array('userExists') );
+
+        // All users exist!
+        $appMock->expects($this->any())
+                ->method('userExists')
+                ->will($this->returnValue(true));
+
+        // Fake the DB connection
         $daoStub = $this->getMockBuilder( 'BIM_DAO_Mysql_UserPhone' )
                 ->disableOriginalConstructor()
                 ->getMock();
-        $app->setUserPhoneDao( $daoStub );
-        return $app;
+
+        $appMock->setUserPhoneDao( $daoStub );
+        return $appMock;
     }
 }
 

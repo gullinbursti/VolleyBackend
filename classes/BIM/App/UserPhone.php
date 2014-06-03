@@ -6,8 +6,10 @@ class BIM_App_UserPhone extends BIM_App_Base {
 
     private $_userPhoneDao = null;
 
-    public function updatePhone( $userId, $phone ) {
+    public function createOrUpdatePhone( $userId, $phone ) {
+        //----
         // Validation
+        //----
         if ( empty($userId) || empty($phone) ) {
             throw new InvalidArgumentException(
                     "Both '\$userId', and '\$phone' must be set" );
@@ -15,6 +17,24 @@ class BIM_App_UserPhone extends BIM_App_Base {
 
         if ( !$this->userExists($userId) ) {
             return false;
+        }
+
+        //----
+        // Process
+        //----
+        $phoneNumberEnc = BIM_Utils::blowfishEncrypt( $phone );
+        $verifyCode = "TESTING";
+        $verifyCountDown = 5;
+
+        // TODO: Add check to see if number is registered by another user
+
+        $dao = $this->getUserPhoneDao();
+        $userPhone = $dao->readByUserId( $userId );
+        if ( is_null($userPhone) ) {
+            $dao->create( $userId, $phoneNumberEnc, $verifyCode,
+                    $verifyCountDown );
+        } else {
+            // TODO
         }
 
 
