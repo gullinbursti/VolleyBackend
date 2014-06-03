@@ -119,15 +119,17 @@ class BIM_DAO_Mysql_UserPhoneTest extends PHPUnit_Framework_TestCase
         $count = $dao->updateNewPhone( $id, $newPhone->userId,
                 $newPhone->phoneNumberEnc, $newPhone->verifyCode,
                 $newPhone->verifyCountDown);
-        $newEntry = $dao->readById( $id );
+        $dbEntry = $dao->readById( $id );
 
         // Assert
         assertThat( $count, is(equalTo(1)) );
-        assertThat( $newEntry->id, is(equalTo($id)) );
-        assertThat( $newEntry->user_id, is(equalTo($newPhone->userId)) );
-        assertThat( $newEntry->phone_number_enc, is(equalTo($newPhone->phoneNumberEnc)) );
-        assertThat( $newEntry->verify_code, is(equalTo($newPhone->verifyCode)) );
-        assertThat( $newEntry->verify_count_down, is(equalTo($newPhone->verifyCountDown)) );
+        assertThat( $dbEntry->id, is(equalTo($id)) );
+        assertThat( $dbEntry->user_id, is(equalTo($newPhone->userId)) );
+        assertThat( $dbEntry->phone_number_enc, is(equalTo($newPhone->phoneNumberEnc)) );
+        assertThat( $dbEntry->verify_code, is(equalTo($newPhone->verifyCode)) );
+        assertThat( $dbEntry->verify_count_down, is(equalTo($newPhone->verifyCountDown)) );
+        assertThat( $dbEntry->verified, is(equalTo(0)) );
+        assertThat( $dbEntry->verified_date, is(nullValue()) );
     }
 
     /**

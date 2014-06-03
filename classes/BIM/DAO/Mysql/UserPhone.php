@@ -63,6 +63,8 @@ class BIM_DAO_Mysql_UserPhone extends BIM_DAO_Mysql{
             SET
                 user_id = ?,
                 phone_number_enc =?,
+                verified = 0,
+                verified_date = NULL,
                 verify_code = ?,
                 verify_count_down = ?,
                 updated = NOW()
