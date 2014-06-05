@@ -9,6 +9,7 @@ class BIM_Integration_Nexmo_TwoFactorAuth {
 
     public function sendPin( $phone, $pin )
     {
+        //----
         // Prepare for call
         $endPoint = $this->_config->twoFactorJsonEndpoint;
         $query = array(
@@ -17,7 +18,12 @@ class BIM_Integration_Nexmo_TwoFactorAuth {
             'to' => "$phone",
             'pin' => "$pin"
         );
+
+        // You really want to turn the query into a URL string so that the
+        // HTTP POST Content-Type is application/x-www-form-urlencoded.
+        // Anything else will likely cause problems with Nexmo.
         $queryString = http_build_query( $query );
+
         $curlOptions = array(
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $queryString,
@@ -27,6 +33,7 @@ class BIM_Integration_Nexmo_TwoFactorAuth {
             CURLOPT_FAILONERROR => true,
         );
 
+        //----
         // Make web-service call
         $handle = curl_init( $endPoint );
         curl_setopt_array( $handle, $curlOptions );
@@ -34,10 +41,10 @@ class BIM_Integration_Nexmo_TwoFactorAuth {
         $curlErrorNumber = curl_errno( $handle );
         $curlError = curl_error( $handle );
         curl_close($handle);
-
-        // Post processing
         $nexmoSuccessful = $this->nexmoCallSuccessful( $curlResponse );
 
+        //----
+        // Post processing
         // TODO - Add logging on error
 
         // Return true IFF curl error num is 0, and nexmoSuccessful is true
