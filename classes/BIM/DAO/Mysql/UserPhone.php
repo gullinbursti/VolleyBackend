@@ -56,6 +56,31 @@ class BIM_DAO_Mysql_UserPhone extends BIM_DAO_Mysql{
         return $data;
     }
 
+    public function readVerifyDataByUserId( $userId ) {
+        $query = "
+            SELECT
+                id,
+                user_id,
+                phone_number_enc,
+                verified,
+                verified_date,
+                verify_code,
+                verify_count_down,
+                verify_count_total,
+                verify_last_attempt,
+                updated
+            FROM `hotornot-dev`.tblUserPhones WHERE user_id = ?
+            ";
+        $params = array( $userId );
+        $stmt = $this->prepareAndExecute( $query, $params );
+        $raw_data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+        $data = isset($raw_data[0])
+                ? $raw_data[0]
+                : null;
+        return $data;
+    }
+
+
     public function updateNewPhone( $phoneId, $userId, $phoneNumberEnc,
             $verifyCode, $verifyCountDown) {
         $query = "
@@ -76,6 +101,49 @@ class BIM_DAO_Mysql_UserPhone extends BIM_DAO_Mysql{
 
         $this->prepareAndExecute( $query, $params );
         return $this->rowCount;
+    }
+
+    public function updateVerifyPhonePin( $userId, $phoneNumberEnc, $verifyCode ) {
+        $query = "
+            UPDATE `hotornot-dev`.tblUserPhones
+            SET
+                verified = 1,
+                verified_date = NOW(),
+                verify_code = NULL,
+                verify_last_attempt = NOW(),
+                verify_count_down = verify_count_down - 1,
+                verify_count_total = verify_count_total + 1,
+                updated = NOW()
+            WHERE
+                user_id = ?
+                    AND phone_number_enc = ?
+                    AND verify_code = ?
+                    AND verify_count_down > 0;
+            ";
+
+        $params = array( $userId, $phoneNumberEnc, $verifyCode );
+
+        $this->prepareAndExecute( $query, $params );
+        return $this->rowCount == 1 ? true : false;
+    }
+
+    public function updatePhonePinVerifyFailed( $userId, $phoneNumberEnc ) {
+        $query = "
+            UPDATE `hotornot-dev`.tblUserPhones
+            SET
+                verify_last_attempt = NOW(),
+                verify_count_down = verify_count_down - 1,
+                verify_count_total = verify_count_total + 1,
+                updated = NOW()
+            WHERE
+                user_id = ?
+                    AND phone_number_enc = ?
+                    AND verify_count_down > 0;
+            ";
+
+        $params = array( $userId, $phoneNumberEnc );
+        $this->prepareAndExecute( $query, $params );
+        return $this->rowCount == 1 ? true : false;
     }
 
     public function deleteByPhoneNumberEnc( $phoneNumberEnc ) {
