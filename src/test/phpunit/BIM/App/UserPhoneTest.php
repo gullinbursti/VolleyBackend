@@ -89,24 +89,38 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
      * @dataProvider validatePhoneInvalidData
      * @expectedException InvalidArgumentException
      */
-    public function validatePhone_invalid_null( $userId, $pin ) {
+    public function validatePhone_invalid_null( $userId, $phone, $pin ) {
         // Arrange
         $app = $this->getNewUserPhoneApp();
 
         // Act & assert
-        $response = $app->validatePhone( $userId, $pin );
+        $response = $app->validatePhone( $userId, $phone, $pin );
     }
 
     public function validatePhoneInvalidData() {
         return array(
-            //-----$userId---+$phone
-            array( null,      null ),
-            array( 921384723, null ),
-            array( null,      'abcd' ),
-            array( 921384723, null ),
-            array( null,      'abcd' ),
-            array( 921384723, '' ),
-            array( 0,         'abcd' ),
+            //-----$userId---+$phone---------+$pin
+            array( null,      '15555555555',  null ),
+            array( 921384723, '15555555555',  null ),
+            array( null,      '15555555555',  'abcd' ),
+            array( 921384723, '15555555555',  null ),
+            array( null,      '15555555555',  'abcd' ),
+            array( 921384723, '15555555555',  '' ),
+            array( 0,         '15555555555',  'abcd' ),
+            array( null,      '',             null ),
+            array( 921384723, '',             null ),
+            array( null,      '',             'abcd' ),
+            array( 921384723, '',             null ),
+            array( null,      '',             'abcd' ),
+            array( 921384723, '',             '' ),
+            array( 0,         '',             'abcd' ),
+            array( null,      null,           null ),
+            array( 921384723, null,           null ),
+            array( null,      null,           'abcd' ),
+            array( 921384723, null,           null ),
+            array( null,      null,           'abcd' ),
+            array( 921384723, null,           '' ),
+            array( 0,         null,           'abcd' ),
         );
     }
 
@@ -223,14 +237,15 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function validatePhone_nonexistantUser_false() {
+    public function validatePhone_nonexistantUser_returnsFalse() {
         // Arrange
         $userId = 7820934;
         $phone = '18085550149';
+        $pin = '786F4ZQES5';
         $appMock = $this->getNewUserPhoneApp( false );
 
         // Act
-        $result = $appMock->validatePhone( $userId, $phone );
+        $result = $appMock->validatePhone( $userId, $phone, $pin );
 
         // Assert
         assertThat( $result, is(equalTo(false)) );

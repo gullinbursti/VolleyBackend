@@ -24,16 +24,17 @@ class BIM_Controller_UserPhone extends BIM_Controller_Base {
     public function validatePhone() {
         $input = (object) ($_POST ? $_POST : $_GET);
         $userId = isset($input->userID) ? $input->userID : null;
+        $phone = isset($input->phone) ? $input->phone : null;
         $pin = isset($input->pin) ? $input->pin : null;
 
         // Validation
-        if ( empty($userId) || empty($pin) ) {
+        if ( empty($userId) || empty($phone) || empty($pin) ) {
             return null;
         }
 
         // Process
         $app = $this->getUserPhoneApp();
-        $app->validatePhone( $userId, $pin );
+        $app->validatePhone( $userId, $phone, $pin );
 
         return true;
     }

@@ -36,6 +36,7 @@ class BIM_App_UserPhone extends BIM_App_Base {
 
         // Call Nexmo
         $nexmoAuth = $this->getNexmoTwoFactorAuth();
+        // TODO - error check
         $nexmoAuth->sendPin($phone, $verifyCode );
 
         // Save data
@@ -55,11 +56,11 @@ class BIM_App_UserPhone extends BIM_App_Base {
         return true;
     }
 
-    public function validatePhone( $userId, $pin ) {
+    public function validatePhone( $userId, $phone, $pin ) {
         // Validation
-        if ( empty($userId) || empty($pin) ) {
+        if ( empty($userId) || empty($phone) || empty($pin) ) {
             throw new InvalidArgumentException(
-                    "Both '\$userId', and '\$pin' must be set" );
+                    "Both '\$userId', '\$phone', and '\$pin' must be set" );
         }
 
         if ( !$this->userExists($userId) ) {

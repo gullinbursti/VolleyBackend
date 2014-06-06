@@ -41,13 +41,20 @@ class BIM_Controller_UserPhoneTest extends PHPUnit_Framework_TestCase
     public function validatePhone_valid_callsUserPhoneApp() {
         // Arrange
         $userId = 921384723;
+        $phone = '18085550125';
         $pin = 'abcd';
-        $GLOBALS['_POST'] = array( 'userID' => $userId, 'pin' => $pin );
+        $GLOBALS['_POST'] = array(
+            'userID' => $userId,
+            'phone' => $phone,
+            'pin' => $pin
+        );
         $controller = $this->getNewUserPhoneController();
         $observer = $controller->getUserPhoneApp();
         $observer->expects($this->once())
                 ->method('validatePhone')
-                ->with($this->equalTo($userId), $this->equalTo($pin));
+                ->with($this->equalTo($userId),
+                    $this->equalTo($phone),
+                    $this->equalTo($pin));
 
         // Act & assert
         $controller->validatePhone();
@@ -106,14 +113,26 @@ class BIM_Controller_UserPhoneTest extends PHPUnit_Framework_TestCase
             array(array( )),
             array(array( 'userID' => 921384723 )),
             array(array( 'pin' => 'abcd' )),
-            array(array( 'userID' => 921384723, 'pin' => null )),
-            array(array( 'userID' => null,      'pin' => 'abcd' )),
-            array(array( 'userID' => 921384723, 'pin' => '' )),
-            array(array( 'userID' => 0,         'pin' => 'abcd' )),
+            array(array( 'phone' => '13175550130' )),
+            array(array( 'userID' => 921384723, 'phone' => '16085550106', 'pin' => null )),
+            array(array( 'userID' => null,      'phone' => '16085550106', 'pin' => 'abcd' )),
+            array(array( 'userID' => 921384723, 'phone' => '16085550106', 'pin' => '' )),
+            array(array( 'userID' => 0,         'phone' => '16085550106', 'pin' => 'abcd' )),
+            array(array( 'userID' => 921384723, 'phone' => '', 'pin' => null )),
+            array(array( 'userID' => null,      'phone' => '', 'pin' => 'abcd' )),
+            array(array( 'userID' => 921384723, 'phone' => '', 'pin' => '' )),
+            array(array( 'userID' => 0,         'phone' => '', 'pin' => 'abcd' )),
+            array(array( 'userID' => 921384723, 'phone' => null, 'pin' => null )),
+            array(array( 'userID' => null,      'phone' => null, 'pin' => 'abcd' )),
+            array(array( 'userID' => 921384723, 'phone' => null, 'pin' => '' )),
+            array(array( 'userID' => 0,         'phone' => null, 'pin' => 'abcd' )),
+
             // userId instead of userID
             array(array( 'userId' => 921384723, 'pin' => 'abcd' )),
             // Pin instead of pin
-            array(array( 'userID' => 921384723, 'Pin' => 'abcd' ))
+            array(array( 'userID' => 921384723, 'Pin' => 'abcd' )),
+            // Phone instead of phone
+            array(array( 'userID' => 921384723, 'pin' => 'abcd', 'Phone' => '18435550113' ))
         );
     }
 
