@@ -34,9 +34,9 @@ class BIM_Controller_UserPhone extends BIM_Controller_Base {
 
         // Process
         $app = $this->getUserPhoneApp();
-        $app->validatePhone( $userId, $phone, $pin );
+        $verified = $app->validatePhone( $userId, $phone, $pin );
 
-        return true;
+        return $verified;
     }
 
     public function setUserPhoneApp( $userPhoneApp ) {

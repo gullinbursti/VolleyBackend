@@ -4,6 +4,8 @@ require_once 'Hamcrest.php';
 
 class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
 {
+    const PHONE_ENC_REGEX = '/^[\/\\+\w]+==$/';
+
     //-------------------------------------------------------------------------
     // Unit test fixtures
     //-------------------------------------------------------------------------
@@ -162,7 +164,7 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
             ->method( 'create' )
             ->with( $this->equalTo($userId),
                     $this->logicalAnd($this->logicalNot($this->equalTo($phone)),
-                        $this->matchesRegularExpression("/^\w+==$/")),
+                        $this->matchesRegularExpression(self::PHONE_ENC_REGEX)),
                     // TODO: More constraints
                     $this->anything(),
                     // TODO: More constraints
@@ -196,7 +198,7 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
             ->with( $this->equalTo($phoneId),
                     $this->equalTo($userId),
                     $this->logicalAnd($this->logicalNot($this->equalTo($phone)),
-                        $this->matchesRegularExpression("/^\w+==$/")),
+                        $this->matchesRegularExpression(self::PHONE_ENC_REGEX)),
                     // TODO: More constraints
                     $this->anything(),
                     // TODO: More constraints
@@ -251,8 +253,105 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         assertThat( $result, is(equalTo(false)) );
     }
 
+    /**
+     * Check to make sure parameters fed in are passed.
+     *
+     * @test
+     */
+    public function validatePhone_validPin_validateisPinWithValidParams() {
+        // Arrange
+        $userId = 94346;
+        $phone = '15035550143';
+        $pin = 'SfXcEiwtIu';
+        $appMock = $this->getNewUserPhoneApp( true );
+        $daoMock = $appMock->getUserPhoneDao();
+        $daoMock->expects( $this->once() )
+            ->method( 'updateVerifyPhonePin' )
+            ->with( $this->equalTo($userId),
+                    $this->logicalAnd($this->logicalNot($this->equalTo($phone)),
+                        $this->matchesRegularExpression(self::PHONE_ENC_REGEX)),
+                    $this->equalTo($pin)
+                )
+            ->will($this->returnValue(true));
+
+        // Act & assert
+        $appMock->validatePhone( $userId, $phone, $pin );
+    }
+
+    /**
+     * @test
+     */
+    public function validatePhone_validPin_returnsTrueOnValidation() {
+        // Arrange
+        $userId = 7784118;
+        $phone = '14045550161';
+        $pin = 'rjv14nvzwlc8rr7op';
+        $appMock = $this->getNewUserPhoneApp( true );
+        $daoMock = $appMock->getUserPhoneDao();
+        $daoMock->expects( $this->once() )
+            ->method( 'updateVerifyPhonePin' )
+            ->will($this->returnValue(true));
+
+        // Act
+        $result = $appMock->validatePhone( $userId, $phone, $pin );
+
+        // Assert
+        assertThat( $result, is(equalTo(true)) );
+    }
+
+    /**
+     * @test
+     */
+    public function validatePhone_invalidPin_updatesFailureCounts() {
+        // Arrange
+        $userId = 645830;
+        $phone = '18085550118';
+        $pin = 'pli3u258jcmuzw05q';
+        $appMock = $this->getNewUserPhoneApp( true );
+        $daoMock = $appMock->getUserPhoneDao();
+        $daoMock->expects( $this->once() )
+            ->method( 'updateVerifyPhonePin' )
+            ->will($this->returnValue(false));
+
+        $daoMock->expects( $this->once() )
+            ->method( 'updatePhonePinVerifyFailed' )
+            ->with( $this->equalTo($userId),
+                    $this->logicalAnd($this->logicalNot($this->equalTo($phone)),
+                        $this->matchesRegularExpression(self::PHONE_ENC_REGEX))
+                )
+            ->will($this->returnValue(true));
+
+        // Act & assert
+        $appMock->validatePhone( $userId, $phone, $pin );
+    }
+
+    /**
+     * @test
+     */
+    public function validatePhone_invalidPin_returnsFalse() {
+        // Arrange
+        $userId = 7535295;
+        $phone = '19165550192';
+        $pin = '9occc9q5p3fenxilv';
+        $appMock = $this->getNewUserPhoneApp( true );
+        $daoMock = $appMock->getUserPhoneDao();
+        $daoMock->expects( $this->once() )
+            ->method( 'updateVerifyPhonePin' )
+            ->will($this->returnValue(false));
+
+        $daoMock->expects( $this->once() )
+            ->method( 'updatePhonePinVerifyFailed' )
+            ->will($this->returnValue(true));
+
+        // Act
+        $result = $appMock->validatePhone( $userId, $phone, $pin );
+
+        // Assert
+        assertThat( $result, is(equalTo(false)) );
+    }
+
     //-------------------------------------------------------------------------
-    // getUserPhoneDao() & setUserPhoneDao
+    // getUserPhoneDao() & setUserPhoneDao()
     //-------------------------------------------------------------------------
     /**
      * @test

@@ -67,7 +67,16 @@ class BIM_App_UserPhone extends BIM_App_Base {
             return false;
         }
 
-        return true;
+        // Process
+        $phoneNumberEnc = BIM_Utils::blowfishEncrypt( $phone );
+        $dao = $this->getUserPhoneDao();
+        $verified = $dao->updateVerifyPhonePin( $userId, $phoneNumberEnc, $pin );
+
+        if ( !$verified ) {
+            $dao->updatePhonePinVerifyFailed( $userId, $phoneNumberEnc );
+        }
+
+        return $verified;
     }
 
     /**
