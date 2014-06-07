@@ -310,7 +310,23 @@ class BIM_App_Users extends BIM_App_Base{
             $user = $friendMatches[ $user ];
         }
 
-        return array_values($matches);
+        $finalMatched = array_values($matches);
+        $this->decodeMatchFriends( $finalMatched );
+
+        return $finalMatched;
+    }
+
+    protected function decodeMatchFriends( $friends ) {
+        foreach ( $friends as $friend ) {
+            $phone = $friend->hashed_number;
+
+            $phone = !empty($phone)
+                ?  $phone = BIM_Utils::blowfishDecrypt( $phone )
+                : '';
+
+            $friend->phone = $phone;
+            unset( $friend->hashed_number );
+        }
     }
 
     public function matchFriendsEmail( $params ){
