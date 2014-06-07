@@ -42,7 +42,7 @@ class BIM_Model_Volley{
                 'id' => $volley->creator_id,
                 'img' => $volley->creator_img ? $volley->creator_img : '',
                 'score' => $volley->creator_likes,
-                'subject' => $this->subject,
+                'subjects' => $this->subjects,
             );
             if($this->is_private){
                 $viewed = !empty( $volley->has_viewed ) ? 1 : 0;
@@ -72,7 +72,7 @@ class BIM_Model_Volley{
                     'id' => $challenger->challenger_id,
                     'img' => $challenger->challenger_img ? $challenger->challenger_img : '',
                     'score' => $challenger->likes,
-                    'subject' => $replySubjects,
+                    'subjects' => $replySubjects,
                     'joined' => $joined,
                     'joined_timestamp' => $challenger->joined,
                 );
@@ -160,7 +160,7 @@ class BIM_Model_Volley{
         if ( property_exists( $me, 'subject' ) && !empty($me->subject) ) {
             $subjects[] = $me->subject;
         }
-        $this->subject = array_unique( $subjects );
+        $this->subjects = array_unique( $subjects );
     }
 
     private static function _getReplySubjects( $replyId, $subject ) {
@@ -478,9 +478,9 @@ class BIM_Model_Volley{
 
             if( !empty($hashTag ) || !empty($hashTags) ) {
                 $hashTagIds = self::_processHashTags( $userId, $hashTag, $hashTags );
-            } else if ( property_exists($this, 'subject') && is_array($this->subject) ) {
+            } else if ( property_exists($this, 'subjects') && is_array($this->subjects) ) {
                 $hashTagIds = array();
-                foreach ($this->subject as $subjectTitle) {
+                foreach ($this->subjects as $subjectTitle) {
                     $hashTagIds[] = $dao->getHashTagId($subjectTitle);
                 }
             } else {
