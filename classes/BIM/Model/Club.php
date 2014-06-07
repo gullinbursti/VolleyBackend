@@ -39,6 +39,7 @@ class BIM_Model_Club{
         $this->pending = array();
         $this->blocked = array();
         $members = array();
+        $memberCount = 0;
         foreach( $this->members as $member ){
             self::_cleanUpMember( $member );
 
@@ -48,11 +49,19 @@ class BIM_Model_Club{
                 $this->pending[] = self::_convertPendingMember( $member );
             } else if ( $member->user_id == $ownerUserId ) {
                 $this->owner = self::_convertOwnerMember( $member );
+                $memberCount++;
             } else if( !empty($member->id) ){
                 $members[] = self::_convertJoinedMember( $member );
+                $memberCount++;
             }
         }
 
+        // The logic in BIM_DAO_Mysql_Club for total_members is beyond my
+        // comprehension at this time.  The logic for total_members should not
+        // even be in BIM_DAO_Mysql_Club IMHO!!!!
+        //
+        // Putting total_members counter in here!
+        $this->total_members = $memberCount;
         $this->members = $members;
 
         $this->_populateSubmissions();

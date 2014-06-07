@@ -38,6 +38,8 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         $stmt = $this->prepareAndExecute( $sql, $ids );
         $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
 
+        // TODO - Rip the total_members counters out of this code.  Why is
+        // business logic in the DAO?!?!?!
         $clubs = array();
         $memberCounts = array();
         if( $data ){
