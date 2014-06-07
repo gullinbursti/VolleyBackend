@@ -90,7 +90,7 @@ class BIM_Model_Club{
         $submission->avatar = $volley->creator->avatar;
         $submission->added = $volley->added;
         $submission->img = $volley->creator->img;
-        $submission->subjects = $volley->creator->subject;
+        $submission->subjects = $volley->creator->subjects;
         $this->_updateUpdatedIfNewer( $volley->updated );
 
         $submission->total_replies = 0;
