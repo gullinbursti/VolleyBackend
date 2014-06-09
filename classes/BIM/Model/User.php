@@ -997,21 +997,10 @@ delete from tblUsers where username like "%yoosnapyoo";
             'size' => 50,
             'userID' => $userId,
         );
-        $friends = BIM_App_Social::getFollowers($params, false);
 
         $tz = new DateTimeZone('UTC');
         $date = new DateTime();
         $date->setTimezone( $tz );
-
-        foreach( $friends as $friend ){
-            $date->setTimestamp($friend->init_time);
-            $activities[] = (object) array(
-                'id' => "2_{$friend->user->id}_{$friend->init_time}",
-                'activity_type' => 2,
-                'user' => $friend->user,
-                'time' => $date->format('Y-m-d H:i:s'),
-            );
-        }
 
         $likers = self::getLikers( $userId );
 
@@ -1041,22 +1030,6 @@ delete from tblUsers where username like "%yoosnapyoo";
                      'id' => $verifier->user->id,
                      'username' => $verifier->user->username,
                      'avatar_url' => $verifier->user->avatar_url,
-                ),
-                'time' => $date->format('Y-m-d H:i:s'),
-            );
-        }
-
-        $shouters = self::getShoutouts( $userId );
-        foreach( $shouters as $shouter ){
-            $date = new DateTime( $shouter->added );
-            $date->setTimezone( $tz );
-            $activities[] = (object) array(
-                'id' => "4_{$shouter->user->id}_{$date->getTimestamp()}",
-                'activity_type' => 4,
-                'user' => (object) array(
-                     'id' => $shouter->user->id,
-                     'username' => $shouter->user->username,
-                     'avatar_url' => $shouter->user->avatar_url,
                 ),
                 'time' => $date->format('Y-m-d H:i:s'),
             );
