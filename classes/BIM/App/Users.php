@@ -144,8 +144,8 @@ class BIM_App_Users extends BIM_App_Base{
      * @param $user_id The ID for the user (integer)
      * @return An associative object representing a user (array)
     **/
-    public function getActivity($userId) {
-        return BIM_Model_User::getActivity($userId);
+    public function getActivity($userId, $lastUpdated = '') {
+        return BIM_Model_User::getActivity($userId, $lastUpdated);
     }
 
     /**

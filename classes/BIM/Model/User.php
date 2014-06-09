@@ -991,7 +991,7 @@ delete from tblUsers where username like "%yoosnapyoo";
      *
      * @param int $userId
      */
-    public static function getActivity( $userId, $lastUpdated = "" ) {
+    public static function getActivity( $userId, $lastUpdated = '' ) {
         $activities = array();
 
         $params = (object) array(

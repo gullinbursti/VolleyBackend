@@ -139,7 +139,11 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         if (isset($input->userID)){
             $input->userID = $this->resolveUserId($input->userID);
             $users = new BIM_App_Users();
-            return $users->getActivity($input->userID);
+
+            $lastUpdated = property_exists($input, 'lastUpdated')
+                ? $input->lastUpdated
+                : '';
+            return $users->getActivity($input->userID, $lastUpdated);
         }
         return array();
     }
