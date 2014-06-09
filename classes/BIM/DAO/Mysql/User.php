@@ -259,10 +259,16 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
     public function getVerifiers( $userId ){
         $count = 0;
         $sql = "
-            SELECT a.user_id as id, added
-            FROM `hotornot-dev`.`tblChallenges` as c
-                JOIN `hotornot-dev`.`tblFlaggedUserApprovals` as a
-                ON c.id = a.challenge_id
+            SELECT
+                a.user_id as id,
+                a.added as added,
+                club.id as club_id,
+                club.name as club_name
+            FROM `hotornot-dev`.tblChallenges as c
+                JOIN `hotornot-dev`.tblFlaggedUserApprovals as a
+                    ON c.id = a.challenge_id
+                LEFT JOIN `hotornot-dev`.club as club
+                    ON c.club_id = club.id
             WHERE c.creator_id = ?
                 AND c.is_verify = 1
             ORDER by a.added desc

@@ -944,9 +944,11 @@ delete from tblUsers where username like "%yoosnapyoo";
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
         $verifiers = $dao->getVerifiers( $userId );
         $ids = array();
+
         foreach( $verifiers as $verifier ){
             $ids[] = $verifier->id;
         }
+
         $verifierObjs = self::getMulti($ids, true);
         foreach( $verifiers as $verifier ){
             $verifier->user = $verifierObjs[ $verifier->id ];
@@ -1023,9 +1025,15 @@ delete from tblUsers where username like "%yoosnapyoo";
         $verifiers = self::getVerifiers( $userId );
         foreach( $verifiers as $verifier ){
             $date->setTimestamp($verifier->added);
+            $club_name = !is_null($verifier->club_name)
+                ? $verifier->club_name
+                : '';
+
             $activities[] = (object) array(
                 'id' => "1_{$verifier->user->id}_{$verifier->added}",
                 'activity_type' => 1,
+                'club_id' => $verifier->club_id,
+                'club_name' => $club_name,
                 'user' => (object) array(
                      'id' => $verifier->user->id,
                      'username' => $verifier->user->username,
