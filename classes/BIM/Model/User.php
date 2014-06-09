@@ -1010,8 +1010,6 @@ delete from tblUsers where username like "%yoosnapyoo";
                 'activity_type' => 2,
                 'user' => $friend->user,
                 'time' => $date->format('Y-m-d H:i:s'),
-                'message' => 'followed you',
-                'type' => 3
             );
         }
 
@@ -1030,8 +1028,6 @@ delete from tblUsers where username like "%yoosnapyoo";
                 ),
                 'challengeID' => $liker->challenge_id,
                 'time' => $liker->added,
-                'message' => 'liked your Selfie',
-                'type' => 3
             );
         }
 
@@ -1047,8 +1043,6 @@ delete from tblUsers where username like "%yoosnapyoo";
                      'avatar_url' => $verifier->user->avatar_url,
                 ),
                 'time' => $date->format('Y-m-d H:i:s'),
-                'message' => 'verified your profile',
-                'type' => 3
             );
         }
 
@@ -1065,8 +1059,6 @@ delete from tblUsers where username like "%yoosnapyoo";
                      'avatar_url' => $shouter->user->avatar_url,
                 ),
                 'time' => $date->format('Y-m-d H:i:s'),
-                'message' => 'gave you a shoutout',
-                'type' => 3
             );
         }
 
@@ -1088,8 +1080,6 @@ delete from tblUsers where username like "%yoosnapyoo";
                     ),
                     'challengeID' => $userVolley->id,
                     'time' => $challenger->joined,
-                    'message' => 'replied to your Selfie',
-                    'type' => 3
                 );
             }
         }
