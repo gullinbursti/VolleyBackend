@@ -180,6 +180,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         $sql = "
             SELECT
                 tc.*,
+                club.name as club_name,
                 tcp.id AS challenge_id,
                 tcp.user_id AS challenger_id,
                 tcp.img AS challenger_img,
@@ -189,7 +190,9 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
                 tcp.has_viewed as viewed
             FROM `hotornot-dev`.tblChallenges AS tc
                 LEFT JOIN `hotornot-dev`.tblChallengeParticipants AS tcp
-                ON tc.id = tcp.challenge_id
+                    ON tc.id = tcp.challenge_id
+                LEFT JOIN `hotornot-dev`.club AS club
+                    ON tc.club_id = club.id
             WHERE tc.id in ( $placeHolders )
             ORDER BY tc.id, tcp.joined desc, tcp.user_id
         ";

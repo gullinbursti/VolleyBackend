@@ -27,6 +27,7 @@ class BIM_Model_Volley{
             $this->is_private = (int) $volley->is_private;
             $this->is_verify = (int) $volley->is_verify;
             $this->club_id = (int) $volley->club_id;
+            $this->club_name = $volley->club_name;
 
             $this->total_likers = 0;
             // setting up recent likes
@@ -343,7 +344,7 @@ class BIM_Model_Volley{
                     $hashTagArray[] = $tag;
                 }
             }
-        } 
+        }
 
         $hashTagIds = array();
         foreach ( $hashTagArray as $hashTagTitle ) {

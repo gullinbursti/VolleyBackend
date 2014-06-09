@@ -1042,6 +1042,11 @@ delete from tblUsers where username like "%yoosnapyoo";
             if( $userVolley->is_private ){
                 continue;
             }
+
+            $club_name = !is_null($userVolley->club_name)
+                ? $userVolley->club_name
+                : '';
+
             foreach( $userVolley->challengers as $challenger ){
                 $activities[] = (object) array(
                     'id' => "5_{$challenger->id}_{$date->getTimestamp()}",
@@ -1052,6 +1057,8 @@ delete from tblUsers where username like "%yoosnapyoo";
                          'avatar_url' => $challenger->img,
                     ),
                     'challengeID' => $userVolley->id,
+                    'club_id' => $userVolley->club_id,
+                    'club_name' => $club_name,
                     'time' => $challenger->joined,
                 );
             }
