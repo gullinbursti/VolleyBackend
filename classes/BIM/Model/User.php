@@ -991,7 +991,7 @@ delete from tblUsers where username like "%yoosnapyoo";
      *
      * @param int $userId
      */
-    public static function getActivity( $userId ){
+    public static function getActivity( $userId, $lastUpdated = "" ) {
         $activities = array();
 
         $params = (object) array(
@@ -1048,8 +1048,6 @@ delete from tblUsers where username like "%yoosnapyoo";
         }
 
         $userVolleys = BIM_Model_Volley::getVolleys( $userId );
-
-        $replies = array();
         foreach( $userVolleys as $userVolley ){
             if( $userVolley->is_private ){
                 continue;
@@ -1076,16 +1074,75 @@ delete from tblUsers where username like "%yoosnapyoo";
             }
         }
 
-        usort($activities,
-            function($a, $b){
-                if ($a->time == $b->time) {
-                    return 0;
-                }
-                return ($a->time < $b->time ) ? 1 : -1;
-            }
-        );
+        $activities = self::sortAndTrimActivities( $activities, $lastUpdated );
 
-        return array_splice($activities, 0, 50);
+        return $activities;
+    }
+
+    protected static function sortAndTrimActivities( $activities, $oldestDate,
+            $limit = 20 ) {
+
+        // Shared comparator
+        $comparator = function($a, $b){
+            if ($a->time == $b->time) {
+                return 0;
+            }
+            return ($a->time < $b->time ) ? 1 : -1;
+        };
+
+        // Sort
+        usort( $activities, $comparator );
+
+        // Trim the array
+        if ( empty($oldestDate) || (strcmp($oldestDate, "0000-00-00 00:00:00") == 0)) {
+            $splice_length = $limit;
+        } else {
+            $splice_length = $limit;
+            $needle = (object) array( 'time' => $oldestDate );
+            self::arrayBinarySearch( $needle, $activities, $comparator,
+                    $splice_length );
+
+            ++$splice_length;
+            $splice_length = $splice_length <= $limit
+                ? $splice_length
+                : $limit;
+        }
+        $activities = array_splice($activities, 0, $splice_length);
+
+        return $activities;
+    }
+
+    /**
+     * Thank you: http://www.php.net//manual/en/function.array-search.php#93352
+     */
+    // TODO - Move to a Util class
+    protected static function arrayBinarySearch(
+            $needle, $haystack, $comparator , &$probe ) {
+        $high = Count( $haystack ) -1;
+        $low = 0;
+
+        while ( $high >= $low ) {
+            $probe = Floor( ( $high + $low ) / 2 );
+            $comparison = $comparator( $haystack[$probe], $needle );
+            if ( $comparison < 0 )
+            {
+                $low = $probe +1;
+            }
+            elseif ( $comparison > 0 )
+            {
+                $high = $probe -1;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        //The loop ended without a match
+        //Compensate for needle greater than highest haystack element
+        if($comparator($haystack[count($haystack)-1], $needle) < 0) {
+            $probe = count($haystack);
+        }
+        return false;
     }
 
     public static function getRandomKikUser( ){
