@@ -245,10 +245,19 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
     public function getLikers( $userId ){
         $count = 0;
         $sql = "
-            SELECT user_id as id, added, challenge_id
-            FROM `hotornot-dev`.`tblChallengeVotes`
+            SELECT
+                user_id AS id,
+                votes.added AS added,
+                challenge_id,
+                chall.club_id AS club_id,
+                club.name AS club_name
+            FROM `hotornot-dev`.tblChallengeVotes AS votes
+                LEFT JOIN `hotornot-dev`.tblChallenges AS chall
+                    ON votes.challenge_id = chall.id
+                LEFT JOIN `hotornot-dev`.club
+                    ON chall.club_id = club.id
             WHERE `challenger_id` = ?
-            ORDER by added desc
+            ORDER BY added DESC
             LIMIT 50
         ";
         $params = array( $userId );

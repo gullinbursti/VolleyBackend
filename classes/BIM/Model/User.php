@@ -1005,13 +1005,17 @@ delete from tblUsers where username like "%yoosnapyoo";
         $date->setTimezone( $tz );
 
         $likers = self::getLikers( $userId );
-
         foreach( $likers as $liker ){
             $date = new DateTime( $liker->added );
             $date->setTimezone( $tz );
+            $club_name = !is_null($liker->club_name)
+                ? $liker->club_name
+                : '';
             $activities[] = (object) array(
                 'id' => "3_{$liker->user->id}_{$date->getTimestamp()}",
                 'activity_type' => 3,
+                'club_id' => $liker->club_id,
+                'club_name' => $club_name,
                 'user' => (object) array(
                      'id' => $liker->user->id,
                      'username' => $liker->user->username,
