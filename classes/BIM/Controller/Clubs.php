@@ -47,7 +47,7 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
         $input = (object) ($_POST ? $_POST : $_GET);
         if( !empty( $input->userID ) && !empty( $input->name ) ){
             $description = !empty( $input->description ) ? $input->description : '';
-            $img = !empty( $input->imageURL ) ? $input->imageURL : '';
+            $img = !empty( $input->imgURL ) ? $input->imgURL : '';
             $img = $this->normalizeVolleyImgUrl($img);
             $input->userID = $this->resolveUserId( $input->userID );
             $clubType = !empty( $input->clubType ) ? $input->clubType : 'USER_GENERATED';
@@ -185,8 +185,8 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
 
     public function processImage(){
         $input = (object) ($_POST ? $_POST : $_GET);
-        if( !empty( $input->imageURL ) ){
-            BIM_Jobs_Challenges::queueProcessImage( $input->imageURL);
+        if( !empty( $input->imgURL ) ){
+            BIM_Jobs_Challenges::queueProcessImage( $input->imgURL);
         }
         return true;
     }
