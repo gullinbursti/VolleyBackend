@@ -10,6 +10,7 @@ class BIM_App_UserPhone extends BIM_App_Base {
 
     private $_userPhoneDao = null;
     private $_nexmoTwoFactorAuth = null;
+    private $_userApp = null;
 
     public function createOrUpdatePhone( $userId, $phone ) {
         //----
@@ -72,7 +73,14 @@ class BIM_App_UserPhone extends BIM_App_Base {
         $dao = $this->getUserPhoneDao();
         $verified = $dao->updateVerifyPhonePin( $userId, $phoneNumberEnc, $pin );
 
-        if ( !$verified ) {
+        if ( $verified ) {
+            $userApp = $this->getUserApp();
+            $params = (object) array(
+                'phone' => $phone,
+                'user_id' => $userId
+            );
+            $userApp->verifyPhone( $params );
+        } else {
             $dao->updatePhonePinVerifyFailed( $userId, $phoneNumberEnc );
         }
 
@@ -137,6 +145,24 @@ class BIM_App_UserPhone extends BIM_App_Base {
         }
 
         return $this->_nexmoTwoFactorAuth;
+    }
+
+    public function setUserApp( $userApp ) {
+        if ( is_null($this->_userApp) ) {
+            $this->_userApp = $userApp;
+        } else {
+            throw new UnexpectedValueException(
+                    "'userApp' can only be set once." );
+        }
+    }
+
+    public function getUserApp() {
+        if ( is_null($this->_userApp) ) {
+            $app = new BIM_App_Users();
+            $this->setUserApp( $app );
+        }
+
+        return $this->_userApp;
     }
 }
 

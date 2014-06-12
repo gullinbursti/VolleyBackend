@@ -302,6 +302,29 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function validatePhone_validPin_callsAppUserVerifyPhone() {
+        // Arrange
+        $userId = 891800099;
+        $phone = '+16025550171';
+        $pin = 'T5L32XE495NSB';
+        $appMock = $this->getNewUserPhoneApp( true );
+        $daoMock = $appMock->getUserPhoneDao();
+        $daoMock->expects( $this->once() )
+            ->method( 'updateVerifyPhonePin' )
+            ->will($this->returnValue(true));
+
+        // TODO - add $params check.  It being a map is a PITA!!!
+        $userAppMock = $appMock->getUserApp();
+        $userAppMock->expects( $this->once() )
+            ->method( 'verifyPhone' );
+
+        // Act & assert
+        $result = $appMock->validatePhone( $userId, $phone, $pin );
+    }
+
+    /**
+     * @test
+     */
     public function validatePhone_invalidPin_updatesFailureCounts() {
         // Arrange
         $userId = 645830;
@@ -438,6 +461,42 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         assertThat( $nexmo, is(identicalTo($nexmoStub)) );
     }
 
+    //-------------------------------------------------------------------------
+    // getUserApp() & setUserApp
+    //-------------------------------------------------------------------------
+    /**
+     * @test
+     */
+    public function getUserApp_nothing_lazyLoads() {
+        // Arrange
+        $app = new BIM_App_UserPhone();
+
+        // Act
+        $app = $app->getUserApp();
+
+        // Assert
+        assertThat( $app, is(not(nullValue())) );
+        assertThat( $app, is(anInstanceOf('BIM_App_Users')) );
+    }
+
+    /**
+     * @test
+     */
+    public function getUserApp_setAll_identical() {
+        // Arrange
+        $app = new BIM_App_UserPhone();
+        $appStub = $this->getMockBuilder( 'BIM_App_Users' )
+                ->disableOriginalConstructor()
+                ->getMock();
+
+        // Act
+        $app->setUserApp( $appStub );
+        $app = $app->getUserApp();
+
+        // Assert
+        assertThat( $app, is(identicalTo($appStub)) );
+    }
+
     /**
      * @test
      * @expectedException UnexpectedValueException
@@ -552,6 +611,10 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         // Fake Nexmo connection
         $nexmoStub = $this->getMock( 'BIM_Integration_Nexmo_TwoFactorAuth' );
         $appMock->setNexmoTwoFactorAuth( $nexmoStub );
+
+        // Fake BIM_App_Users
+        $appStub = $this->getMock( 'BIM_App_Users' );
+        $appMock->setUserApp( $appStub );
 
         return $appMock;
     }

@@ -2,7 +2,7 @@
 
 curl -v --request POST \
     "http://api-dev.letsvolley.com/api/pedro/userPhone/validatePhone" \
-    --data-urlencode "userID=2466" \
+    --data-urlencode "userID=131853" \
     --data-urlencode "phone=15555555555" \
-    --data-urlencode "pin=0708"
+    --data-urlencode "pin=6987"
 
