@@ -311,7 +311,7 @@ class BIM_Model_Club{
             $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
             $missingObjData = $dao->get($missingObs);
             foreach( $missingObjData as $objData ){
-                $obj = new BIM_Model_Club( $objData, false );
+                $obj = new BIM_Model_Club( $objData, true );
                 if( $obj->isExtant() ){
                     $objs[ $obj->id ] = $obj;
                 }
