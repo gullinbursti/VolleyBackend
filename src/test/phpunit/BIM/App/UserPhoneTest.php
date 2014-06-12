@@ -232,6 +232,79 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
         // Act & assert
         $app->createOrUpdatePhone( $userId, $phone );
     }
+    //
+    //-------------------------------------------------------------------------
+    // idValid()
+    //-------------------------------------------------------------------------
+    /**
+     * @test
+     */
+    public function isValid_nonexistantUser_returnsFalse() {
+        // Arrange
+        $userId = 16345006;
+        $appMock = $this->getNewUserPhoneApp( false );
+
+        // Act
+        $result = $appMock->isValid( $userId );
+
+        // Assert
+        assertThat( $result, is(equalTo(false)) );
+    }
+
+    /**
+     * @test
+     * @dataProvider isVaildInvalidData
+     * @expectedException InvalidArgumentException
+     */
+    public function isValid_invalid_throwsInvalidArgumentException( $userId ) {
+        // Arrange
+        $app = $this->getNewUserPhoneApp();
+
+        // Act & assert
+        $response = $app->isValid( $userId );
+    }
+
+    public function isVaildInvalidData() {
+        return array(
+            array( 0 ),
+            array( null ),
+        );
+    }
+
+    /**
+     * @test
+     * @dataProvider isValid_validPhone_dataProvider
+     */
+    public function isValid_validPhone_returnsStatus( $verified, $expected ) {
+        // Arrange
+        $userId = 16345006;
+        $appMock = $this->getNewUserPhoneApp( true );
+
+        $daoResponse = (object) array( 'verified' => $verified );
+        $daoMock = $appMock->getUserPhoneDao();
+        $daoMock->expects( $this->once() )
+            ->method( 'readVerifyDataByUserId' )
+            ->with( $this->equalTo($userId) )
+            ->will($this->returnValue($daoResponse));
+
+        // Act
+        $result = $appMock->isValid( $userId );
+
+        // Assert
+        assertThat( $result, is(equalTo($expected)) );
+    }
+
+    public function isValid_validPhone_dataProvider() {
+        return array(
+                    array(1, true),
+                    array(100, true),
+                    array(555, true),
+                    array(true, true),
+                    array(0, false),
+                    array(null, false),
+                    array(false, false)
+        );
+    }
 
     //-------------------------------------------------------------------------
     // validatePhone()

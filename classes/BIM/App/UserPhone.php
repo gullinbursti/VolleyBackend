@@ -87,6 +87,23 @@ class BIM_App_UserPhone extends BIM_App_Base {
         return $verified;
     }
 
+    public function isValid( $userId ) {
+        // Validation
+        if ( empty($userId) ) {
+            throw new InvalidArgumentException( "'\$userId' must be set" );
+        }
+
+        if ( !$this->userExists($userId) ) {
+            return false;
+        }
+
+        $dao = $this->getUserPhoneDao();
+        $data = $dao->readVerifyDataByUserId( $userId );
+        $result = $data->verified ? true : false;
+
+        return $result;
+    }
+
     /**
      * Thank you:
      *   - http://stackoverflow.com/questions/4356289/php-random-string-generator

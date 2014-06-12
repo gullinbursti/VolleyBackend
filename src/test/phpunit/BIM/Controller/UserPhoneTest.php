@@ -181,6 +181,70 @@ class BIM_Controller_UserPhoneTest extends PHPUnit_Framework_TestCase
         $controller->setUserPhoneApp( $appStub );
     }
 
+    //-------------------------------------------------------------------------
+    // isValid()
+    //-------------------------------------------------------------------------
+    /**
+     * @test
+     * @dataProvider isValid_badUser_dataSource
+     */
+    public function isValid_badUser_returnsNull( $userId ) {
+        $GLOBALS['_POST'] = array(
+            'userID' => $userId
+        );
+        $controller = $this->getNewUserPhoneController();
+
+        // Act
+        $actual = $controller->isValid($userId);
+
+        // Assert
+        assertThat( $actual, is(equalTo(null)) );
+    }
+
+    public function isValid_badUser_dataSource() {
+        return array(
+            array(null),
+            array(0)
+        );
+    }
+
+    /**
+     * @test
+     * @dataProvider isValid_goodUser_dataSource
+     */
+    public function isValid_goodUser_returnsStatus( $userId, $status, $expected ) {
+        $GLOBALS['_POST'] = array(
+            'userID' => $userId
+        );
+        $controller = $this->getNewUserPhoneController();
+        $appMock = $controller->getUserPhoneApp();
+        $appMock->expects($this->once())
+            ->method('isValid')
+            ->with($this->equalTo($userId))
+            ->will($this->returnValue($status));
+
+        // Act
+        $actual = $controller->isValid($userId);
+
+        // Assert
+        assertThat( $actual, is(equalTo($expected)) );
+    }
+
+    public function isValid_goodUser_dataSource() {
+        return array(
+            array(42842459, 1, true),
+            array(42842459, 100, true),
+            array(42842459, 555, true),
+            array(42842459, true, true),
+            array(42842459, 0, false),
+            array(42842459, null, false),
+            array(42842459, false, false)
+        );
+    }
+
+    //-------------------------------------------------------------------------
+    // Unit test helpers
+    //-------------------------------------------------------------------------
     protected function getNewUserPhoneController() {
         $controller = new BIM_Controller_UserPhone();
         $appStub = $this->getMock( 'BIM_App_UserPhone' );

@@ -39,6 +39,22 @@ class BIM_Controller_UserPhone extends BIM_Controller_Base {
         return $verified;
     }
 
+    public function isValid() {
+        $input = (object) ($_POST ? $_POST : $_GET);
+        $userId = isset($input->userID) ? $input->userID : null;
+
+        // Validation
+        if ( empty($userId) ) {
+            return null;
+        }
+
+        // Process
+        $app = $this->getUserPhoneApp();
+        $status = $app->isValid($userId) ? true : false;
+
+        return $status;
+    }
+
     public function setUserPhoneApp( $userPhoneApp ) {
         if ( is_null($this->_userPhoneApp) ) {
             $this->_userPhoneApp = $userPhoneApp;
