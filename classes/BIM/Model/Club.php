@@ -44,14 +44,14 @@ class BIM_Model_Club{
             self::_cleanUpMember( $member );
 
             if( $member->blocked ){
-                $this->blocked[] = self::_convertBlockedMember( $member );
+                $this->blocked[] = $this->_convertBlockedMember( $member );
             } else if( $member->pending ){
-                $this->pending[] = self::_convertPendingMember( $member );
+                $this->pending[] = $this->_convertPendingMember( $member );
             } else if ( $member->user_id == $ownerUserId ) {
-                $this->owner = self::_convertOwnerMember( $member );
+                $this->owner = $this->_convertOwnerMember( $member );
                 $memberCount++;
             } else if( !empty($member->id) ){
-                $members[] = self::_convertJoinedMember( $member );
+                $members[] = $this->_convertJoinedMember( $member );
                 $memberCount++;
             }
         }
@@ -125,7 +125,7 @@ class BIM_Model_Club{
         }
     }
 
-    private static function _convertOwnerMember( $member ) {
+    private function _convertOwnerMember( $member ) {
         $ownerMember = self::_convert(
             $member,
             array(
@@ -137,7 +137,7 @@ class BIM_Model_Club{
         return $ownerMember;
     }
 
-    private static function _convertJoinedMember( $member ) {
+    private function _convertJoinedMember( $member ) {
         $joinedMember = self::_convert(
             $member,
             array(
@@ -148,10 +148,11 @@ class BIM_Model_Club{
                 'joined' => 'joined')
         );
 
+        $this->_updateUpdatedIfNewer( $joinedMember->joined );
         return $joinedMember;
     }
 
-    private static function _convertBlockedMember( $member ) {
+    private function _convertBlockedMember( $member ) {
         $blockedMember = self::_convert(
             $member,
             array(
@@ -166,7 +167,7 @@ class BIM_Model_Club{
         return $blockedMember;
     }
 
-    private static function _convertPendingMember( $member ) {
+    private function _convertPendingMember( $member ) {
         $pendingMember = self::_convert(
             $member,
             array(
