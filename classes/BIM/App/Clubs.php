@@ -13,6 +13,19 @@ class BIM_App_Clubs extends BIM_App_Base{
     public static function invite( $clubId, $ownerId, $users = array(), $nonUsers = array() ) {
         $invited = false;
         $club = BIM_Model_Club::get( $clubId );
+
+        foreach ($nonUsers as $user) {
+            if ( count($user) != 3 ) {
+                // Data missing from user
+                return false;
+            } else {
+                if ( empty($user[0]) && (empty($user[1]) || empty($user[2])) ) {
+                    // Name AND (phone OR email) required!!
+                    return false;
+                }
+            }
+        }
+
         if( $club->isOwner($ownerId) ){
             $invited = $club->invite( $users, $nonUsers );
             if( $invited ){
