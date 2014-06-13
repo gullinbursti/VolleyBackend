@@ -107,9 +107,6 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
             unset( $club->members );
             unset( $club->pending );
             unset( $club->blocked );
-
-            BIM_Controller_Clubs::stripProperty( 'email', $club->pending );
-            BIM_Controller_Clubs::stripProperty( 'email', $club->blocked );
         }
 
         return $club;
