@@ -335,6 +335,7 @@ class BIM_Model_Club{
             }
         }
 
+        // TODO - Fix this sorting crap.  Should only be sorting by last updated
         // now reorder according to passed ids
         $objArray = array();
         foreach( $objs as $id => $obj ){
