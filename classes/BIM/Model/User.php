@@ -784,6 +784,7 @@ delete from tblUsers where username like "%yoosnapyoo";
                 'pending' => array(),
                 'other' => array()
             );
+
             $clubData = BIM_Model_Club::getMulti( $clubData );
             foreach( $clubData as $club ){
                 if( $club->isOwner( $this->id ) ){

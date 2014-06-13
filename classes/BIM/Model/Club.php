@@ -347,7 +347,25 @@ class BIM_Model_Club{
             }
         }
 
-        return $assoc ? $objs : array_values($objs);
+        if ( !$assoc ) {
+            $clubs = array_values($objs);
+            self::sortClubs( $clubs );
+        } else {
+            $clubs = $objs;
+        }
+
+        return $clubs;
+    }
+
+    protected static function sortClubs( &$clubs ) {
+        $comparator = function($a, $b){
+            if ($a->updated == $b->updated) {
+                return 0;
+            }
+            return ($a->updated > $b->updated ) ? 1 : -1;
+        };
+
+        usort( $clubs, $comparator );
     }
 
     public static function get( $clubId, $forceDb = false ){
