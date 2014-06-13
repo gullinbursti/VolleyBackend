@@ -161,7 +161,11 @@ class BIM_Model_Volley{
         if ( property_exists( $me, 'subject' ) && !empty($me->subject) ) {
             $subjects[] = $me->subject;
         }
-        $this->subjects = array_unique( $subjects );
+
+        $subjects = array_intersect_key($subjects,array_unique(
+            array_map('strtolower',$subjects)));
+
+        $this->subjects = $subjects;
     }
 
     private static function _getReplySubjects( $replyId, $subject ) {
