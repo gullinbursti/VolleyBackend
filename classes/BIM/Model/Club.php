@@ -2,6 +2,8 @@
 
 class BIM_Model_Club{
 
+    const CLUB_IMAGE_DAFAULT_BASE_URL = 'https://d1fqnfrnudpaz6.cloudfront.net/defaultClubCover';
+
     public function __construct($clubId, $populateUserData = true ) {
 
         $club = null;
@@ -34,6 +36,8 @@ class BIM_Model_Club{
             self::_fetchUserData( $this->members );
         }
 
+        $this->processClubImage();
+
         $this->updated = $this->added;
 
         $this->pending = array();
@@ -65,6 +69,12 @@ class BIM_Model_Club{
         $this->members = $members;
 
         $this->_populateSubmissions();
+    }
+
+    protected function processClubImage() {
+        if ( empty($this->img) ) {
+            $this->img = self::CLUB_IMAGE_DAFAULT_BASE_URL;
+        }
     }
 
     private function _populateSubmissions() {
