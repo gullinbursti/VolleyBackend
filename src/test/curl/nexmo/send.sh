@@ -14,17 +14,18 @@ else
 fi
 
 echo -e "\n\nUsing: $api_account\n\n"
-curl -v --get 'https://rest.nexmo.com/sc/us/2fa/json' \
-    --data-urlencode "api_key=$api_key" \
-    --data-urlencode "api_secret=$api_secret" \
-    --data-urlencode "to=16463915410" \
-    --data-urlencode "pin=1234"
 
-
-#curl -v --get 'https://rest.nexmo.com/sms/json' \
+#curl -v --get 'https://rest.nexmo.com/sc/us/2fa/json' \
 #    --data-urlencode "api_key=$api_key" \
 #    --data-urlencode "api_secret=$api_secret" \
-#    --data-urlencode "from=$from" \
 #    --data-urlencode "to=16463915410" \
-#    --data-urlencode "text={$api_account} It's Pedro..   Please ignore..."
+#    --data-urlencode "pin=1234"
+
+
+curl -v --get 'https://rest.nexmo.com/sms/json' \
+    --data-urlencode "api_key=$api_key" \
+    --data-urlencode "api_secret=$api_secret" \
+    --data-urlencode "from=$from" \
+    --data-urlencode "to=+16463915410" \
+    --data-urlencode "text={$api_account} It's Pedro..   Please ignore..."
 

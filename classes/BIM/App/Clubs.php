@@ -65,15 +65,22 @@ class BIM_App_Clubs extends BIM_App_Base{
         $club = BIM_Model_Club::get( $clubId );
 
         foreach( $numbers as $number ){
-            $client = BIM_Utils::getTwilioClient();
-            $conf = BIM_Config::twilio();
+            // Clean up number
             $number = preg_replace('@[^\d]@', '', $number);
             $number = preg_replace('@^1@', '', $number);
             $number = "+1$number";
+
+            // Setup message
             $msg = BIM_Config::clubSmsInviteMsg();
             $msg = str_replace('[CLUBNAME]',$club->name, $msg);
             $msg = str_replace('[USERNAME]',$club->owner->username, $msg);
-            $sms = $client->account->sms_messages->create( $conf->api->number, $number, $msg );
+
+            // Send
+            $smsSender = new BIM_Integration_Nexmo_SmsSender( BIM_Config::nexmo() );
+            $status = $smsSender->send( $number, $msg );
+            if ( !$status ) {
+                // TODO - Add some kind of error handling
+            }
         }
     }
 
