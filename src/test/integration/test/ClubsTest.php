@@ -14,6 +14,9 @@ class BIM_integration_endpoint_ClubsTest extends PHPUnit_Framework_TestCase
      */
     public function get_validRequest_validResponse()
     {
+        $config = $this->getConfiguration()->clubs();
+        $url = $config->urlGet;
+
         // Arrange
         $expected_properties = array( 'added', 'blocked', 'club_type',
             'description', 'id', 'img', 'members', 'name', 'owner', 'pending',
@@ -26,7 +29,7 @@ class BIM_integration_endpoint_ClubsTest extends PHPUnit_Framework_TestCase
         );
 
         // Act
-        $response = curlPostQueryReturnJson( self::COMMAND_GET_URL, $queryData );
+        $response = curlPostQueryReturnJson( $url, $queryData );
 
         $jsonResponse = $response->httpBodyJson;
         $props = getProperties( $jsonResponse );
@@ -53,6 +56,13 @@ class BIM_integration_endpoint_ClubsTest extends PHPUnit_Framework_TestCase
         assertThat( $jsonResponse->owner, is(anObject()) );
     }
 
-
+    //-------------------------------------------------------------------------
+    // Test helpers
+    //-------------------------------------------------------------------------
+    protected function getConfiguration()
+    {
+        return BIM_IntegrationTest_IntegrationTestContext::getContext()
+            ->getConfiguration();
+    }
 }
 ?>
