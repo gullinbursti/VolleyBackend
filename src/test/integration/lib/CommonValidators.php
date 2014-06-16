@@ -1,6 +1,7 @@
 <?
 
 require_once 'Hamcrest.php';
+require_once 'CurlHelpers.php';
 
 function validateDateTimeString( $dateTime )
 {
@@ -17,6 +18,13 @@ function validateClubType( $type )
 {
     $regex = '/^(FEATURE|NEARBY|SCHOOL|STAFF_CREATED|THIRD_PARTY|USER_GENERATED)$/';
     assertThat($type, matchesPattern($regex));
+}
+
+function validateCurlResponse( $response )
+{
+    assertThat( $response->curlErrorNumber, is(equalTo(CURLE_OK)));
+    assertThat( $response->httpCode, is(equalTo(200)));
+    assertThat( $response->curlError, is(emptyString()));
 }
 
 ?>

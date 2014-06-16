@@ -7,15 +7,15 @@ require_once 'CommonValidators.php';
 
 class BIM_integration_endpoint_ClubsTest extends PHPUnit_Framework_TestCase
 {
-    const COMMAND_GET_URL = "http://api-dev.letsvolley.com/api/pedro/clubs/get";
-
     /**
      * @test
      */
     public function get_validRequest_validResponse()
     {
-        $config = $this->getConfiguration()->clubs();
+        $config = $this->getConfiguration()->clubsGet();
         $url = $config->urlGet;
+        $clubId = $config->existent->clubId;
+        $userId = $config->existent->userId;
 
         // Arrange
         $expected_properties = array( 'added', 'blocked', 'club_type',
@@ -24,17 +24,17 @@ class BIM_integration_endpoint_ClubsTest extends PHPUnit_Framework_TestCase
             'updated'
         );
         $queryData = (object) array(
-            'clubID' => 112,
-            'userID' => 133907
+            'clubID' => $clubId,
+            'userID' => $userId
         );
 
         // Act
         $response = curlPostQueryReturnJson( $url, $queryData );
-
         $jsonResponse = $response->httpBodyJson;
         $props = getProperties( $jsonResponse );
 
         // Assert
+        validateCurlResponse( $response );
         assertThat( $props, is(arrayContainingInAnyOrder($expected_properties)) );
 
         validateId( $jsonResponse->id );
