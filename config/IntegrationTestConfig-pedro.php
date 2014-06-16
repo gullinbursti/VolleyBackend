@@ -8,8 +8,12 @@ class BIM_IntegrationTest_Config_Pedro
         return (object) array(
             'urlGet' => self::BASE_URL . '/clubs/get',
             'existent' => (object) array(
-                'clubId' => 112,
-                'userId' => 133907
+                'clubId' => 40,
+                'userId' => 131820
+            ),
+            'existent' => (object) array(
+                'clubId' => 0,
+                'userId' => 0
             )
         );
     }

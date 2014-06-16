@@ -7,6 +7,9 @@ require_once 'CommonValidators.php';
 
 class BIM_integration_endpoint_ClubsTest extends PHPUnit_Framework_TestCase
 {
+    //-------------------------------------------------------------------------
+    // Action - get
+    //-------------------------------------------------------------------------
     /**
      * @test
      */
@@ -54,6 +57,96 @@ class BIM_integration_endpoint_ClubsTest extends PHPUnit_Framework_TestCase
         assertThat( $jsonResponse->submissions, is(arrayValue()) );
         assertThat( $jsonResponse->pending, is(arrayValue()) );
         assertThat( $jsonResponse->owner, is(anObject()) );
+    }
+
+    /**
+     * @test
+     * @dataProvider get_invalidParams_dataProvider
+     */
+    public function get_invalidParams_returnsNull( $userId, $clubId )
+    {
+        $config = $this->getConfiguration()->clubsGet();
+        $url = $config->urlGet;
+        $queryData = (object) array(
+            'clubID' => $clubId,
+            'userID' => $userId
+        );
+
+        // Act
+        $response = curlPostQueryReturnJson( $url, $queryData );
+        $jsonResponse = $response->httpBodyJson;
+        $props = getProperties( $jsonResponse );
+
+        // Assert
+        validateCurlResponse( $response );
+        assertThat( $response->httpBodyString, is(equalTo('null')) );
+    }
+
+    public function get_invalidParams_dataProvider()
+    {
+        $config = $this->getConfiguration()->clubsGet();
+        $url = $config->urlGet;
+        $clubId = $config->existent->clubId;
+        $userId = $config->existent->userId;
+
+        return array(
+            array('', null),
+            array(null, ''),
+            array(null, null),
+            array('', ''),
+            array($userId, ''),
+            array('', $clubId),
+            array($userId, null),
+            array(null, $clubId)
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function get_nonexistentUser_returnsNull()
+    {
+        $config = $this->getConfiguration()->clubsGet();
+        $url = $config->urlGet;
+        $clubId = $config->existent->clubId;
+        $userId = $config->nonexistent->userId;
+        $queryData = (object) array(
+            'clubID' => $clubId,
+            'userID' => $userId
+        );
+
+        // Act
+        $response = curlPostQueryReturnJson( $url, $queryData );
+        $jsonResponse = $response->httpBodyJson;
+        $props = getProperties( $jsonResponse );
+
+        // Assert
+        validateCurlResponse( $response );
+        assertThat( $response->httpBodyString, is(equalTo('null')) );
+    }
+
+    /**
+     * @test
+     */
+    public function get_nonexistentClub_returnsNull()
+    {
+        $config = $this->getConfiguration()->clubsGet();
+        $url = $config->urlGet;
+        $clubId = $config->nonexistent->clubId;
+        $userId = $config->existent->userId;
+        $queryData = (object) array(
+            'clubID' => $clubId,
+            'userID' => $userId
+        );
+
+        // Act
+        $response = curlPostQueryReturnJson( $url, $queryData );
+        $jsonResponse = $response->httpBodyJson;
+        $props = getProperties( $jsonResponse );
+
+        // Assert
+        validateCurlResponse( $response );
+        assertThat( $response->httpBodyString, is(equalTo('null')) );
     }
 
     //-------------------------------------------------------------------------
