@@ -7,6 +7,10 @@
     <property name="build.bin.path" location="${build.path}/bin" />
     <property name="build.vendor.path" location="${basedir}/vendor" />
 
+    <property name="vendor.bin.path" location="${build.vendor.path}/bin" />
+    <property name="phpunit.path" location="${vendor.bin.path}/phpunit" />
+
+
     <target name="build" depends="init,prepare,composer-install"
             description="Builds the project"/>
 
@@ -39,7 +43,7 @@
 
     <target name="test" depends="build"
             description="Run unit tests">
-        <exec executable="${basedir}/vendor/bin/phpunit" failonerror="true">
+        <exec executable="${phpunit.path}" failonerror="true">
             <arg value="&#45;&#45;configuration=config/phpunit.xml" />
             <arg value="&#45;&#45;testsuite=default" />
         </exec>
