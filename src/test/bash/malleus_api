@@ -1,0 +1,95 @@
+#!/bin/bash
+# 
+# ./malleus_api
+#
+#
+#  
+#  tests the api with club related calls
+#  specify the delay between curls by passing an int as the 1st arg
+
+
+#-- delay between calls
+call_itv="$1"
+if [ ! $1 ]; then call_itv=1 ; else call_itv=1; fi
+
+#-- list of endpts to call
+endPts=( "users/getclubs" "clubs/get" "clubs/join")
+
+
+#-- generates a randon int LOWER UPPER
+rnd_int() {
+	printf "%02g" $(( (RANDOM % (($2 + 1) - $1)) + $1 ))
+}
+
+
+
+#-- keep goin
+
+loop_cnt=0
+while [ $loop_cnt -lt 10 ]; do echo $'\ec'
+	#-- iterate thru endpts
+	for endpt_api in "${endPts[@]}"; do
+	
+		#-- clubs to call
+		for clubID in 12 98 99 100 101 109; do echo $'\ec'
+			echo "HITTING ENDPT:http://api-stage.letsvolley.com/api/devint/${endpt_api}"
+			echo "userID=64846" ; echo "ownerID=64846" ; echo "clubID=${clubID}"
+			
+			printf "[%s=]\n" $(printf "=-"%.0s {1..24})
+			echo $(curl --request POST "http://api-stage.letsvolley.com/api/devint/${endpt_api}" --data-urlencode "userID=64846" --data-urlencode "ownerID=64846" --data-urlencode "clubID=${clubID}" --silent) | python -mjson.tool
+			sleep $call_itv
+		done
+		
+		#-- ¡do it again!
+		for clubID in 12 98 99 100 101 109; do echo $'\ec'
+			echo "HITTING ENDPT:http://api-stage.letsvolley.com/api/devint/${endpt_api}"
+			echo "userID=64846" ; echo "ownerID=133910" ; echo "clubID=${clubID}"
+			
+			printf "[%s=]\n" $(printf "=-"%.0s {1..24})
+			echo $(curl --request POST "http://api-stage.letsvolley.com/api/devint/${endpt_api}" --data-urlencode "userID=64846" --data-urlencode "ownerID=133910" --data-urlencode "clubID=${clubID}" --silent) | python -mjson.tool
+			sleep $call_itv
+		done
+	done
+	
+	#-- invite rnd users
+	endpt_api="clubs/invite"
+	for clubID in `seq 78 91`; do echo $'\ec'
+		rand_id=$(rnd_int 6000 12000)
+		
+		echo "HITTING ENDPT:http://api-stage.letsvolley.com/api/devint/${endpt_api}"
+		echo "userID=64846" ; echo "ownerID=133910" ; echo "clubID=${clubID}" ; echo "users=${rand_id}"
+		
+		printf "[%s=]\n" $(printf "=-"%.0s {1..24})
+		echo $(curl --request POST "http://api-stage.letsvolley.com/api/devint/${endpt_api}" --data-urlencode "userID=64846" --data-urlencode "ownerID=133910" --data-urlencode "clubID=${clubID}" --data-urlencode "users=${rnd_id}" --silent)  | python -mjson.tool
+		sleep $call_itv
+	done
+	
+	#-- --#-- --#-- --#-- --#-- /[ CYCLE COMPLETE ]\ --#-- --#-- --#-- --#-- --#
+	printf "CYCLE DONE... PAUSE %d SECS...\n" $(( $call_itv * 3 ))
+	sleep $(( $call_itv * 3 ))
+done
+
+
+exit 0;
+
+
+
+curl --request POST "http://api-stage.letsvolley.com/api/devint/${endpt_api}" --data-urlencode "${userID}" | python -mjson.tool
+curl --request POST "http://api-dev.letsvolley.com/api/pedro/userPhone/updatePhone" --data-urlencode "userID=133910" --data-urlencode "phone=+12393709811"
+
+http://api-stage.letsvolley.com/api/matt/clubs/get?clubID=40
+json_pp "http://api-dev.letsvolley.com/api/pedro/clubs/invite" "clubID=118" "userID=133910" "users=64846" "nonUsers="
+curl --request POST "http://api-dev.letsvolley.com/api/pedro/Users.php" --data-urlencode "action=11" --data-urlencode "userID=13310" --data-urlencode "phone=+12133009127|+12393709811|+14152549391|+16544329852|+14519854455|+15144358352"
+
+
+curl --request POST "http://api-dev.letsvolley.com/api/pedro/userPhone/updatePhone" \
+--data-urlencode "userID=133910" \
+--data-urlencode "phone=+12393709811"
+
+
+curl --request POST "http://api-dev.letsvolley.com/api/pedro/userPhone/validatePhone" \
+--data-urlencode "userID=133910" \
+--data-urlencode "pin=$SMS_PIN" \
+--data-urlencode "phone=+12393709811"
+
+
