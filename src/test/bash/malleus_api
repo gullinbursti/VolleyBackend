@@ -13,7 +13,7 @@ call_itv="$1"
 if [ ! $1 ]; then call_itv=1 ; else call_itv=1; fi
 
 #-- list of endpts to call
-endPts=( "users/getclubs" "clubs/get" "clubs/join")
+endPts=( "users/getclubs" "clubs/get" "clubs/join" "clubs/quit" )
 
 
 #-- generates a randon int LOWER UPPER
@@ -23,8 +23,7 @@ rnd_int() {
 
 
 
-#-- keep goin
-
+#-- keep 'er goin 10x
 loop_cnt=0
 while [ $loop_cnt -lt 10 ]; do echo $'\ec'
 	#-- iterate thru endpts
@@ -49,6 +48,28 @@ while [ $loop_cnt -lt 10 ]; do echo $'\ec'
 			echo $(curl --request POST "http://api-stage.letsvolley.com/api/devint/${endpt_api}" --data-urlencode "userID=64846" --data-urlencode "ownerID=133910" --data-urlencode "clubID=${clubID}" --silent) | python -mjson.tool
 			sleep $call_itv
 		done
+		
+		#-- -¡- quit the club
+		for clubID in `seq 70 91`; do echo $'\ec'
+			echo "HITTING ENDPT:http://api-dev.letsvolley.com/api/devint/${endpt_api}"
+			echo "userID=64846" ; echo "ownerID=133703" ; echo "clubID=${clubID}"
+			
+			printf "[%s=]\n" $(printf "=-"%.0s {1..24})
+			echo $(curl --request POST "http://api-stage.letsvolley.com/api/devint/${endpt_api}" --data-urlencode "userID=64846" --data-urlencode "ownerID=133703" --data-urlencode "clubID=${clubID}" --silent) | python -mjson.tool
+			sleep $call_itv
+		done
+		
+		#-- -!- quit the club
+		for clubID in `seq 98 101`; do echo $'\ec'
+			echo "HITTING ENDPT:http://api-dev.letsvolley.com/api/devint/${endpt_api}"
+			echo "userID=133910" ; echo "ownerID=64846" ; echo "clubID=${clubID}"
+			
+			printf "[%s=]\n" $(printf "=-"%.0s {1..24})
+			echo $(curl --request POST "http://api-stage.letsvolley.com/api/devint/${endpt_api}" --data-urlencode "userID=133703" --data-urlencode "ownerID=64846" --data-urlencode "clubID=${clubID}" --silent) | python -mjson.tool
+			sleep $call_itv
+		done
+		
+		"http://api-dev.letsvolley.com/api/devint/clubs/quit" "ownerID=133907" "memberID=13616"
 	done
 	
 	#-- invite rnd users
