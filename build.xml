@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="VolleyBackend" default="build">
+
+    <property name="bin.path" location="${basedir}/bin" />
+
+    <property name="build.path" location="${basedir}/build" />
+    <property name="build.bin.path" location="${build.path}/bin" />
+    <property name="build.vendor.path" location="${basedir}/vendor" />
+
+    <target name="build" depends="init,prepare,composer-install"
+            description="Builds the project"/>
+
+    <target name="clean" depends="init" description="Cleanup build artifacts">
+        <delete dir="${build.path}"/>
+        <delete dir="${build.vendor.path}"/>
+    </target>
+
+    <target name="init" />
+
+    <target name="prepare" depends="init" description="Prepare for build">
+        <mkdir dir="${build.path}"/>
+        <mkdir dir="${build.bin.path}"/>
+    </target>
+
+    <target name="composer-installer" depends="init,prepare"
+            description="Build/install PHP composer">
+        <exec executable="${bin.path}/composer-installer.php" failonerror="true">
+            <arg value="--install-dir=${build.bin.path}" />
+        </exec>
+    </target>
+
+    <target name="composer-install" depends="init,prepare,composer-installer"
+            description="Install PHP dependencies using PHP composer">
+        <exec executable="${build.bin.path}/composer.phar" failonerror="true">
+            <arg value="install" />
+            <arg value="--working-dir=${basedir}" />
+        </exec>
+    </target>
+</project>
+
