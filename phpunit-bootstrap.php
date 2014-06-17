@@ -7,4 +7,6 @@ $final_path = "$prod_path:$dev_path";
 
 set_include_path($final_path);
 
+require_once 'config/Dynamic-phpunit-MOCKED.php';
+
 require_once 'lib/vendor/autoload.php';

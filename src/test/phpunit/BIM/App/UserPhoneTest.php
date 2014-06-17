@@ -452,21 +452,6 @@ class BIM_App_UserPhoneTest extends PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function getUserPhoneDao_nothing_lazyLoads() {
-        // Arrange
-        $app = new BIM_App_UserPhone();
-
-        // Act
-        $dao = $app->getUserPhoneDao();
-
-        // Assert
-        assertThat( $dao, is(not(nullValue())) );
-        assertThat( $dao, is(anInstanceOf('BIM_DAO_Mysql_UserPhone')) );
-    }
-
-    /**
-     * @test
-     */
     public function getUserPhoneDao_setAll_identical() {
         // Arrange
         $app = new BIM_App_UserPhone();
