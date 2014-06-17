@@ -29,3 +29,7 @@ Thumbs.db
 /vendor/
 /composer.phar
 
+# Ant Build #
+#############
+/build/
+
