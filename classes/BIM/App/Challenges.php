@@ -372,7 +372,7 @@ class BIM_App_Challenges extends BIM_App_Base{
 
     public function sendFlagEmail( $volleyId, $userId ){
         // send email
-        $to = "bim.picchallenge@gmail.com";
+        $to = "support@getselfieclub.com";
         $subject = "Flagged Challenge";
         $body = "Challenge ID: #". $volleyId ."\nFlagged By User: #". $userId;
         $from = "picchallenge@builtinmenlo.com";
