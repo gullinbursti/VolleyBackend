@@ -12,8 +12,7 @@
 - Update `clubSmsInviteMsg()` in `classes/BIM/Config/Dynamic.php`:
 
         public static function clubSmsInviteMsg(){
-            return "[USERNAME] has invited you to receive their status updates. Reply YES or tap here >> Taps.io/selfieclub";
+            return "[USERNAME] has invited you to receive their status updates. Tap here >> Taps.io/selfieclub";
         }
-
 
 
