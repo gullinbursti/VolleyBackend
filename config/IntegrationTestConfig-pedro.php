@@ -11,7 +11,7 @@ class BIM_IntegrationTest_Config_Pedro
                 'clubId' => 40,
                 'userId' => 131820
             ),
-            'existent' => (object) array(
+            'nonexistent' => (object) array(
                 'clubId' => 0,
                 'userId' => 0
             )
