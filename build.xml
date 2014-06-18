@@ -6,10 +6,11 @@
     <property name="build.path" location="${basedir}/build" />
     <property name="build.bin.path" location="${build.path}/bin" />
     <property name="build.vendor.path" location="${basedir}/vendor" />
-
     <property name="vendor.bin.path" location="${build.vendor.path}/bin" />
+
     <property name="phpunit.path" location="${vendor.bin.path}/phpunit" />
     <property name="composer.phar.path" location="${build.bin.path}/composer.phar" />
+    <property name="composer.installer.path" location="${bin.path}/composer-installer.php" />
 
 
     <target name="build" depends="init,prepare,update-vendor-dir"
@@ -35,7 +36,7 @@
     <target name="install-composer-phar" depends="init,prepare"
             unless="${composer.phar.installed}"
             description="Build/install PHP Composer (composer-phar)">
-        <exec executable="${bin.path}/update-vendor-direr.php" failonerror="true">
+        <exec executable="${composer.installer.path}" failonerror="true">
             <arg value="&#45;&#45;install-dir=${build.bin.path}" />
         </exec>
     </target>
@@ -52,9 +53,20 @@
     <target name="test" depends="build"
             description="Run unit tests">
         <exec executable="${phpunit.path}" failonerror="true">
-            <arg value="&#45;&#45;configuration=config/phpunit.xml" />
+            <env key="BIM_PROJECT_BASE_DIR" value="${basedir}" />
+            <arg value="&#45;&#45;configuration=src/test/phpunit/phpunit.xml" />
             <arg value="&#45;&#45;testsuite=default" />
         </exec>
     </target>
+
+    <target name="test-live" depends="build"
+            description="Run unit tests">
+        <exec executable="${phpunit.path}" failonerror="true">
+            <env key="BIM_PROJECT_BASE_DIR" value="${basedir}" />
+            <arg value="&#45;&#45;configuration=src/test/phpunit/phpunit.xml" />
+            <arg value="&#45;&#45;testsuite=live" />
+        </exec>
+    </target>
+
 </project>
 
