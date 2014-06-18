@@ -1,0 +1,30 @@
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.1/phpunit.xsd"
+        bootstrap="./phpunit-bootstrap.php">
+
+    <testsuites>
+        <!--
+        - 'Default' testsuite only runs against mocked classes.  Never actually
+        - talks to services like MySQL.
+        - 
+        - Making it so that people have to <exclude> lessens the chance of
+        - missing tests.
+        -->
+        <testsuite name="default">
+            <directory>./BIM/</directory>
+            <exclude>./BIM/DAO/Mysql/UserPhoneTest.php</exclude>
+        </testsuite>
+
+        <!--
+        - 'live' testsuite runs against everything!  It will try to talk to
+        - and other services MySQL.
+        -
+        - *WARNING*
+        -       Use with care!!!
+        -->
+        <testsuite name="live">
+            <directory>./BIM/</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

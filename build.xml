@@ -1,39 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="VolleyBackend" default="build">
 
+    <property environment="env" />
+    <property file="${basedir}/project-local.properties" />
+    <property file="${env.HOME}/.ant/VolleyBackend.properties" />
+
+    <!-- If volleybackend.config.dynamic was not already set, make it blank.
+        Remeber, that once set a property cannot be changed. -->
+    <property name="volleybackend.config.dynamic" value="" />
+
     <property name="bin.path" location="${basedir}/bin" />
 
     <property name="build.path" location="${basedir}/build" />
     <property name="build.bin.path" location="${build.path}/bin" />
     <property name="build.vendor.path" location="${basedir}/vendor" />
+    <property name="vendor.bin.path" location="${build.vendor.path}/bin" />
 
-    <target name="build" depends="init,prepare,composer-install"
+    <property name="phpunit.path" location="${vendor.bin.path}/phpunit" />
+    <property name="composer.phar.path" location="${build.bin.path}/composer.phar" />
+    <property name="composer.installer.path" location="${bin.path}/composer-installer.php" />
+
+    <target name="build" depends="init,prepare,update-vendor-dir"
             description="Builds the project"/>
 
-    <target name="clean" depends="init" description="Cleanup build artifacts">
+    <target name="clean" description="Cleanup build artifacts">
         <delete dir="${build.path}"/>
         <delete dir="${build.vendor.path}"/>
     </target>
 
-    <target name="init" />
+    <target name="init">
+        <echo message="HERE ==> ${volleybackend.config.dynamic}" />
+        <available property="composer.phar.installed"
+                file="${build.bin.path}/composer.phar" />
+        <uptodate property="vendor.dir.uptodate"
+                targetfile="${build.vendor.path}" srcfile="composer.lock" />
+    </target>
 
     <target name="prepare" depends="init" description="Prepare for build">
         <mkdir dir="${build.path}"/>
         <mkdir dir="${build.bin.path}"/>
     </target>
 
-    <target name="composer-installer" depends="init,prepare"
-            description="Build/install PHP composer">
-        <exec executable="${bin.path}/composer-installer.php" failonerror="true">
-            <arg value="--install-dir=${build.bin.path}" />
+    <target name="install-composer-phar" depends="init,prepare"
+            unless="${composer.phar.installed}"
+            description="Build/install PHP Composer (composer-phar)">
+        <exec executable="${composer.installer.path}" failonerror="true">
+            <arg value="&#45;&#45;install-dir=${build.bin.path}" />
         </exec>
     </target>
 
-    <target name="composer-install" depends="init,prepare,composer-installer"
+    <target name="update-vendor-dir" depends="install-composer-phar"
+            unless="${vendor.dir.uptodate}"
             description="Install PHP dependencies using PHP composer">
-        <exec executable="${build.bin.path}/composer.phar" failonerror="true">
+        <exec executable="${composer.phar.path}" failonerror="true">
             <arg value="install" />
-            <arg value="--working-dir=${basedir}" />
+            <arg value="&#45;&#45;working-dir=${basedir}" />
+        </exec>
+    </target>
+
+    <target name="test" depends="build"
+            description="Run unit tests">
+        <exec executable="${phpunit.path}" failonerror="true">
+            <env key="BIM_PROJECT_BASE_DIR" value="${basedir}" />
+            <arg value="&#45;&#45;configuration=src/test/phpunit/phpunit.xml" />
+            <arg value="&#45;&#45;testsuite=default" />
+        </exec>
+    </target>
+
+    <target name="test-live" depends="build"
+            description="Run *LIVE* unit test, these run against MySQL, ElasticSearch, and more">
+        <exec executable="${phpunit.path}" failonerror="true">
+            <env key="BIM_PROJECT_BASE_DIR" value="${basedir}" />
+            <env key="BIM_CONFIG_DYNAMIC" value="${volleybackend.config.dynamic}" />
+            <arg value="&#45;&#45;configuration=src/test/phpunit/phpunit.xml" />
+            <arg value="&#45;&#45;testsuite=live" />
         </exec>
     </target>
 </project>
