@@ -7,6 +7,9 @@
         <!--
         - 'Default' testsuite only runs against mocked classes.  Never actually
         - talks to services like MySQL.
+        - 
+        - Making it so that people have to <exclude> lessens the chance of
+        - missing tests.
         -->
         <testsuite name="default">
             <directory>./BIM/</directory>

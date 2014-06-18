@@ -32,4 +32,4 @@ Thumbs.db
 # Ant Build #
 #############
 /build/
-
+/project-local.properties

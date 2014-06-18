@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="VolleyBackend" default="build">
 
+    <property environment="env" />
+    <property file="${basedir}/project-local.properties" />
+    <property file="${env.HOME}/.ant/VolleyBackend.properties" />
+
+    <!-- If volleybackend.config.dynamic was not already set, make it blank.
+        Remeber, that once set a property cannot be changed. -->
+    <property name="volleybackend.config.dynamic" value="" />
+
     <property name="bin.path" location="${basedir}/bin" />
 
     <property name="build.path" location="${basedir}/build" />
@@ -12,16 +20,16 @@
     <property name="composer.phar.path" location="${build.bin.path}/composer.phar" />
     <property name="composer.installer.path" location="${bin.path}/composer-installer.php" />
 
-
     <target name="build" depends="init,prepare,update-vendor-dir"
             description="Builds the project"/>
 
-    <target name="clean" depends="init" description="Cleanup build artifacts">
+    <target name="clean" description="Cleanup build artifacts">
         <delete dir="${build.path}"/>
         <delete dir="${build.vendor.path}"/>
     </target>
 
     <target name="init">
+        <echo message="HERE ==> ${volleybackend.config.dynamic}" />
         <available property="composer.phar.installed"
                 file="${build.bin.path}/composer.phar" />
         <uptodate property="vendor.dir.uptodate"
@@ -60,13 +68,13 @@
     </target>
 
     <target name="test-live" depends="build"
-            description="Run unit tests">
+            description="Run *LIVE* unit test, these run against MySQL, ElasticSearch, and more">
         <exec executable="${phpunit.path}" failonerror="true">
             <env key="BIM_PROJECT_BASE_DIR" value="${basedir}" />
+            <env key="BIM_CONFIG_DYNAMIC" value="${volleybackend.config.dynamic}" />
             <arg value="&#45;&#45;configuration=src/test/phpunit/phpunit.xml" />
             <arg value="&#45;&#45;testsuite=live" />
         </exec>
     </target>
-
 </project>
 
