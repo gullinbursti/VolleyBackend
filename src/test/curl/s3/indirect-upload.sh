@@ -7,6 +7,7 @@ file='test-image.png'
 fileSize=$(stat -c '%s' ${file})
 bucket='volley-test'
 contentType='image/png'
+acl='public-read'
 expiry=$(date '+%Y-%m-%dT23:59:59Z')
 
 read -d '' policy <<EOT
@@ -14,7 +15,7 @@ read -d '' policy <<EOT
   "conditions": [
     {"bucket": "${bucket}"},
     {"key": "${file}"},
-    {"acl": "public-read"},
+    {"acl": "${acl}"},
     {"Content-Type": "${contentType}"},
     ["content-length-range", ${fileSize}, ${fileSize}]
   ]
@@ -27,7 +28,7 @@ policySig=$(echo -n ${policyBase64} | openssl sha1 -hmac ${S3_SECRET} -binary | 
 
 curl -v https://${bucket}.s3.amazonaws.com/ \
     --form "key=${file}" \
-    --form "acl=public-read" \
+    --form "acl=${acl}" \
     --form "AWSAccessKeyId=${S3_KEY}" \
     --form "Policy=${policyBase64}" \
     --form "Signature=${policySig}" \
