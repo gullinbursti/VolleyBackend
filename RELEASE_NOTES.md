@@ -18,4 +18,18 @@
             return "[USERNAME] has invited you to receive their status updates. Tap here >> Taps.io/selfieclub";
         }
 
+- Add `nexmo()` to `classes/BIM/Config/Dynamic.php`.  Make sure to replace `CHANGE_ME` with the correct values:
+
+        public static function nexmo() {
+            return (object) array(
+                'apiKey' => 'CHANGE_ME',
+                'apiSecret' => 'CHANGE_ME',
+                'from' => '19189620405',
+                'twoFactorJsonEndpoint' => 'https://rest.nexmo.com/sc/us/2fa/json',
+                'sendSmsEndpoint' => 'https://rest.nexmo.com/sms/json'
+            );
+        }
+
+
+
 
