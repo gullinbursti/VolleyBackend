@@ -1,5 +1,5 @@
 <?php
-class BIM_IntegrationTest_Config_Pedro
+class Bim_IntegrationTest_Config
 {
     const BASE_URL = 'http://api-dev.letsvolley.com/api/pedro';
 

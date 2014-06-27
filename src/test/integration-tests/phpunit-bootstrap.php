@@ -15,10 +15,10 @@ $finalPath = "$prodPath:$devPath";
 set_include_path($finalPath);
 
 
-require_once 'config/IntegrationTestConfig-pedro.php';
+require_once 'test/Bim/IntegrationTest/Config.php';
 require_once 'IntegrationTestContext.php';
 
-$config = new BIM_IntegrationTest_Config_Pedro();
+$config = new Bim_IntegrationTest_Config();
 $context = BIM_IntegrationTest_IntegrationTestContext::getContext();
 $context->setConfiguration($config);
 
