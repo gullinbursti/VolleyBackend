@@ -29,7 +29,6 @@
     </target>
 
     <target name="init">
-        <echo message="HERE ==> ${volleybackend.config.dynamic}" />
         <available property="composer.phar.installed"
                 file="${build.bin.path}/composer.phar" />
         <uptodate property="vendor.dir.uptodate"
@@ -74,6 +73,15 @@
             <env key="BIM_CONFIG_DYNAMIC" value="${volleybackend.config.dynamic}" />
             <arg value="&#45;&#45;configuration=src/test/phpunit/phpunit.xml" />
             <arg value="&#45;&#45;testsuite=live" />
+        </exec>
+    </target>
+
+    <target name="test-integration" depends="init,prepare,update-vendor-dir"
+            description="Run *LIVE* integration tests a live service">
+        <exec executable="${phpunit.path}" failonerror="true">
+            <env key="BIM_PROJECT_BASE_DIR" value="${basedir}" />
+            <arg value="&#45;&#45;configuration=src/test/phpunit/phpunit.xml" />
+            <arg value="&#45;&#45;testsuite=default" />
         </exec>
     </target>
 </project>

@@ -5,7 +5,7 @@ require_once 'CurlHelpers.php';
 require_once 'ObjectHelpers.php';
 require_once 'CommonValidators.php';
 
-class BIM_integration_endpoint_ClubsTest extends PHPUnit_Framework_TestCase
+class Bim_IntegrationTest_ClubsTest extends PHPUnit_Framework_TestCase
 {
     //-------------------------------------------------------------------------
     // Action - get
