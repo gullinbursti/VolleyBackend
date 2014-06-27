@@ -5,7 +5,7 @@
 
     <testsuites>
         <testsuite name="default">
-            <directory>./lib/Bim/</directory>
+            <directory>./test/Bim/</directory>
         </testsuite>
     </testsuites>
 </phpunit>

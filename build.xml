@@ -78,9 +78,11 @@
 
     <target name="test-integration" depends="init,prepare,update-vendor-dir"
             description="Run *LIVE* integration tests a live service">
+        <fail unless="integration.test.url" message="'integration.test.url' property must be set" />
         <exec executable="${phpunit.path}" failonerror="true">
             <env key="BIM_PROJECT_BASE_DIR" value="${basedir}" />
-            <arg value="&#45;&#45;configuration=src/test/phpunit/phpunit.xml" />
+            <env key="BIM_INTEGRATION_TEST_BASE_URL" value="${integration.test.url}" />
+            <arg value="&#45;&#45;configuration=src/test/integration-tests/phpunit.xml" />
             <arg value="&#45;&#45;testsuite=default" />
         </exec>
     </target>

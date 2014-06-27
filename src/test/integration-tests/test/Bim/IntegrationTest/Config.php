@@ -1,12 +1,17 @@
 <?php
 class Bim_IntegrationTest_Config
 {
-    const BASE_URL = 'http://api-dev.letsvolley.com/api/pedro';
+    private $_baseUrl;
+
+    function __construct($baseUrl)
+    {
+        $this->_baseUrl = $baseUrl;
+    }
 
     public function clubsGet()
     {
         return (object) array(
-            'urlGet' => self::BASE_URL . '/clubs/get',
+            'urlGet' => $this->_baseUrl . '/clubs/get',
             'existent' => (object) array(
                 'clubId' => 40,
                 'userId' => 131820

@@ -2,6 +2,7 @@
 
 // Load environment variables
 $bimProjectBaseDir = getenv('BIM_PROJECT_BASE_DIR');
+$baseUrl = getenv('BIM_INTEGRATION_TEST_BASE_URL');
 
 // Set defaults
 $baseDir = !empty($bimProjectBaseDir)
@@ -18,7 +19,7 @@ set_include_path($finalPath);
 require_once 'test/Bim/IntegrationTest/Config.php';
 require_once 'IntegrationTestContext.php';
 
-$config = new Bim_IntegrationTest_Config();
+$config = new Bim_IntegrationTest_Config($baseUrl);
 $context = BIM_IntegrationTest_IntegrationTestContext::getContext();
 $context->setConfiguration($config);
 
