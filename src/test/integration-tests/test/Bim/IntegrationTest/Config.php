@@ -8,6 +8,9 @@ class Bim_IntegrationTest_Config
         $this->_baseUrl = $baseUrl;
     }
 
+    //-------------------------------------------------------------------------
+    // Clubs
+    //-------------------------------------------------------------------------
     public function clubsGet()
     {
         return (object) array(
@@ -23,6 +26,9 @@ class Bim_IntegrationTest_Config
         );
     }
 
+    //-------------------------------------------------------------------------
+    // Users
+    //-------------------------------------------------------------------------
     public function usersGetSubscribees()
     {
         return (object) array(
@@ -33,6 +39,14 @@ class Bim_IntegrationTest_Config
             'nonexistent' => (object) array(
                 'userId' => 0
             )
+        );
+    }
+
+    public function usersProcessImage()
+    {
+        return (object) array(
+            'url' => $this->_baseUrl . '/users/processImage',
+            'imgUrl' => 'https://hotornot-challenges.s3.amazonaws.com/86793eee81144ca9ae32c4e7544457a6-bcafe25a99b64c8db308cbe77b07854e_1400615027'
         );
     }
 

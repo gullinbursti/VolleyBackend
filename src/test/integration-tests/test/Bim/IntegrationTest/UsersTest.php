@@ -111,6 +111,39 @@ class Bim_IntegrationTest_UsersTest extends PHPUnit_Framework_TestCase
     }
 
     //-------------------------------------------------------------------------
+    // Action - processImage()
+    //-------------------------------------------------------------------------
+    /**
+     * @test
+     */
+    public function processImage_validRequest_validResponse()
+    {
+        $config = $this->getConfiguration()->usersProcessImage();
+        $url = $config->url;
+        $imgUrl = $config->imgUrl;
+
+        // Arrange
+        $expected_properties = array( 'result' );
+        $queryData = (object) array(
+            'imgURL' => $imgUrl
+        );
+
+        // Act
+        $response = curlPostQueryReturnJson( $url, $queryData );
+        $jsonResponse = $response->httpBodyJson;
+
+        // Assert
+        validateCurlResponse( $response );
+        assertThat( $jsonResponse, is(anObject()) );
+
+        $props = getProperties( $jsonResponse );
+        assertThat( $props,
+            is(arrayContainingInAnyOrder($expected_properties))
+        );
+        assertThat( $jsonResponse->result, is(equalTo(true)) );
+    }
+
+    //-------------------------------------------------------------------------
     // Test helpers
     //-------------------------------------------------------------------------
     protected function getConfiguration()
