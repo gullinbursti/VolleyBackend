@@ -23,5 +23,18 @@ class Bim_IntegrationTest_Config
         );
     }
 
+    public function usersGetSubscribees()
+    {
+        return (object) array(
+            'url' => $this->_baseUrl . '/users/getSubscribees',
+            'existent' => (object) array(
+                'userId' => 64846
+            ),
+            'nonexistent' => (object) array(
+                'userId' => 0
+            )
+        );
+    }
+
 }
 ?>

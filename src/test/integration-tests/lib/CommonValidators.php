@@ -9,9 +9,25 @@ function validateDateTimeString( $dateTime )
     assertThat($dateTime, matchesPattern($dateTimeRegex));
 }
 
+function validateEpoc( $epoc )
+{
+    assertThat( $epoc, is(numericValue()) );
+    assertThat( $epoc, is(greaterThan(0)) );
+}
+
 function validateId( $id )
 {
     assertThat( $id, is(numericValue()) );
+}
+
+function validateUsername( $username )
+{
+    assertThat( $username, is(stringValue()) );
+}
+
+function validateUrl( $url )
+{
+    assertThat( $url, is(stringValue()) );
 }
 
 function validateClubType( $type )
