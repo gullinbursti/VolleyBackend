@@ -12,6 +12,7 @@ class BIM_Integration_Nexmo_TwoFactorAuth {
         //----
         // Prepare for call
         $endPoint = $this->_config->twoFactorJsonEndpoint;
+
         $query = array(
             'api_key' => $this->_config->apiKey,
             'api_secret' => $this->_config->apiSecret,
@@ -23,6 +24,7 @@ class BIM_Integration_Nexmo_TwoFactorAuth {
         // HTTP POST Content-Type is application/x-www-form-urlencoded.
         // Anything else will likely cause problems with Nexmo.
         $queryString = http_build_query( $query );
+        $queryString = str_replace( '%2B', '+', "$queryString" );
 
         $curlOptions = array(
             CURLOPT_POST => true,
