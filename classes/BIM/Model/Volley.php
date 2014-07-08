@@ -330,6 +330,11 @@ class BIM_Model_Volley{
             $dao->mapChallengeToSubject($volleyId, $currentTagId);
         }
 
+        $club = BIM_Model_Club::get($clubId);
+        if ( $club->isExtant()  ) {
+            $club->purgeFromCache();
+        }
+
         BIM_Model_User::purgeById( array( $userId ) );
         return self::get( $volleyId );
     }
