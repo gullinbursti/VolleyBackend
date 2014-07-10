@@ -23,6 +23,6 @@
         }
     ],
     "require": {
-
+        "massivescale/celery-php": "dev-master"
     }
 }
