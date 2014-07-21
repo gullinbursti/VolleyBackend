@@ -30,10 +30,18 @@ class BIM_App_Clubs extends BIM_App_Base{
             $invited = $club->invite( $users, $nonUsers );
             if( $invited ){
                 self::notifyInvitees($clubId, $users, $nonUsers);
+                self::postInvitationEvents($clubId, $ownerId, $users, $nonUsers);
                 //BIM_Jobs_Clubs::queueNotifyInvitees($clubId, $users, $nonUsers);
             }
         }
         return $invited;
+    }
+
+    public static function postInvitationEvents( $clubId, $actorMemberId, $invitees, $nonUsers ) {
+        $eventDispatcher = new BIM_EventDispatcher_Club();
+        foreach ( $invitees as $inviteeMemberId ) {
+            $eventDispatcher->invitationToMember($clubId, $actorMemberId, $inviteeMemberId);
+        }
     }
 
     public static function notifyInvitees( $clubId, $users, $nonUsers ) {
