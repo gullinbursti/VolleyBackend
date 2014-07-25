@@ -334,6 +334,16 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         return $clubs;
     }
 
+    public function getOtherUsersClubs() {
+        $clubs = array();
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty( $input->userID ) ){
+            $clubs = BIM_App_Users::getClubs( $input->userID );
+        }
+
+        return $clubs;
+    }
+
     public function getClubInvites(){
         $clubs = array();
         $input = (object) ($_POST ? $_POST : $_GET);
