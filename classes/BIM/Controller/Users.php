@@ -334,6 +334,16 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         return $clubs;
     }
 
+    public function getOtherUsersClubs() {
+        $clubs = array();
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty( $input->userID ) ){
+            $clubs = BIM_App_Users::getClubs( $input->userID );
+        }
+
+        return $clubs;
+    }
+
     public function getClubInvites(){
         $clubs = array();
         $input = (object) ($_POST ? $_POST : $_GET);
@@ -342,6 +352,25 @@ class BIM_Controller_Users extends BIM_Controller_Base {
             $clubs = BIM_App_Users::getClubInvites( $input->userID );
         }
         return $clubs;
+    }
+
+    public function setDeviceToken() {
+        $response = (object) array();
+        $response->result = false;
+
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if( empty($input->userID) || empty($input->token) ) {
+            return $response;
+        }
+
+        $input->userID = $this->resolveUserId($input->userID);
+        $user = BIM_Model_User::get($input->userID);
+        if ($user && $user->isExtant()) {
+            $user->setDeviceToken($input->token);
+            $response->result = true;
+        }
+
+        return $response;
     }
 
     public function purge(){
