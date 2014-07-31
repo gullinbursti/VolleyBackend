@@ -29,8 +29,8 @@ class BIM_App_Clubs extends BIM_App_Base{
         if( $club->isOwner($ownerId) ){
             $invited = $club->invite( $users, $nonUsers );
             if( $invited ){
-                self::notifyInvitees($clubId, $users, $nonUsers);
                 self::postInvitationEvents($clubId, $ownerId, $users, $nonUsers);
+                self::notifyInvitees($clubId, $users, $nonUsers);
                 //BIM_Jobs_Clubs::queueNotifyInvitees($clubId, $users, $nonUsers);
             }
         }
