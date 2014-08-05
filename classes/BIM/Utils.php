@@ -336,7 +336,7 @@ class BIM_Utils{
     public static function resize( $image, $width, $height ){
         $image->setImagePage(0,0,0,0);
         $image->setImageResolution( $width, $height );
-        $image->resizeImage($width, $height,imagick::FILTER_LANCZOS,0);
+        $image->resizeImage($width, $height, imagick::FILTER_LANCZOS, 0);
     }
 
     public static function cropX( $image, $width, $height ){
