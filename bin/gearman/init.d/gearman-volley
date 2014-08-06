@@ -1,8 +1,8 @@
 #! /bin/sh
 ### BEGIN INIT INFO
 # Provides:          gearman-volley
-# Required-Start:    $remote_fs $syslog gearman-job-server
-# Required-Stop:     $remote_fs $syslog gearman-job-server
+# Required-Start:    $all $remote_fs $syslog gearman-job-server
+# Required-Stop:     $all $remote_fs $syslog gearman-job-server
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: gearman-volley initscript
@@ -106,16 +106,15 @@ do_stop()
     RETVAL="$?"
     [ "$RETVAL" = 2 ] && return 2
 
-    # Try and use the PHP gearman worker code to stop
-    "$DAEMON" \
-        --define include_path="$PHP_INCLUDE_PATH" \
-        "$VOLLEY_START_WORKER" \
-        -c "$VOLLEY_CONFIG" \
-        -p "$PIDFILE" \
-        -d \
-        -k stop
-    RETVAL="$?"
-    [ "$RETVAL" != 0 ] && return $RETVAL
+    # # Try and use the PHP gearman worker code to stop
+    # "$DAEMON" \
+    #     --define include_path="$PHP_INCLUDE_PATH" \
+    #     "$VOLLEY_START_WORKER" \
+    #     -c "$VOLLEY_CONFIG" \
+    #     -p "$PIDFILE" \
+    #     -k stop
+    # RETVAL="$?"
+    # [ "$RETVAL" != 0 ] && return $RETVAL
 
     # Wait for children to finish too if this is a daemon that forks
     # and if the daemon is only ever run from this initscript.
@@ -132,7 +131,7 @@ do_stop()
         --exec $DAEMON
     [ "$?" = 2 ] && return 2
     # Many daemons don't delete their pidfiles when they exit.
-    rm -f "$PIDFILE" "$PIDFILE.*"
+    rm -f $PIDFILE $PIDFILE.*
     return "$RETVAL"
 }
 
