@@ -38,9 +38,13 @@ class BIM_App_Clubs extends BIM_App_Base{
     }
 
     public static function postInvitationEvents( $clubId, $actorMemberId, $invitees, $nonUsers ) {
-        $eventDispatcher = new BIM_EventDispatcher_Club();
-        foreach ( $invitees as $inviteeMemberId ) {
-            $eventDispatcher->invitationToMember($clubId, $actorMemberId, $inviteeMemberId);
+        if ( count($invitees) >= 1 && $clubId && $actorMemberId ) {
+            $eventDispatcher = new BIM_EventDispatcher_Club();
+            if ( is_object($eventDispatcher) ) {
+                foreach ( $invitees as $inviteeMemberId ) {
+                    $eventDispatcher->invitationToMember($clubId, $actorMemberId, $inviteeMemberId);
+                }
+            }
         }
     }
 
