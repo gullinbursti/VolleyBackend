@@ -117,8 +117,20 @@ class BIM_App_Clubs extends BIM_App_Base{
         $joined = false;
         if( $club->isExtant() ){
             $joined = $club->join( $userId );
+            if( $joined ){
+                self::postJoinEvent($clubId, $userId);
+            }
         }
         return $joined;
+    }
+
+    public static function postJoinEvent( $clubId, $joinerId) {
+        if ( $clubId && $joinerId) {
+            $eventDispatcher = new BIM_EventDispatcher_Club();
+            if ( is_object($eventDispatcher) ) {
+                $eventDispatcher->memberJoined($clubId, $joinerId);
+            }
+        }
     }
 
     public static function quit( $clubId, $userId ){
