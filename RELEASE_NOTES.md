@@ -1,5 +1,22 @@
 # Release Notes
 
+## SC0006
+
+- Add `eventDispatcher()` to `classes/BIM/Config/Dynamic.php`.  Make sure to replace `CHANGE_ME` with the correct values:
+
+        public static function eventDispatcher() {
+            return (object) array(
+                'enabled' => true,
+                'celery' => (object) array(
+                    'host' => 'CHANGE_ME',
+                    'user' => 'CHANGE_ME',
+                    'password' => 'CHANGE_ME',
+                    'virtual_host' => '/'
+                ),
+            );
+        }
+
+
 ## SC0005
 
 - Update database schema changes:
