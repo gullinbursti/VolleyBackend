@@ -30,7 +30,7 @@ class BIM_App_Clubs extends BIM_App_Base{
             $invited = $club->invite( $users, $nonUsers );
             if( $invited ){
                 self::postInvitationEvents($clubId, $ownerId, $users, $nonUsers);
-                self::notifyInvitees($clubId, $users, $nonUsers);
+                //self::notifyInvitees($clubId, $users, $nonUsers);
                 //BIM_Jobs_Clubs::queueNotifyInvitees($clubId, $users, $nonUsers);
             }
         }
@@ -38,17 +38,31 @@ class BIM_App_Clubs extends BIM_App_Base{
     }
 
     public static function postInvitationEvents( $clubId, $actorMemberId, $invitees, $nonUsers ) {
-        if ( count($invitees) >= 1 && $clubId && $actorMemberId ) {
+        if ( $clubId && $actorMemberId && (count($invitees) >= 1 || count($nonUsers) >= 1)) {
             $eventDispatcher = new BIM_EventDispatcher_Club();
             if ( is_object($eventDispatcher) ) {
+                if (count($invitees) >= 1) {
+                    $dao = new BIM_DAO_Mysql_UserPhone( BIM_Config::db() );
+                }
                 foreach ( $invitees as $inviteeMemberId ) {
-                    $eventDispatcher->invitationToMember($clubId, $actorMemberId, $inviteeMemberId);
+                    $memberPhoneObject = $dao->readExistingByUserId( $inviteeMemberId );
+                    if ($memberPhoneObject) {
+                        $memberSMS = BIM_Utils::blowfishDecrypt($memberPhoneObject->phone_number_enc);
+                    } else {
+                        $memberSMS = null;
+                    }
+                    $eventDispatcher->invitationToMember($clubId, $actorMemberId, $inviteeMemberId, $memberSMS);
+                }
+                foreach ( $nonUsers as $nonUser ) {
+                    if ($nonUser[1]) {
+                        $eventDispatcher->invitationToNonMember($clubId, $actorMemberId, $nonUser[1]);
+                    }
                 }
             }
         }
     }
 
-    public static function notifyInvitees( $clubId, $users, $nonUsers ) {
+    /* public static function notifyInvitees( $clubId, $users, $nonUsers ) {
         $numbers = array();
         $emails = array();
         foreach( $nonUsers as $user ){
@@ -67,9 +81,9 @@ class BIM_App_Clubs extends BIM_App_Base{
 
         self::smsInvites( $numbers, $clubId );
         self::emailInvites( $emails, $clubId );
-    }
+    } */
 
-    public static function smsInvites( $numbers, $clubId ){
+    /* public static function smsInvites( $numbers, $clubId ){
         if( !is_array( $numbers ) ){
             $numbers = array( $numbers );
         }
@@ -94,7 +108,7 @@ class BIM_App_Clubs extends BIM_App_Base{
                 // TODO - Add some kind of error handling
             }
         }
-    }
+    } */
 
     public static function emailInvites($addys, $clubId){
         $emailData = BIM_Config::clubEmailInvite();
