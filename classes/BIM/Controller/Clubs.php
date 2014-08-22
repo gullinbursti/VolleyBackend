@@ -63,7 +63,6 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
             $inviterId = $this->resolveUserId($input->userID);
             $nonUsers = !empty( $input->nonUsers ) ? self::extractUsers( $input->nonUsers ) : array();
             $users = !empty( $input->users ) ? explode(',', $input->users ) : array();
-            error_log("Invite with " . count($users) . " users and " . count($nonUsers) . " non-users");
             $invited = BIM_App_Clubs::invite( $input->clubID, $inviterId, $users, $nonUsers );
         }
         return $invited;

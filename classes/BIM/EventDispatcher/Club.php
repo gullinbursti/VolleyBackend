@@ -1,11 +1,11 @@
 <?php
 class BIM_EventDispatcher_Club extends BIM_EventDispatcher_Base {
 
-    public function invitationToMember( $clubId, $actorMemberId, $inviteeMemberId ) {
+    public function invitationToMember( $clubId, $actorMemberId, $inviteeMemberId, $inviteePhoneNumber ) {
         $utc = new DateTimeZone("UTC");
         $now = new DateTime( "now", $utc );
         $nowString = $now->format(DateTime::ISO8601);
-        $this->dispatchEvent('club.tasks.invitation_sent', $clubId, $actorMemberId, $inviteeMemberId, $nowString);
+        $this->dispatchEvent('club.tasks.invitation_sent', $clubId, $actorMemberId, $inviteeMemberId, $inviteePhoneNumber, $nowString);
     }
 
     public function invitationToNonMember( $clubId, $actorMemberId, $inviteePhoneNumber ) {

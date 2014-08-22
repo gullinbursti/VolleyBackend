@@ -41,8 +41,17 @@ class BIM_App_Clubs extends BIM_App_Base{
         if ( $clubId && $actorMemberId && (count($invitees) >= 1 || count($nonUsers) >= 1)) {
             $eventDispatcher = new BIM_EventDispatcher_Club();
             if ( is_object($eventDispatcher) ) {
+                if (count($invitees) >= 1) {
+                    $dao = new BIM_DAO_Mysql_UserPhone( BIM_Config::db() );
+                }
                 foreach ( $invitees as $inviteeMemberId ) {
-                    $eventDispatcher->invitationToMember($clubId, $actorMemberId, $inviteeMemberId);
+                    $memberPhoneObject = $dao->readExistingByUserId( $inviteeMemberId );
+                    if ($memberPhoneObject) {
+                        $memberSMS = BIM_Utils::blowfishDecrypt($memberPhoneObject->phone_number_enc);
+                    } else {
+                        $memberSMS = null;
+                    }
+                    $eventDispatcher->invitationToMember($clubId, $actorMemberId, $inviteeMemberId, $memberSMS);
                 }
                 foreach ( $nonUsers as $nonUser ) {
                     if ($nonUser[1]) {
