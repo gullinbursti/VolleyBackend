@@ -1,5 +1,11 @@
 # Release Notes
 
+## SC0007
+
+- **TODO** - Fill me in...
+
+
+
 ## SC0006
 
 - Add `eventDispatcher()` to `classes/BIM/Config/Dynamic.php`.  Make sure to replace `CHANGE_ME` with the correct values:
