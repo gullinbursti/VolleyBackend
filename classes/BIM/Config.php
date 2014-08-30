@@ -249,6 +249,7 @@ class BIM_Config{
         		'10' => 'flagUser',
         		'11' => 'matchFriends',
         		'12' => 'inviteInsta',
+                        '13' => 'getUserFromPhone',
             ),
             'BIM_Controller_Discover' => array(
         		'0' => 'test',

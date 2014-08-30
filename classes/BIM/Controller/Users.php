@@ -208,6 +208,21 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         return $friends;
     }
 
+    public function getUserFromPhone(){
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if ( isset( $input->userID ) && isset( $input->phone ) ){
+            $input->userID = $this->resolveUserId( $input->userID );
+            $hashedNumber = BIM_Utils::blowfishEncrypt($input->phone);
+            $params = (object) array(
+                'id' => $input->userID,
+                'hashedNumber' => $hashedNumber,
+            );
+            $users = new BIM_App_Users();
+            $matches = $users->matchFriend( $params );
+        }
+        return $matches;
+    }
+
     public function twilioCallback(){
         $input = (object) ($_POST ? $_POST : $_GET);
         $users = new BIM_App_Users();
