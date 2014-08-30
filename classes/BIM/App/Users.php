@@ -316,6 +316,13 @@ class BIM_App_Users extends BIM_App_Base{
         return $finalMatched;
     }
 
+    public function matchFriend( $params ){
+        $matches = $this->findFriend($params, true);
+        $finalMatched = array_values($matches);
+        $this->decodeMatchFriends( $finalMatched );
+        return $finalMatched;
+    }
+
     protected function decodeMatchFriends( $friends ) {
         foreach ( $friends as $friend ) {
             $phone = $friend->hashed_number;
@@ -332,6 +339,29 @@ class BIM_App_Users extends BIM_App_Base{
     public function matchFriendsEmail( $params ){
         $list = $this->addEmailList($params);
         return $this->findfriendsEmail($list);
+    }
+
+    public function findfriend( $params, $assoc = false ){
+        $dao = new BIM_DAO_ElasticSearch_ContactLists( BIM_Config::elasticSearch() );
+        $hits = $dao->findFriend( $params, $assoc );
+        $hits = json_decode($hits);
+        $matches = array();
+        if( isset( $hits->hits->hits ) && is_array($hits->hits->hits) ){
+            $hits = &$hits->hits->hits;
+            foreach( $hits as $hit ){
+                $hit = $hit->fields->_source;
+                $user = BIM_Model_User::get( $hit->id );
+                if( $user->isExtant() ){
+                    $hit->username = $user->username;
+                    if( $assoc ){
+                        $matches[ $hit->id ] = $hit;
+                    } else {
+                        $matches[] = $hit;
+                    }
+                }
+            }
+        }
+        return $matches;
     }
 
     public function findfriends( $list, $assoc = false ){

@@ -46,6 +46,30 @@ class BIM_DAO_ElasticSearch_ContactLists extends BIM_DAO_ElasticSearch {
         return $this->call('POST', $urlSuffix, $query);
     }
 
+    public function findFriend( $params ){
+        if (isset( $params->hashedNumber )) {
+            $from = isset( $params->from ) ? $params->from : 0;
+            $size = isset( $params->size ) ? $params->size : 100;
+            $query = array(
+                "from" => $from,
+                "size" => $size,
+                "query" => array(
+                    "query_string" => array(
+                        "fields" => array("hashed_number"),
+                        "query" => $params->hashedNumber,
+                    )
+                ),
+                "partial_fields" => array(
+                    "_source" => array(
+                        "exclude" => "hashed_list"
+                    )
+                )
+            );
+            $urlSuffix = "contact_lists/phone/_search";
+            return $this->call('POST', $urlSuffix, $query);
+        }
+    }
+
     public function findFriends( $params ){
         $hashedNumber = isset( $params->hashed_number ) ? $params->hashed_number : '';
         $hashedList = isset( $params->hashed_list ) ? $params->hashed_list : array();

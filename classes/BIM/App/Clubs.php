@@ -44,6 +44,10 @@ class BIM_App_Clubs extends BIM_App_Base{
                 if (count($invitees) >= 1) {
                     $dao = new BIM_DAO_Mysql_UserPhone( BIM_Config::db() );
                 }
+                $actorPhoneObject = $dao->readExistingByUserId( $actorMemberId );
+                if ($actorPhoneObject) {
+                    $actorSMS = BIM_Utils::blowfishDecrypt($actorPhoneObject->phone_number_enc);
+                }
                 foreach ( $invitees as $inviteeMemberId ) {
                     $memberPhoneObject = $dao->readExistingByUserId( $inviteeMemberId );
                     if ($memberPhoneObject) {
