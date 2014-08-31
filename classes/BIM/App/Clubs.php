@@ -41,13 +41,7 @@ class BIM_App_Clubs extends BIM_App_Base{
         if ( $clubId && $actorMemberId && (count($invitees) >= 1 || count($nonUsers) >= 1)) {
             $eventDispatcher = new BIM_EventDispatcher_Club();
             if ( is_object($eventDispatcher) ) {
-                if (count($invitees) >= 1) {
-                    $dao = new BIM_DAO_Mysql_UserPhone( BIM_Config::db() );
-                }
-                $actorPhoneObject = $dao->readExistingByUserId( $actorMemberId );
-                if ($actorPhoneObject) {
-                    $actorSMS = BIM_Utils::blowfishDecrypt($actorPhoneObject->phone_number_enc);
-                }
+                $dao = new BIM_DAO_Mysql_UserPhone( BIM_Config::db() );
                 foreach ( $invitees as $inviteeMemberId ) {
                     $memberPhoneObject = $dao->readExistingByUserId( $inviteeMemberId );
                     if ($memberPhoneObject) {
@@ -57,9 +51,32 @@ class BIM_App_Clubs extends BIM_App_Base{
                     }
                     $eventDispatcher->invitationToMember($clubId, $actorMemberId, $inviteeMemberId, $memberSMS);
                 }
-                foreach ( $nonUsers as $nonUser ) {
-                    if ($nonUser[1]) {
-                        $eventDispatcher->invitationToNonMember($clubId, $actorMemberId, $nonUser[1]);
+                if (count($nonUsers) >= 1) {
+                    /**
+                     * We want to ensure submitted numbers have country codes.
+                     * We'll start by focusing on N.America, so if the inviter
+                     * has "+1" as the first two digits, and the invitee has
+                     * only ten digits (and the first isn't '+', we'll add "+1"
+                     * for N.America. Many U.S. people don't store +1 in their
+                     * phones.
+                     */
+                    $actorPrefix = null;
+                    $actorPhoneObject = $dao->readExistingByUserId( $actorMemberId );
+                    if ($actorPhoneObject) {
+                        $actorSMS = BIM_Utils::blowfishDecrypt($actorPhoneObject->phone_number_enc);
+                        $actorPrefix = substr($actorSMS, 0, 2);
+                    }
+                    foreach ( $nonUsers as $nonUser ) {
+                        if ($nonUser[1]) {
+                            $inviteePhone = $nonUser[1];
+                            if ('+1' == $actorPrefix && '+' != substr($inviteePhone, 0, 1)) {
+                                // No + means this could be a sloppy number
+                                if (10 == strlen($inviteePhone)) {
+                                    $inviteePhone = '1' . $inviteePhone;
+                                }
+                            }
+                            $eventDispatcher->invitationToNonMember($clubId, $actorMemberId, $inviteePhone);
+                        }
                     }
                 }
             }
