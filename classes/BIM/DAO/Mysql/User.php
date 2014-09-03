@@ -377,6 +377,18 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         return $id;
     }
 
+    public function getIdByPhone( $phone ){
+        $id = null;
+        $sql = "select id from `hotornot-dev`.tblUsers where email = ?";
+        $params = array( $phone );
+        $stmt = $this->prepareAndExecute( $sql, $params );
+        $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+        if( $data ){
+            $id = $data[0]->id;
+        }
+        return $id;
+    }
+
     public function getDataByUsername( $username ){
         $sql = "select * from `hotornot-dev`.tblUsers where username = ?";
         $params = array( $username );
