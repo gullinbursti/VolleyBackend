@@ -51,6 +51,22 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         return $result;
     }
 
+    public function checkUsername(){
+        $result = null;
+        $input = (object) ($_POST ? $_POST : $_GET);
+        if ( !empty($input->userID) && !empty($input->username)){
+            $existingUserId = BIM_Model_User::getIdByUsername( $input->username );
+            if ($existingUserId) {
+                $result = (object) array('found' => true, 'status' => 'OK');
+            } else {
+                $result = (object) array('found' => false, 'status' => 'OK');
+            }
+        } else {
+            $result = (object) array('status' => 'ERROR', 'error' => 'BAD_INPUT');
+        }
+        return $result;
+    }
+
     public function checkNameAndEmail(){
         $result = null;
         $input = (object) ($_POST ? $_POST : $_GET);
