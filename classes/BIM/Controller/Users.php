@@ -62,7 +62,11 @@ class BIM_Controller_Users extends BIM_Controller_Base {
             } else {
                 $existingUserId = BIM_Model_User::getIdByUsername( $username );
                 if ($existingUserId) {
-                    $result = (object) array('found' => true, 'status' => 'OK');
+                    if ($existingUserId == $input->userID) {
+                        $result = (object) array('found' => true, 'status' => 'SELF');
+                    } else {
+                        $result = (object) array('found' => true, 'status' => 'OK');
+                    }
                 } else {
                     $result = (object) array('found' => false, 'status' => 'OK');
                 }
@@ -85,7 +89,11 @@ class BIM_Controller_Users extends BIM_Controller_Base {
             } else {
                 $existingUserId = BIM_Model_User::getIdByPhone( $phone );
                 if ($existingUserId) {
-                    $result = (object) array('found' => true, 'status' => 'OK');
+                    if ($existingUserId == $input->userID) {
+                        $result = (object) array('found' => true, 'status' => 'SELF');
+                    } else {
+                        $result = (object) array('found' => true, 'status' => 'OK');
+                    }
                 } else {
                     $result = (object) array('found' => false, 'status' => 'OK');
                 }
