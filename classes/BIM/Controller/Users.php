@@ -51,6 +51,51 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         return $result;
     }
 
+    public function checkUsername(){
+        $result = null;
+        $input = (object) ($_POST ? $_POST : $_GET);
+        $username = filter_var(trim($input->username), FILTER_SANITIZE_STRING,
+            array('options'=>array(FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH)));
+        if ( !empty($input->userID) && !empty($username)){
+            if ( $username != $input->username ){
+                $result = (object) array('status' => 'ERROR', 'error' => 'BAD_INPUT');
+            } else {
+                $existingUserId = BIM_Model_User::getIdByUsername( $username );
+                if ($existingUserId) {
+                    $result = (object) array('found' => true, 'status' => 'OK');
+                } else {
+                    $result = (object) array('found' => false, 'status' => 'OK');
+                }
+            }
+        } else {
+            $result = (object) array('status' => 'ERROR', 'error' => 'BAD_INPUT');
+        }
+        return $result;
+    }
+
+    public function checkPhone(){
+        $regexp = '/^(\+?)(\d+)$/';
+        $result = null;
+        $input = (object) ($_POST ? $_POST : $_GET);
+        $phone = filter_var($input->phone, FILTER_VALIDATE_REGEXP,
+            array('options'=>array('regexp'=>$regexp)));
+        if ( !empty($input->userID) && !empty($phone)){
+            if ( $phone != $input->phone ){
+                $result = (object) array('status' => 'ERROR', 'error' => 'BAD_INPUT');
+            } else {
+                $existingUserId = BIM_Model_User::getIdByPhone( $phone );
+                if ($existingUserId) {
+                    $result = (object) array('found' => true, 'status' => 'OK');
+                } else {
+                    $result = (object) array('found' => false, 'status' => 'OK');
+                }
+            }
+        } else {
+            $result = (object) array('status' => 'ERROR', 'error' => 'BAD_INPUT');
+        }
+        return $result;
+    }
+
     public function checkNameAndEmail(){
         $result = null;
         $input = (object) ($_POST ? $_POST : $_GET);

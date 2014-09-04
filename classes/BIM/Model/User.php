@@ -622,6 +622,18 @@ delete from tblUsers where username like "%yoosnapyoo";
         return $user;
     }
 
+    public static function getIdByUsername( $name, $forceDb = false ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        $id = $dao->getIdByUsername( $name );
+        return $id;
+    }
+
+    public static function getIdByPhone( $phone, $forceDb = false ){
+        $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
+        $id = $dao->getIdByPhone( $phone );
+        return $id;
+    }
+
     public static function getByUsername( $name, $forceDb = false ){
         $me = null;
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
