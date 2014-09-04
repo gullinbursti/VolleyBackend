@@ -63,12 +63,12 @@ class BIM_Controller_Users extends BIM_Controller_Base {
                 $existingUserId = BIM_Model_User::getIdByUsername( $username );
                 if ($existingUserId) {
                     if ($existingUserId == $input->userID) {
-                        $result = (object) array('found' => true, 'status' => 'SELF');
+                        $result = (object) array('found' => true, 'self' => true, 'status' => 'OK');
                     } else {
-                        $result = (object) array('found' => true, 'status' => 'OK');
+                        $result = (object) array('found' => true, 'self' => false, 'status' => 'OK');
                     }
                 } else {
-                    $result = (object) array('found' => false, 'status' => 'OK');
+                    $result = (object) array('found' => false, 'self' => false, 'status' => 'OK');
                 }
             }
         } else {
@@ -90,12 +90,12 @@ class BIM_Controller_Users extends BIM_Controller_Base {
                 $existingUserId = BIM_Model_User::getIdByPhone( $phone );
                 if ($existingUserId) {
                     if ($existingUserId == $input->userID) {
-                        $result = (object) array('found' => true, 'status' => 'SELF');
+                        $result = (object) array('found' => true, 'self' => true, 'status' => 'OK');
                     } else {
-                        $result = (object) array('found' => true, 'status' => 'OK');
+                        $result = (object) array('found' => true, 'self' => false, 'status' => 'OK');
                     }
                 } else {
-                    $result = (object) array('found' => false, 'status' => 'OK');
+                    $result = (object) array('found' => false, 'self' => 'false', 'status' => 'OK');
                 }
             }
         } else {
