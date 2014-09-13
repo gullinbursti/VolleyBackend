@@ -158,6 +158,19 @@ class BIM_Model_Volley{
     private function _setSubject( $me ) {
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
         $subjects = $dao->getChallengeSubjectTitles( $me->id );
+        $emotionTitles = array();
+        $emotionJson = $dao->getChallengeEmotionJson($me->id);
+        if ($emotionJson) {
+            $emotionIds = json_decode($emotionJson);
+            if ($emotionIds) {
+                foreach ($emotionIds as $emotionId) {
+                    $emotionTitles[] = $dao->getEmotionTitle($emotionId);
+                }
+            }
+        }
+        $this->subjects = $emotionTitles;
+
+        /**
         if ( property_exists( $me, 'subject' ) && !empty($me->subject) ) {
             $subjects[] = $me->subject;
         }
@@ -166,6 +179,7 @@ class BIM_Model_Volley{
             array_map('strtolower',$subjects)));
 
         $this->subjects = $subjects;
+        */
     }
 
     private static function _getReplySubjects( $replyId, $subject ) {
@@ -318,17 +332,13 @@ class BIM_Model_Volley{
     public static function create( $userId, $hashTag, $imgUrl, $targetIds = array(), $isPrivate = false, $expires = -1,
             $isVerify = false, $status = 2, $clubId = 0, $hashTags = '' ) {
         $volleyId = null;
-        $hashTagIds = self::_processHashTags( $userId, $hashTag, $hashTags );
-        $hashTagId = $hashTagIds[0];
+        $emotionIds = self::_getEmotionIds($hashTags);
 
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-        $volleyId = $dao->add( $userId, $targetIds, $hashTagId, $hashTag, $imgUrl, $isPrivate, $expires, $isVerify,
+        $volleyId = $dao->add( $userId, $targetIds, '', '', $imgUrl, $isPrivate, $expires, $isVerify,
                 $status, $clubId );
 
-        foreach ( $hashTagIds as $currentTagId ) {
-            // TODO - Should be turned into a multi call to save on performance
-            $dao->mapChallengeToSubject($volleyId, $currentTagId);
-        }
+        $dao->storeChallengeEmotions($volleyId, $emotionIds);
 
         $club = BIM_Model_Club::get($clubId);
         if ( $club->isExtant()  ) {
@@ -337,6 +347,24 @@ class BIM_Model_Volley{
 
         BIM_Model_User::purgeById( array( $userId ) );
         return self::get( $volleyId );
+    }
+
+    private static function _getEmotionIds($emotions)
+    {
+        $emotionIds = array();
+        if (!empty($emotions)) {
+            $dao = new BIM_DAO_Mysql_Volleys(BIM_Config::db());
+            $emotionJson = json_decode($emotions);
+            if ($emotionJson) {
+                foreach ($emotionJson as $emotion) {
+                    $emotionId = $dao->getEmotionId($emotion);
+                    if ($emotionId) {
+                        $emotionIds[] = $emotionId;
+                    }
+                }
+            }
+        }
+        return $emotionIds;
     }
 
     private static function _processHashTags( $userId, $hashTag, $hashTags ) {

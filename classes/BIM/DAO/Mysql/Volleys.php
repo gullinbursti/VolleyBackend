@@ -139,6 +139,32 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         return $id;
     }
 
+    public function getEmotionId($emotionTitle)
+    {
+        $id = null;
+        $sql = 'SELECT id FROM `hotornot-dev`.tbl_emotion WHERE title = ? LIMIT 1';
+        $params = array($emotionTitle);
+        $stmt = $this->prepareAndExecute($sql, $params);
+        $data = $stmt->fetchAll(PDO::FETCH_CLASS, 'stdClass');
+        if ($data) {
+            $id = $data[0]->id;
+        }
+        return $id;
+    }
+
+    public function getEmotionTitle($emotionId)
+    {
+        $title = null;
+        $sql = 'SELECT title FROM `hotornot-dev`.tbl_emotion WHERE id = ? LIMIT 1';
+        $params = array($emotionId);
+        $stmt = $this->prepareAndExecute($sql, $params);
+        $data = $stmt->fetchAll(PDO::FETCH_CLASS, 'stdClass');
+        if ($data) {
+            $title = $data[0]->title;
+        }
+        return $title;
+    }
+
     public function getMulti( $ids ){
 
         //$ids = array_splice($ids, 254);
@@ -1322,6 +1348,25 @@ limit 20
         ";
         $params = array( $volleyId, $targetVolleyId, $targetUserId );
         $this->prepareAndExecute( $sql, $params );
+    }
+
+    public function storeChallengeEmotions($challengeId, $emotionIds)
+    {
+        $count = count($emotionIds);
+        $json = json_encode($emotionIds);
+        $sql = "INSERT IGNORE INTO `hotornot-dev`.tbl_status_update_emotion (status_update_id, emotion_id_count, emotion_id_json) VALUE (?, ?, ?)";
+        $params = array($challengeId, $count, $json);
+        $this->prepareAndExecute($sql, $params);
+    }
+
+    public function getChallengeEmotionJson($challengeId)
+    {
+        $sql = "SELECT emotion_id_json FROM `hotornot-dev`.tbl_status_update_emotion WHERE status_update_id = ?";
+        $params = array($challengeId);
+        $stmt = $this->prepareAndExecute($sql, $params);
+        $jsonRows = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+        $json = $jsonRows[0];
+        return $json;
     }
 
     public function mapChallengeToSubject( $challengeId, $subjectId ) {

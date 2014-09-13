@@ -5,6 +5,7 @@
 - Update database schema changes: 
 
         mysql -u root hotornot-dev < VolleyBackend/bin/data_schemas/hotornot-dev-schema-sc0007-00.sql
+        mysql -u root hotornot-dev < VolleyBackend/bin/data_schemas/hotornot-dev-schema-sc0007-01.sql
 
 
 ## SC0006
