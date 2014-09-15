@@ -1,6 +1,6 @@
 # Release Notes
 
-## SC0007
+## SC0009
 
 - Update database schema changes: 
 
