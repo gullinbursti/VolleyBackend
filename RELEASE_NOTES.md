@@ -8,6 +8,10 @@
         mysql -u root hotornot-dev < VolleyBackend/bin/data_schemas/hotornot-dev-schema-sc0007-01.sql
         mysql -u root hotornot-dev < VolleyBackend/bin/data_schemas/hotornot-dev-schema-sc0007-02.sql
 
+- Migrate data (after setting hostname and password inside script):
+
+        python VolleyBackend/bin/data/migrate_emotions.py
+
 
 ## SC0006
 
