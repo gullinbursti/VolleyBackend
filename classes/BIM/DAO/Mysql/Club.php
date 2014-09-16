@@ -159,10 +159,11 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         if( $insertSql ){
             $insertSql = join( ',', $insertSql );
             $sql = "
-                INSERT IGNORE INTO `hotornot-dev`.club_member
+                INSERT INTO `hotornot-dev`.club_member
                 ( club_id, extern_name, mobile_number, email )
                 VALUES
                 $insertSql
+                ON DUPLICATE KEY UPDATE invited=NOW()
             ";
             $this->prepareAndExecute( $sql, $params );
             $invited = (bool) $this->rowCount;
@@ -180,10 +181,11 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         if( $insertSql ){
             $insertSql = join( ',', $insertSql );
             $sql = "
-                INSERT IGNORE INTO `hotornot-dev`.club_member
+                INSERT INTO `hotornot-dev`.club_member
                 ( club_id, user_id, invited )
                 VALUES
                 $insertSql
+                ON DUPLICATE KEY UPDATE invited=NOW()
             ";
             $this->prepareAndExecute( $sql, $params );
         }
