@@ -170,7 +170,7 @@ class BIM_Model_Volley{
         }
         $this->subjects = $emotionTitles;
 
-        /**
+        /** TODO: Delete this once it's confirmed on devint that it isn't needed
         if ( property_exists( $me, 'subject' ) && !empty($me->subject) ) {
             $subjects[] = $me->subject;
         }
@@ -367,6 +367,7 @@ class BIM_Model_Volley{
         return $emotionIds;
     }
 
+    // TODO: Delete once the join() method that calls it is deleted
     private static function _processHashTags( $userId, $hashTag, $hashTags ) {
         $hashTagArray = array();
         if ( !empty($hashTag) ) {
@@ -509,6 +510,7 @@ class BIM_Model_Volley{
         return $canJoin;
     }
 
+    // TODO: Delete this entire method, as @matt.holcombe says it isn't used
     // $userId, $imgUrl
     public function join( $userId, $imgUrl, $hashTag = '', $hashTags = '' ){
         if( $this->canJoin($userId) ){
