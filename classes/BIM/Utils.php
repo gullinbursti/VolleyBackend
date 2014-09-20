@@ -23,6 +23,9 @@ class BIM_Utils{
 
     public static function hashList( &$list ){
         foreach( $list as &$value ){
+            if (10 == strlen($value)) {
+                $value = '+1' . $value;
+            }
             $value = self::blowfishEncrypt($value);
         }
     }
