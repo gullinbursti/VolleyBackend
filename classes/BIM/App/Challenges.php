@@ -129,14 +129,27 @@ class BIM_App_Challenges extends BIM_App_Base{
                 if( $clubId ){
                     $club = BIM_Model_Club::get( $clubId );
                     $targets = $club->getMemberIds();
+                    self::postStatusUpdateEvent($volley->id, $userId, $clubId, $targets);
                 } else if( !$targets || !is_array($targets) ){
                     $followers = BIM_App_Social::getFollowers( $creator->id, true );
                     $targets = array_keys($followers);
                 }
-                BIM_Push::sendVolleyNotifications( $volley->id, $targets );
             }
         }
         return $volley;
+    }
+
+    public static function postStatusUpdateEvent($updateId, $creatorId, $clubId, $memberIds) {
+        if ($updateId && $creatorId && $clubId && is_array($memberIds)) {
+            $eventDispatcher = new BIM_EventDispatcher_StatusUpdate();
+            if (is_object($eventDispatcher)) {
+                foreach ($memberIds as $memberId) {
+                    if ($memberId != $creatorId) {
+                        $eventDispatcher->post_status_update($clubId, $creatorId, $memberId);
+                    }
+                }
+            }
+        }
     }
 
     protected static function reminderTime(){
