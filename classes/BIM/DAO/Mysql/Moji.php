@@ -16,7 +16,7 @@ class BIM_DAO_Mysql_Moji extends BIM_DAO_Mysql{
         if( $insertSql ){
             $insertSql = join( ',', $insertSql );
             $sql = "
-                INSERT IGNORE INTO `hotornot-dev`.moji_invite
+                INSERT IGNORE INTO `hotornot-dev`.tbl_moji_invite
                 ( member_id, emoji, mobile_number )
                 VALUES
                 $insertSql
