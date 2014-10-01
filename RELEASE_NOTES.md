@@ -1,5 +1,12 @@
 # Release Notes
 
+## SC0008
+
+- Update database schema changes: 
+
+        echo "RENAME TABLE moji_invite TO tbl_moji_invite" | mysql -u root hotornot-dev
+
+
 ## SC0007
 
 - Update database schema changes: 
