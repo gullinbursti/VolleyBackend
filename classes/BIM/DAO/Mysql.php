@@ -167,7 +167,7 @@ class BIM_DAO_Mysql extends BIM_DAO{
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $params );
         if( !preg_match('/^(?:00|01|IM)/', $stmt->errorCode() ) ){
-            error_log( get_class( $this ). ' ' . $stmt->errorCode(). ' ' .$stmt->errorInfo() . ' ' .$sql );
+            error_log( get_class( $this ). ' ' . $stmt->errorCode(). ' ' .print_r($stmt->errorInfo(), true). ' ' .$sql );
             // do some error handling
         }
         $this->lastInsertId = $conn->lastInsertId();
