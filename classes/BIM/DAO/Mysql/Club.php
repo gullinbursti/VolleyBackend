@@ -287,8 +287,9 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         return (bool) $this->rowCount;
     }
 
-    public function getUnsentInvites($beforeDate = '2014-09-01') {
-        $sql = "
+    public function getUnsentInvites($beforeDate) {
+        if ($beforeDate) {
+            $sql = "
             SELECT club_id,
                    owner_id,
                    mobile_number
@@ -298,10 +299,13 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
                AND mobile_number IS NOT NULL
                AND pending = 1
                AND user_id IS NULL
-        ";
-        $params = array($beforeDate);
-        $stmt = $this->prepareAndExecute( $sql, $params );
-        $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+            ";
+            $params = array($beforeDate);
+            $stmt = $this->prepareAndExecute( $sql, $params );
+            $data = $stmt->fetchAll( PDO::FETCH_CLASS, 'stdClass' );
+        } else {
+            $data = null;
+        }
         return $data;
     }
 
