@@ -75,6 +75,7 @@ class BIM_App_UserPhone extends BIM_App_Base {
 
         if ( $verified ) {
             $userApp = $this->getUserApp();
+            $userApp->convertInvitations($userId, $phone);
             $params = (object) array(
                 'phone' => $phone,
                 'user_id' => $userId

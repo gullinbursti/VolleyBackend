@@ -565,6 +565,11 @@ class BIM_App_Users extends BIM_App_Base{
         return $verified;
     }
 
+    public function convertInvitations( $userId, $phoneNumber ){
+        $eventDispatcher = new BIM_EventDispatcher_User();
+        $eventDispatcher->convertInvitations($userId, $phoneNumber);
+    }
+
     public function verifyPhone( $params ){
         $friends = array();
         $phone = trim( $params->phone );
