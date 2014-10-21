@@ -17,6 +17,7 @@ class BIM_Cache {
 	}
 	
     public function set( $key, &$data, $exp = 0, $local = true ){
+        return false;
         $return = false;
         if( $this->cacheObj ){
             self::startProfiling();
