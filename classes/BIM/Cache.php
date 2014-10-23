@@ -17,7 +17,7 @@ class BIM_Cache {
 	}
 	
     public function set( $key, &$data, $exp = 0, $local = true ){
-        return false;
+        return false; // Disabling gently
         $return = false;
         if( $this->cacheObj ){
             self::startProfiling();
@@ -44,6 +44,7 @@ class BIM_Cache {
     }
     
     public function get( $key, $local = true ){
+        return false; // Disabling gently
         $data = false;
         //$d = debug_backtrace();
         //error_log( print_r( array($key, $d[2]['function'], $d[1]['function'] ), 1) );
@@ -62,6 +63,7 @@ class BIM_Cache {
     }
     
     public function getMulti( $keys, $local = true ){
+        return array(); // Disabling gently
         $return = array();
         if( $local ){
             $newKeys = array();
