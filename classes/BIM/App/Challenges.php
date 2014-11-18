@@ -111,19 +111,19 @@ class BIM_App_Challenges extends BIM_App_Base{
     /**
      * Submits a new challenge to a specific user
      * @param $user_id The user submitting the challenge (integer)
-     * @param $subject The challenge's subject (string)
+     * @param $text The challenge's text subject (string)
      * @param $img_url The URL to the challenge's image (string)
      * @param $challenger_id The ID of the user to target (integer)
      * @return An associative object for a challenge (array)
     **/
-    public function submitChallengeWithChallenger($userId, $hashTag, $imgUrl, $isPrivate, $expires, $targets = array(),
+    public function submitChallengeWithChallenger($userId, $text, $imgUrl, $isPrivate, $expires, $targets = array(),
             $clubId = 0, $hashTags = '' ) {
         $volley = null;
         $creator = BIM_Model_User::get( $userId );
         if ( $creator->isExtant() ) {
             $isVerify = false;
             $status = 2;
-            $volley = BIM_Model_Volley::create($creator->id, $hashTag, $imgUrl, $targets, $isPrivate, $expires,
+            $volley = BIM_Model_Volley::create($creator->id, $text, $imgUrl, $targets, $isPrivate, $expires,
                     $isVerify, $status, $clubId, $hashTags );
             if( $volley->isExtant() ){
                 if( $clubId ){
@@ -159,14 +159,14 @@ class BIM_App_Challenges extends BIM_App_Base{
     /**
      * Submits a new challenge to a specific user
      * @param $user_id The user submitting the challenge (integer)
-     * @param $subject The challenge's subject (string)
+     * @param $text The challenge's text subject (string)
      * @param $img_url The URL to the challenge's image (string)
      * @param $username array | string the username(s) of the user to target (string)
      * @return An associative object for a challenge (array)
     **/
-    public function submitChallengeWithUsername($userId, $hashTag, $imgUrl, $isPrivate, $expires, $targets = array(),
+    public function submitChallengeWithUsername($userId, $text, $imgUrl, $isPrivate, $expires, $targets = array(),
             $clubId = 0, $hashTags = '' ) {
-                return $this->submitChallengeWithChallenger($userId, $hashTag, $imgUrl, $isPrivate, $expires, $targets, $clubId,
+                return $this->submitChallengeWithChallenger($userId, $text, $imgUrl, $isPrivate, $expires, $targets, $clubId,
                         $hashTags );
     }
 
