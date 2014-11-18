@@ -286,7 +286,7 @@ class BIM_Controller_Challenges extends BIM_Controller_Base {
                     ? $input->subjects : "";
 
                 $uv = $challenges->submitChallengeWithUsername( $userId, $input->subject, $input->imgURL, $isPrivate,
-                        $expires, $targets, $clubId, $subjects );
+                        $expires, $targets, $clubId, $subjects, $input->challengeID );
             }
         }
 
