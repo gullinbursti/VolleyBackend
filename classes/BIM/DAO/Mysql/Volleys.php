@@ -66,7 +66,7 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         $this->prepareAndExecute( $sql, $params );
     }
 
-    public function add( $userId, $targetIds = array(), $hashTagId, $hashTag, $imgUrl, $isPrivate = false, $expires, $isVerify = false, $status = 2, $clubId = 0 ){
+    public function add( $userId, $targetIds = array(), $hashTagId, $hashTag, $imgUrl, $isPrivate = false, $expires, $isVerify = false, $status = 2, $clubId = 0, $parentId = 0 ){
         // cast isPrivate and isverify to an int
         // to be compatible with the db
         $isPrivate = (int) $isPrivate;
@@ -76,14 +76,14 @@ class BIM_DAO_Mysql_Volleys extends BIM_DAO_Mysql{
         $sql = '
             INSERT INTO `hotornot-dev`.tblChallenges
                 (
-                status_id, subject_id, subject, creator_id, creator_img, votes,
+                parent_id, status_id, subject_id, subject, creator_id, creator_img, votes,
                 updated, started, added, is_private, expires, is_verify, club_id
                 )
             VALUES
-                (?, ?, ?, ?, ?, "0", NOW(), NOW(), NOW(), ?, ?, ?, ? )
+                (?, ?, ?, ?, ?, ?, "0", NOW(), NOW(), NOW(), ?, ?, ?, ? )
         ';
 
-        $params = array($status, $hashTagId, $hashTag, $userId, $imgUrl, $isPrivate, $expires, $isVerify, $clubId);
+        $params = array($parentId, $status, $hashTagId, $hashTag, $userId, $imgUrl, $isPrivate, $expires, $isVerify, $clubId);
         $this->prepareAndExecute( $sql, $params );
         $volleyId = $this->lastInsertId;
 
