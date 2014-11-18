@@ -329,13 +329,13 @@ class BIM_Model_Volley{
         return $dao->hasApproved( $this->id, $userId );
     }
 
-    public static function create( $userId, $hashTag, $imgUrl, $targetIds = array(), $isPrivate = false, $expires = -1,
+    public static function create( $userId, $text, $imgUrl, $targetIds = array(), $isPrivate = false, $expires = -1,
             $isVerify = false, $status = 2, $clubId = 0, $hashTags = '' ) {
         $volleyId = null;
         $emotionIds = self::_getEmotionIds($hashTags);
 
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
-        $volleyId = $dao->add( $userId, $targetIds, '', '', $imgUrl, $isPrivate, $expires, $isVerify,
+        $volleyId = $dao->add( $userId, $targetIds, '', $text, $imgUrl, $isPrivate, $expires, $isVerify,
                 $status, $clubId );
 
         $dao->storeChallengeEmotions($volleyId, $emotionIds);
