@@ -17,6 +17,7 @@ class BIM_Model_Volley{
             $this->parent_id = $volley->parent_id;
             $this->status = $volley->status_id;
             $this->_setSubject($volley);
+            $this->text = $volley->subject;
             $this->comments = 0; //$dao->commentCount( $volley->id );
             $this->viewed = array();
             $this->has_viewed = '';
@@ -54,7 +55,6 @@ class BIM_Model_Volley{
             $this->creator = $creator;
             $this->resolveScore($creator);
 
-            $this->text = $volley->subject;
             $this->is_explore = $volley->is_explore;
             $this->is_celeb = BIM_Utils::isCelebrity( $volley->creator_id );
 
