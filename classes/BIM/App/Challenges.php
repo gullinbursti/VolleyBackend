@@ -117,14 +117,14 @@ class BIM_App_Challenges extends BIM_App_Base{
      * @return An associative object for a challenge (array)
     **/
     public function submitChallengeWithChallenger($userId, $text, $imgUrl, $isPrivate, $expires, $targets = array(),
-            $clubId = 0, $hashTags = '' ) {
+            $clubId = 0, $hashTags = '', $parentId = 0 ) {
         $volley = null;
         $creator = BIM_Model_User::get( $userId );
         if ( $creator->isExtant() ) {
             $isVerify = false;
             $status = 2;
             $volley = BIM_Model_Volley::create($creator->id, $text, $imgUrl, $targets, $isPrivate, $expires,
-                    $isVerify, $status, $clubId, $hashTags );
+                    $isVerify, $status, $clubId, $hashTags, $parentId );
             if( $volley->isExtant() ){
                 if( $clubId ){
                     $club = BIM_Model_Club::get( $clubId );
@@ -165,9 +165,9 @@ class BIM_App_Challenges extends BIM_App_Base{
      * @return An associative object for a challenge (array)
     **/
     public function submitChallengeWithUsername($userId, $text, $imgUrl, $isPrivate, $expires, $targets = array(),
-            $clubId = 0, $hashTags = '' ) {
+            $clubId = 0, $hashTags = '', $parentId = 0) {
                 return $this->submitChallengeWithChallenger($userId, $text, $imgUrl, $isPrivate, $expires, $targets, $clubId,
-                        $hashTags );
+                        $hashTags, $parentId );
     }
 
     /**

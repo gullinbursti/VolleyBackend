@@ -6,6 +6,12 @@
 
         echo "RENAME TABLE moji_invite TO tbl_moji_invite" | mysql -u root hotornot-dev
 
+- Also, at a Mysql prompt:
+
+        use hotornot-dev;
+        ALTER TABLE `tblChallenges` ADD COLUMN `parent_id` INT(10) UNSIGNED DEFAULT 0 AFTER `id`;
+        ALTER TABLE `tblChallenges` ADD KEY `parent_id` (`parent_id`);
+
 
 ## SC0007
 

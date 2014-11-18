@@ -14,8 +14,10 @@ class BIM_Model_Volley{
 
         if( $volley && property_exists($volley,'id') ){
             $this->id = $volley->id;
+            $this->parent_id = $volley->parent_id;
             $this->status = $volley->status_id;
             $this->_setSubject($volley);
+            $this->text = $volley->subject;
             $this->comments = 0; //$dao->commentCount( $volley->id );
             $this->viewed = array();
             $this->has_viewed = '';
@@ -169,17 +171,6 @@ class BIM_Model_Volley{
             }
         }
         $this->subjects = $emotionTitles;
-
-        /** TODO: Delete this once it's confirmed on devint that it isn't needed
-        if ( property_exists( $me, 'subject' ) && !empty($me->subject) ) {
-            $subjects[] = $me->subject;
-        }
-
-        $subjects = array_intersect_key($subjects,array_unique(
-            array_map('strtolower',$subjects)));
-
-        $this->subjects = $subjects;
-        */
     }
 
     private static function _getReplySubjects( $replyId, $subject ) {
@@ -330,13 +321,13 @@ class BIM_Model_Volley{
     }
 
     public static function create( $userId, $text, $imgUrl, $targetIds = array(), $isPrivate = false, $expires = -1,
-            $isVerify = false, $status = 2, $clubId = 0, $hashTags = '' ) {
+            $isVerify = false, $status = 2, $clubId = 0, $hashTags = '', $parentId = 0) {
         $volleyId = null;
         $emotionIds = self::_getEmotionIds($hashTags);
 
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
         $volleyId = $dao->add( $userId, $targetIds, '', $text, $imgUrl, $isPrivate, $expires, $isVerify,
-                $status, $clubId );
+                $status, $clubId, $parentId );
 
         $dao->storeChallengeEmotions($volleyId, $emotionIds);
 

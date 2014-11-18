@@ -95,12 +95,13 @@ class BIM_Model_Club{
     private function _convertSubmission( $volley ) {
         $submission = (object) array();
         $submission->challenge_id = $volley->id;
+        $submission->parent_id = $volley->parent_id;
         $submission->user_id = $volley->creator->id;
         $submission->username = $volley->creator->username;
         $submission->avatar = $volley->creator->avatar;
         $submission->added = $volley->added;
         $submission->img = $volley->creator->img;
-        $submission->text = ($volley->subject ? $volley->subject : "");
+        $submission->text = ($volley->text ? $volley->text : "");
         $submission->subjects = $volley->creator->subjects;
         $this->_updateUpdatedIfNewer( $volley->updated );
 
