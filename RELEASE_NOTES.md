@@ -2,15 +2,14 @@
 
 ## SC0008
 
-- Update database schema changes: 
+- Apply database schema changes: 
+-- Rename `moji_invite` to `tbl_moji_invite`:
 
-        echo "RENAME TABLE moji_invite TO tbl_moji_invite" | mysql -u root hotornot-dev
+        mysql -u root hotornot-dev < VolleyBackend/bin/data_schemas/hotornot-dev-schema-sc0008-00.sql
 
-- Also, at a Mysql prompt:
+-- Alter `tblChallenges` to add the `parent_id` column:
 
-        use hotornot-dev;
-        ALTER TABLE `tblChallenges` ADD COLUMN `parent_id` INT(10) UNSIGNED DEFAULT 0 AFTER `id`;
-        ALTER TABLE `tblChallenges` ADD KEY `parent_id` (`parent_id`);
+        mysql -u root hotornot-dev < VolleyBackend/bin/data_schemas/hotornot-dev-schema-sc0008-01.sql
 
 
 ## SC0007
