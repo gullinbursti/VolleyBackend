@@ -32,6 +32,9 @@ class BIM_Controller_Users extends BIM_Controller_Base {
 
     public function firstRunComplete(){
         $input = (object) ($_POST ? $_POST : $_GET);
+        if (!isset($input->sku)) {
+            $input->sku = 'selfieclub';
+        }
         $result = (object) array('result' => "fail");
         if (!empty($input->userID) && !empty($input->username) && !empty($input->imgURL) && !empty( $input->age ) && !empty( $input->password ) ){
             $input->email = $input->password;
@@ -43,7 +46,9 @@ class BIM_Controller_Users extends BIM_Controller_Base {
                 $input->imgURL = $this->normalizeAvatarImgUrl($input->imgURL);
                 $device_token = empty($input->token) ? '' : $input->token;
                 $users = new BIM_App_Users();
-                $result = $users->updateUsernameAvatarFirstRun($userId, $input->username, $input->imgURL, $input->age, $input->email, true, $device_token );
+                $result = $users->updateUsernameAvatarFirstRun($input->sku,
+                    $userId, $input->username, $input->imgURL, $input->age,
+                    $input->email, true, $device_token );
                 self::friendTeamVolley($userId);
                 //BIM_Jobs_Users::queueFirstRunComplete($userId);
             }
@@ -107,6 +112,9 @@ class BIM_Controller_Users extends BIM_Controller_Base {
     public function checkNameAndEmail(){
         $result = null;
         $input = (object) ($_POST ? $_POST : $_GET);
+        if (!isset($input->sku)) {
+            $input->sku = 'selfieclub';
+        }
         if ( !empty($input->userID) && !empty($input->username) && !empty( $input->password ) ){
             $input->email = $input->password;
             unset( $input->password );
@@ -115,7 +123,9 @@ class BIM_Controller_Users extends BIM_Controller_Base {
             $userId = $this->resolveUserId( $input->userID );
             if ( !$result  || $existingUser->id == $userId ) {
                 $users = new BIM_App_Users();
-                $result = $users->updateUsernameAvatarFirstRun($userId, $input->username, '', -1, $input->email, false, BIM_Utils::getDeviceToken() );
+                $result = $users->updateUsernameAvatarFirstRun($input->sku,
+                    $userId, $input->username, '', -1, $input->email, false,
+                    BIM_Utils::getDeviceToken() );
                 $result = (object) array('result' => 0 );
             }
         }

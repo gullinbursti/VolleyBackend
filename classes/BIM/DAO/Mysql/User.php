@@ -463,10 +463,11 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
         return $date;
     }
 
-    public function updateUsernameAvatarFirstRun( $userId, $username, $imgUrl, $birthdate, $email = null, $deviceToken = '' ){
+    public function updateUsernameAvatarFirstRun($sku, $userId, $username,
+            $imgUrl, $birthdate, $email = null, $deviceToken = '') {
         $ageSql = $passSql = '';
         $email = $email?:'';
-        $params = array( $username, $imgUrl, $userId );
+        $params = array($sku, $username, $imgUrl, $userId);
 
         $notifications = 'N';
         if( $deviceToken ){
@@ -477,17 +478,18 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
             $birthdate = new DateTime( $birthdate );
             $birthdate = $birthdate->format('U');
             $ageSql = ' age = ?,';
-            $params = array( $username, $imgUrl, $birthdate, $userId );
+            $params = array($sku, $username, $imgUrl, $birthdate, $userId);
         }
 
         if( $email ){
             $passSql = ' email = ?,';
-            $params = array( $username, $imgUrl, $birthdate, $email );
+            $params = array($sku, $username, $imgUrl, $birthdate, $email);
         }
 
         $query = "
             UPDATE `hotornot-dev`.tblUsers
-            SET username = ?,
+            SET sku_id = (SELECT id FROM `hotornot-dev`.tbl_sku WHERE name = ?),
+                username = ?,
                 img_url = ?,
                 $ageSql
                 $passSql
