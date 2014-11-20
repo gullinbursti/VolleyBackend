@@ -33,7 +33,7 @@ class BIM_Controller_Users extends BIM_Controller_Base {
     public function firstRunComplete(){
         $input = (object) ($_POST ? $_POST : $_GET);
         if (!isset($input->sku)) {
-            $input->sku = 'selfieclub';
+            return (object) array('result' => "fail");
         }
         $result = (object) array('result' => "fail");
         if (!empty($input->userID) && !empty($input->username) && !empty($input->imgURL) && !empty( $input->age ) && !empty( $input->password ) ){
@@ -113,7 +113,7 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         $result = null;
         $input = (object) ($_POST ? $_POST : $_GET);
         if (!isset($input->sku)) {
-            $input->sku = 'selfieclub';
+            return (object) array('result' => "fail");
         }
         if ( !empty($input->userID) && !empty($input->username) && !empty( $input->password ) ){
             $input->email = $input->password;
