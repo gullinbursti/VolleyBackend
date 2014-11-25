@@ -405,8 +405,11 @@ class BIM_Controller_Users extends BIM_Controller_Base {
     public function getOtherUsersClubs() {
         $clubs = array();
         $input = (object) ($_POST ? $_POST : $_GET);
+        if( !empty( $input->sort ) && !in_array( $input->sort, array('new', 'me', 'top') ) ) {
+            return $clubs;
+        }
         if( !empty( $input->userID ) ){
-            $clubs = BIM_App_Users::getClubs( $input->userID );
+            $clubs = BIM_App_Users::getClubs( $input->userID, $input->sort );
         }
 
         return $clubs;
