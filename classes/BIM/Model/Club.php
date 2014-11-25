@@ -308,7 +308,7 @@ class BIM_Model_Club{
      * to reduce trips to the db and network
      *
     **/
-    public static function getMulti( $ids, $assoc = false ) {
+    public static function getMulti( $ids, $assoc = false, $sort = NULL ) {
         $keys = self::makeCacheKeys( $ids );
         $cache = new BIM_Cache( BIM_Config::cache() );
         $objs = $cache->getMulti( $keys );
