@@ -716,18 +716,45 @@ class BIM_Model_Volley{
         return BIM_Utils::makeCacheKeys('volley', $ids);
     }
 
-    public static function getClubVolleys( $clubId ) {
+    public static function getClubVolleys( $clubId, $sort = NULL ) {
         $dao = new BIM_DAO_Mysql_Volleys( BIM_Config::db() );
         $ids = $dao->getVolleyIdsInClub( $clubId );
 
         if (sizeof($ids) > 0) {
             $volleys = self::getMulti( $ids );
+            if ($sort) {
+                if ('new' == $sort || 'me' == $sort) {
+                    usort($volleys, function($a, $b) {
+                        return ($a->added > $b->added) ? -1 : 1;
+                    });
+                    if ('me' == $sort) {
+                        $cuser = BIM_Utils::getSessionUser();
+                        if( $cuser && $cuser->isExtant() && !$cuser->isSuspended() ){
+                            $filteredVolleys = [];
+                            foreach ($volleys as $volley) {
+                                if ($volley->creator->id == $cuser->id) {
+                                    $filteredVolleys[] = $volley;
+                                }
+                            }
+                            $volleys = $filteredVolleys;
+                        }
+                    }
+                } elseif ('top' == $sort) {
+                    usort($volleys, function($a, $b) {
+                        if ($a->score == $b->score) {
+                            return ($a->added > $b->added) ? -1 : 1;
+                        }
+                        return ($a->score > $b->score) ? -1 : 1;
+                    });
+                }
+            }
         } else {
             $volleys = array();
         }
 
         return $volleys;
     }
+
 
     /**
      *
