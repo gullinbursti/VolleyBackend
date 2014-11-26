@@ -70,9 +70,12 @@ class BIM_App_Users extends BIM_App_Base{
      * @param $img_url The url to the avatar (string)
      * @return An associative object representing a user (array)
     **/
-    public function updateUsernameAvatarFirstRun( $userId, $username, $imgUrl, $birthdate = null, $email = null, $createVerifyVolley = true, $deviceToken = '' ) {
+    public function updateUsernameAvatarFirstRun($sku, $userId, $username,
+            $imgUrl, $birthdate = null, $email = null,
+            $createVerifyVolley = true, $deviceToken = '' ) {
         $user = BIM_Model_User::get($userId);
-        $user->updateUsernameAvatarFirstRun( $username, $imgUrl, $birthdate, $email, $deviceToken  );
+        $user->updateUsernameAvatarFirstRun($sku, $username, $imgUrl,
+            $birthdate, $email, $deviceToken  );
         if( $createVerifyVolley ){
             BIM_Model_Volley::addVerifVolley($userId, $imgUrl); // will create a verify volley if one does not yet exist
         }

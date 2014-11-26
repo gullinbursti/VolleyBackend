@@ -349,14 +349,16 @@ delete from tblUsers where username like "%yoosnapyoo";
         }
     }
 
-    public function updateUsernameAvatarFirstRun( $username, $imgUrl, $birthdate = null, $password = null, $deviceToken = '' ){
+    public function updateUsernameAvatarFirstRun($sku, $username, $imgUrl,
+            $birthdate = null, $password = null, $deviceToken = ''){
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
         if( empty($this->avatar_url) ||  ! preg_match('@defaultAvatar@i', $imgUrl) ){
             $this->avatar_url = $imgUrl;
         } else if( !empty($this->avatar_url) && preg_match('@defaultAvatar@i', $imgUrl) ){
             $imgUrl = $this->avatar_url;
         }
-        $dao->updateUsernameAvatarFirstRun( $this->id, $username, $imgUrl, $birthdate, $password, $deviceToken );
+        $dao->updateUsernameAvatarFirstRun($sku, $this->id, $username, $imgUrl,
+            $birthdate, $password, $deviceToken );
         $this->username = $username;
         if( !empty($birthdate) ){
             $this->age = $birthdate;
@@ -1193,7 +1195,7 @@ delete from tblUsers where username like "%yoosnapyoo";
                 $deviceToken = !empty($input->device_token) ? $input->device_token : 'kik_'.uniqid(true);
                 $birthdate = '1970-01-01';
 
-                $app->updateUsernameAvatarFirstRun($user->id, $username, $input->pic, $birthdate, $email, true, $deviceToken);
+                $app->updateUsernameAvatarFirstRun('selfieclub', $user->id, $username, $input->pic, $birthdate, $email, true, $deviceToken);
                 $user->username = $username;
 
                 $input->bim_id = $user->id;
