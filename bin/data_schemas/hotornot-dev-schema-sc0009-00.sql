@@ -20,3 +20,6 @@ INSERT INTO `tbl_sku` (`name`, `description`, `updated`, `created`)
 
 ALTER TABLE `tblUsers` ADD COLUMN `sku_id` int(10) unsigned NOT NULL DEFAULT 1 AFTER `id`;
 ALTER TABLE `tblUsers` ADD CONSTRAINT `sku_id_fk_1` FOREIGN KEY (`sku_id`) REFERENCES `tbl_sku` (`id`);
+
+INSERT INTO `tbl_newsfeed_member_event_type` (`id`, `name`, `description`, `updated`, `created`)
+    VALUES (6, "STATUS_DOWNVOTED", "User has downvoted your selfie.", NOW(), NOW());
