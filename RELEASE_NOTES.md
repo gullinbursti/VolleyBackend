@@ -1,5 +1,15 @@
 # Release Notes
 
+## SC0009
+
+- Apply database schema changes: 
+ - Create `tbl_sku` and update `tblUsers`:
+
+        ```
+        mysql -u root hotornot-dev < VolleyBackend/bin/data_schemas/hotornot-dev-schema-sc0009-00.sql
+        ```
+
+
 ## SC0008
 
 - Apply database schema changes: 
