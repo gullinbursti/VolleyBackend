@@ -4,7 +4,7 @@ class BIM_Model_Club{
 
     const CLUB_IMAGE_DAFAULT_BASE_URL = 'https://d1fqnfrnudpaz6.cloudfront.net/defaultClubCover';
 
-    public function __construct($clubId, $populateUserData = true ) {
+    public function __construct($clubId, $populateUserData = true, $submissionSort = NULL) {
 
         $club = null;
         if( is_object($clubId) ){
@@ -68,7 +68,7 @@ class BIM_Model_Club{
         $this->total_members = $memberCount;
         $this->members = $members;
 
-        $this->_populateSubmissions();
+        $this->_populateSubmissions($submissionSort);
     }
 
     protected function processClubImage() {
@@ -77,8 +77,8 @@ class BIM_Model_Club{
         }
     }
 
-    private function _populateSubmissions() {
-        $volleys = BIM_Model_Volley::getClubVolleys( $this->id );
+    private function _populateSubmissions($sort = NULL) {
+        $volleys = BIM_Model_Volley::getClubVolleys( $this->id, $sort );
 
         $this->total_score = 0;
         $this->total_submissions = 0;
@@ -324,7 +324,7 @@ class BIM_Model_Club{
             $dao = new BIM_DAO_Mysql_Club( BIM_Config::db() );
             $missingObjData = $dao->get($missingObs);
             foreach( $missingObjData as $objData ){
-                $obj = new BIM_Model_Club( $objData, true );
+                $obj = new BIM_Model_Club( $objData, true, $sort );
                 if( $obj->isExtant() ){
                     $objs[ $obj->id ] = $obj;
                 }
