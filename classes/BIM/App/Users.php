@@ -612,11 +612,12 @@ class BIM_App_Users extends BIM_App_Base{
         return BIM_Model_User::get( $userId );
     }
 
-    public static function getClubs( $userId ){
+    public static function getClubs( $userId, $sort = NULL ){
         $clubs = (object) array();
         $user = BIM_Model_User::get( $userId );
         if( $user->isExtant() ){
-            $clubs = $user->getClubs();
+            # First arg is $idsOnly
+            $clubs = $user->getClubs( false, $sort );
         }
         return $clubs;
     }

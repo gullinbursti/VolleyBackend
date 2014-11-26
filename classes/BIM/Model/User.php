@@ -788,7 +788,7 @@ delete from tblUsers where username like "%yoosnapyoo";
         return !empty($this->img_url);
     }
 
-    public function getClubs( $idsOnly = false ){
+    public function getClubs( $idsOnly = false, $sort = NULL ){
         $dao = new BIM_DAO_Mysql_User( BIM_Config::db() );
         $clubData = $dao->getClubIds( $this->id );
         if( !$idsOnly ){
@@ -799,7 +799,7 @@ delete from tblUsers where username like "%yoosnapyoo";
                 'other' => array()
             );
 
-            $clubData = BIM_Model_Club::getMulti( $clubData );
+            $clubData = BIM_Model_Club::getMulti( $clubData, false, $sort );
             foreach( $clubData as $club ){
                 if( $club->isOwner( $this->id ) ){
                     $clubs->owned[] = $club;
