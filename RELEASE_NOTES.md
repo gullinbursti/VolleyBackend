@@ -15,6 +15,12 @@
         mysql -u root hotornot-dev < VolleyBackend/bin/data_schemas/hotornot-dev-schema-sc0008-01.sql
         ```
 
+ - Create `tbl_status_update_voter`:
+
+        ```
+        mysql -u root hotornot-dev < VolleyBackend/bin/data_schemas/hotornot-dev-schema-sc0008-02.sql
+        ```
+
 
 ## SC0007
 
