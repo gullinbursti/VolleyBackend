@@ -1,9 +1,9 @@
 <?php
 class BIM_App_Clubs extends BIM_App_Base{
 
-    public static function create( $name, $ownerId, $description = '', $img = '', $clubType = 'USER_GENERATED' ) {
+    public static function create( $name, $ownerId, $description = '', $img = '', $clubType = 'USER_GENERATED', $coords = NULL ) {
         $club = null;
-        $clubId = BIM_Model_Club::create( $name, $ownerId, $description, $img, $clubType );
+        $clubId = BIM_Model_Club::create( $name, $ownerId, $description, $img, $clubType, $coords );
         if( $clubId ){
             $club = BIM_Model_Club::get( $clubId );
         }

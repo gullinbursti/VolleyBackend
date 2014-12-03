@@ -51,7 +51,10 @@ class BIM_Controller_Clubs extends BIM_Controller_Base {
             $img = $this->normalizeVolleyImgUrl($img);
             $input->userID = $this->resolveUserId( $input->userID );
             $clubType = !empty( $input->clubType ) ? $input->clubType : 'USER_GENERATED';
-            $club = BIM_App_Clubs::create($input->name, $input->userID, $description, $img, $clubType);
+            $lat = $input->lat;
+            $lon = $input->lon;
+            $coords = array($lat, $lon);
+            $club = BIM_App_Clubs::create($input->name, $input->userID, $description, $img, $clubType, $coords);
         }
         return $club;
     }
