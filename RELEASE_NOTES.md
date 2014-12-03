@@ -1,5 +1,15 @@
 # Release Notes
 
+## SC0010
+
+- Apply database schema changes:
+ - Add `lat` and `lon` to `club`:
+
+        ```
+        mysql -u root hotornot-dev < VolleyBackend/bin/data_schemas/hotornot-dev-schema-sc0010-00.sql
+        ```
+
+
 ## SC0009
 
 - Apply database schema changes: 

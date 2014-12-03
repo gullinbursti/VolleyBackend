@@ -18,6 +18,8 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
                 c.owner_id AS owner_id,
                 c.description AS description,
                 c.img AS img,
+                c.lat AS lat,
+                c.lon AS lon,
                 m.club_id AS club_id,
                 m.extern_name AS extern_name,
                 m.mobile_number AS mobile_number,
@@ -124,15 +126,21 @@ class BIM_DAO_Mysql_Club extends BIM_DAO_Mysql{
         return $clubs;
     }
 
-    public function create( $name, $ownerId, $description = '', $img = '', $clubType = 'USER_GENERATED' ) {
+    public function create( $name, $ownerId, $description = '', $img = '', $clubType = 'USER_GENERATED', $coords = NULL ) {
         $clubId = 0;
+        $lat = 0;
+        $lon = 0;
+        if (is_array($coords) && count($coords) == 2 && $coords[0] != "" && $coords[1] != "") {
+            $lat = $coords[0];
+            $lon = $coords[1];
+        }
         $sql = '
             INSERT IGNORE INTO `hotornot-dev`.club
-            ( name, owner_id, description, img, club_type_id )
+            ( name, owner_id, description, img, club_type_id, lat, lon )
             VALUES
-            (?,?,?,?, (SELECT id FROM `hotornot-dev`.tblClubTypeEnum WHERE club_type = ?))
+            (?,?,?,?, (SELECT id FROM `hotornot-dev`.tblClubTypeEnum WHERE club_type = ?), ?, ?)
         ';
-        $params = array( $name, $ownerId, $description, $img, $clubType );
+        $params = array( $name, $ownerId, $description, $img, $clubType, $lat, $lon );
         $this->prepareAndExecute( $sql, $params );
 
         if( $this->lastInsertId ) $clubId = $this->lastInsertId;
