@@ -1,3 +1,4 @@
 
 ALTER TABLE `club` ADD COLUMN `lat` FLOAT(7,4) NOT NULL DEFAULT 0.0;
 ALTER TABLE `club` ADD COLUMN `lon` FLOAT(7,4) NOT NULL DEFAULT 0.0;
+CREATE INDEX `club_coords` ON club (lat, lon);
