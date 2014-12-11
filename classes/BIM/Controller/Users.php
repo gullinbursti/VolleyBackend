@@ -418,8 +418,13 @@ class BIM_Controller_Users extends BIM_Controller_Base {
         if( !empty( $input->sort ) && !in_array( $input->sort, array('new', 'me', 'top') ) ) {
             return $clubs;
         }
+        if( !empty( $input->sort ) ){
+            $sort = $input->sort;
+        } else {
+            $sort = null;
+        }
         if( !empty( $input->userID ) ){
-            $clubs = BIM_App_Users::getClubs( $input->userID, $input->sort );
+            $clubs = BIM_App_Users::getClubs( $input->userID, $sort );
         }
 
         return $clubs;
