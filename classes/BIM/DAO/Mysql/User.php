@@ -696,9 +696,11 @@ class BIM_DAO_Mysql_User extends BIM_DAO_Mysql{
     }
 
     public function setDeviceToken( $userId, $deviceToken ){
-        $sql = 'update `hotornot-dev`.tblUsers set device_token = ? where id = ? ';
-        $params = array( $deviceToken, $userId );
-        $this->prepareAndExecute( $sql, $params );
+        if (strlen($deviceToken) == 64) {
+            $sql = 'update `hotornot-dev`.tblUsers set device_token = ? where id = ? ';
+            $params = array( $deviceToken, $userId );
+            $this->prepareAndExecute( $sql, $params );
+        }
     }
 
         /*
