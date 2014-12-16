@@ -1,5 +1,10 @@
 # Release Notes
 
+## SC0011
+
+- Nothing to do here...
+
+
 ## SC0010
 
 - Apply database schema changes:
