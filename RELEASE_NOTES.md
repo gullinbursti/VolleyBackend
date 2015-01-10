@@ -1,6 +1,6 @@
 # Release Notes
 
-## SC0012
+## SC0015
 
 - Apply database schema changes:
  - Add `tags` to `club`:
@@ -8,6 +8,11 @@
         ```
         mysql -u root hotornot-dev < VolleyBackend/bin/data_schemas/hotornot-dev-schema-sc0012-00.sql
         ```
+
+
+## SC0012 - SC0014
+
+- Nothing to do here
 
 
 ## SC0011
